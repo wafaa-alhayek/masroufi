@@ -212,6 +212,51 @@ class PlannedMeal(SQLModel, table=True):
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
+class PriceSource(str, Enum):
+    """Where a price observation came from, because it changes how much it is
+    trusted.
+
+    First-hand prices from the household's own shops outweigh a regional average
+    published for a different market.
+    """
+
+    PURCHASE = "purchase"
+    MANUAL = "manual"
+    RECEIPT = "receipt"
+    CROWD = "crowd"
+    REFERENCE = "reference"
+
+
+class PriceObservation(SQLModel, table=True):
+    """What something cost, once, somewhere, on a date.
+
+    There is deliberately no price column on Item. In a market where recorded food
+    prices have moved by tens of percent inside a month, a stored price is wrong
+    silently and somebody plans around it. Prices are only ever observations, and
+    the current estimate is computed from them on demand.
+
+    A manual correction is a new observation too, not an override that sticks.
+    """
+
+    id: int | None = Field(default=None, primary_key=True)
+    item_id: int = Field(foreign_key="item.id", index=True)
+
+    per_unit: float = Field(
+        description="Price for one unit of the item — one gram, one millilitre, "
+        "one piece. Kept unscaled so any quoting convention can be derived."
+    )
+    currency: Currency = Currency.ILS
+
+    quantity: float = Field(description="What was bought, for auditing the figure.")
+    paid: float
+
+    source: PriceSource = PriceSource.MANUAL
+    observed_on: date = Field(index=True)
+    vendor_id: int | None = Field(default=None, foreign_key="vendor.id", index=True)
+    note: str = ""
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
 class StockSource(str, Enum):
     """Where something in the pantry came from.
 

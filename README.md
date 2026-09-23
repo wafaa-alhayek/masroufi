@@ -217,6 +217,16 @@ pytest
 | `PUT /api/pantry/items/{id}/feeling` | Mark something they have had enough of. No reason asked. |
 | `GET /api/pantry/suggestions` | What to cook, weighing the cupboard against the fatigue. |
 
+### Prices
+
+| | |
+|---|---|
+| `POST /api/prices/observations` | Record a price. Corrections are observations too, never overrides. |
+| `GET /api/prices/observations/{id}` | The history behind an estimate, so a figure can be audited. |
+| `GET /api/prices/estimate/{id}` | Current best guess, with range, staleness and certainty. 404 when unknown. |
+| `GET /api/prices/estimates?stale_only=true` | What needs re-checking. |
+| `GET /api/prices/shopping-list/cost` | What a week is likely to cost, with its gaps named. |
+
 ## Importer
 
 Written against no particular bank. Column names are matched against aliases in
@@ -273,6 +283,70 @@ weekly list; bread and leafy greens do not, so they go on the daily one.
 **Aggregating happens before rounding.** Seven days of 80 g of rice is 750 g for
 two adults. Rounding each meal up to a 250 g purchase step first would have
 bought 1.75 kg — the rounding waste multiplied by every meal in the week.
+
+### No price is a fact
+
+WFP has recorded food prices in Gaza moving by tens of percent inside a month. A
+stored price is therefore worse than none: it is wrong silently, and somebody
+plans around it.
+
+So **there is no price column anywhere**. There is a log of dated observations,
+each with a source and a shop, and the current estimate is computed on demand:
+
+```
+rice observed:  4.00/kg (120d ago, reference) · 7.50 (40d) · 11.00 (6d) · 12.50 (1d)
+
+estimate        11.51/kg        <- a flat mean would say 8.75
+range           11.00 – 12.50 over the last month
+spread          13%
+certainty       fair · newest 1 day old · from manual, purchase, reference
+```
+
+Four rules make that number trustworthy:
+
+- **Recent observations dominate.** Weight halves every `PRICE_HALF_LIFE_DAYS`
+  (14 by default — prices here move), so last week's price is not averaged flat
+  into one from three months ago.
+- **First-hand beats reference.** What this household paid, or read off a shelf,
+  outweighs a regional average published for a different market.
+- **The spread is reported, not hidden.** When recent observations disagree, a
+  range is the honest answer and a single number is not. `certainty` is a coarse
+  `good` / `fair` / `poor` by documented rules, rather than a fabricated 0.87
+  nobody can interpret.
+- **No observations means no estimate.** `GET /api/prices/estimate/{id}` returns
+  404, not a guess — *"Add an observation rather than relying on a guess."* An
+  invented price here loses someone money.
+
+Prices arrive four ways, and all four are the same kind of record:
+
+| Source | Weight | Where it comes from |
+|---|---|---|
+| `purchase` | 1.0 | Confirming a planned purchase logs one automatically |
+| `manual` | 1.0 | The household typed it, or read it off a shelf |
+| `receipt` | 1.0 | Receipt OCR, once that exists |
+| `crowd` | 0.7 | Another household's shop, later |
+| `reference` | 0.6 | WFP / PCBS market averages, later |
+
+**A manual correction is not an override that sticks.** It is a fresh, heavily
+weighted observation — which is what keeps the estimate current instead of
+accumulating stale "fixes" that outlive their truth. Nothing is ever overwritten,
+and `GET /api/prices/observations/{id}` shows the history behind any figure.
+
+Costing a whole list names its own gaps rather than quietly covering half of it:
+
+```
+Rice            250g  ~ 2.88  (fair)
+Lentils         250g      ?   (no price recorded)
+Onions          250g      ?   (no price recorded)
+
+known cost 2.88 ILS
+! Covers 1 of 6 lines. 5 have no recorded price.
+```
+
+The same estimates reach the meal suggestions, which turns *"a different meal for
+the price of a spice"* into an actual figure — and `missing_cost_partial` stops a
+total being quoted when some ingredient has no price, because a figure that
+silently omits items is worse than no figure.
 
 ### The cupboard comes first
 
@@ -552,4 +626,8 @@ import jawwalpay  TOP UP                +200   -> linked, excluded from spending
 - Multi-currency amounts are stored but not normalised for reporting.
 - The note and decision caches are per-process; the vendor table is the durable
   half.
+- **No expenses UI exists, and the tab bar in the mockups was wrong.** The gas
+  screen was filed under expenses because a fourth tab was needed, not because
+  it belongs there. The import / review / vendor / summary half of the app has
+  no screens at all.
 - **No auth.** Do not deploy as-is.

@@ -97,6 +97,9 @@ class MissingOut(BaseModel):
     quantity: float
     unit: str
     role: str
+    cost: float | None = Field(
+        default=None, description="Null when no price has been recorded for this item."
+    )
 
 
 class SuggestionOut(BaseModel):
@@ -109,6 +112,15 @@ class SuggestionOut(BaseModel):
     repetition: int = Field(description="Times its main ingredients ran in the last 14 days.")
     weary_items: list[str]
     gas_kg: float
+    missing_cost: float | None = Field(
+        default=None,
+        description="What the missing ingredients would cost, where prices are known.",
+    )
+    missing_cost_partial: bool = Field(
+        default=False,
+        description="True when some missing item has no recorded price, so the total "
+        "understates. A figure is never quoted in `why` when this is set.",
+    )
     flavour_only: bool = Field(
         description="Everything missing is a spice, paste or oil — a different meal "
         "for very little money."
@@ -320,6 +332,8 @@ def suggestions(
             repetition=s.repetition,
             weary_items=s.weary_items,
             gas_kg=s.gas_kg,
+            missing_cost=s.missing_cost,
+            missing_cost_partial=s.missing_cost_partial,
             flavour_only=s.flavour_only,
             score=s.score,
             why=s.why,

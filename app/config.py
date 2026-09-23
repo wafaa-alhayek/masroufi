@@ -33,6 +33,13 @@ class Settings(BaseSettings):
     burner_kg_per_hour: float = 0.25
     simmer_kg_per_hour: float = 0.10
 
+    # Prices are never stored as facts, only as dated observations. Weight halves
+    # every half-life, so last week's price dominates one from three months ago
+    # instead of being averaged flat into it. Short by default: prices here move.
+    price_half_life_days: float = 14.0
+    price_stale_after_days: int = 30
+    price_spread_window_days: int = 30
+
     confidence_threshold: float = 0.70
 
     # How similar two tidied vendor names must be to be treated as one vendor.

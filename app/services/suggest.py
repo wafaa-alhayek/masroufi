@@ -39,7 +39,7 @@ from app.models import (
     PlannedMeal,
     Unit,
 )
-from app.services import pantry
+from app.services import pantry, prices
 
 # How far back "recently eaten" looks.
 RECENT_DAYS = 14
@@ -80,6 +80,7 @@ class Missing:
     quantity: float
     unit: str
     role: str
+    cost: float | None = None
 
 
 @dataclass
@@ -93,6 +94,8 @@ class Suggestion:
     repetition: int = 0
     weary_items: list[str] = field(default_factory=list)
     gas_kg: float = 0.0
+    missing_cost: float | None = None
+    missing_cost_partial: bool = False
     flavour_only: bool = False
     score: float = 0.0
     why: str = ""
@@ -120,6 +123,7 @@ def suggest(
         if p.feeling is ItemFeeling.WEARY
     }
     recent = _recent_item_counts(session, today, items)
+    known_prices = prices.estimates(session, items, on=today)
 
     statement = select(Dish)
     if slot is not None:
@@ -135,7 +139,11 @@ def suggest(
         rows = ingredients.get(dish.id, [])
         if not rows:
             continue
-        out.append(_score_dish(dish, rows, items, on_hand, weary, recent, equivalents))
+        out.append(
+            _score_dish(
+                dish, rows, items, on_hand, weary, recent, equivalents, known_prices
+            )
+        )
 
     # Weariness is absolute, not a term to be traded off. A household that says it
     # has had enough of lentils should not have to scroll past lentil dishes to
@@ -196,6 +204,7 @@ def _score_dish(
     weary: set[int],
     recent: dict[int, int],
     equivalents: float,
+    known_prices: dict,
 ) -> Suggestion:
     required_total = covered_total = 0.0
     missing: list[Missing] = []
@@ -215,14 +224,17 @@ def _score_dish(
         covered_total += covered
 
         if needed - covered > 0.01:
+            shortfall = needed - covered
+            est = known_prices.get(item.id)
             missing.append(
                 Missing(
                     item_id=item.id,
                     name_en=item.name_en,
                     name_ar=item.name_ar,
-                    quantity=round(needed - covered, 2),
+                    quantity=round(shortfall, 2),
                     unit=item.unit.value,
                     role=item.role.value,
+                    cost=round(est.per_unit * shortfall, 2) if est else None,
                 )
             )
 
@@ -233,6 +245,12 @@ def _score_dish(
 
     cover = round(covered_total / required_total, 3) if required_total else 0.0
     gas = fuel.estimate(dish.full_flame_minutes, dish.simmer_minutes, dish.burners).kg
+
+    # Only add up what is actually known. A total that silently omits half the
+    # missing items is worse than one that says it is partial.
+    priced = [m.cost for m in missing if m.cost is not None]
+    missing_cost = round(sum(priced), 2) if priced else None
+    missing_cost_partial = bool(missing) and len(priced) != len(missing)
     flavour_only = bool(missing) and all(
         items[m.item_id].role in FLAVOUR_ROLES for m in missing
     )
@@ -262,9 +280,14 @@ def _score_dish(
         repetition=repetition,
         weary_items=weary_names,
         gas_kg=gas,
+        missing_cost=missing_cost,
+        missing_cost_partial=missing_cost_partial,
         flavour_only=flavour_only,
         score=round(score, 3),
-        why=_explain(cover, missing, repetition, weary_names, flavour_only, gas),
+        why=_explain(
+            cover, missing, repetition, weary_names, flavour_only, gas, missing_cost,
+            missing_cost_partial,
+        ),
     )
 
 
@@ -275,6 +298,8 @@ def _explain(
     weary: list[str],
     flavour_only: bool,
     gas: float,
+    missing_cost: float | None = None,
+    partial: bool = False,
 ) -> str:
     """One honest line. No encouragement, no nudging back towards what someone
     has said they are tired of."""
@@ -282,6 +307,11 @@ def _explain(
         return f"Uses {', '.join(weary)}, which you have had enough of."
     if flavour_only:
         names = ", ".join(m.name_en for m in missing)
+        if missing_cost is not None and not partial:
+            return (
+                f"Everything but {names} is already in your cupboard — a different "
+                f"meal for about {missing_cost:g}."
+            )
         return (
             f"Everything but {names} is already in your cupboard — a different meal "
             "for the price of a spice."

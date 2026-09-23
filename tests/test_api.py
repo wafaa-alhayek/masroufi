@@ -1,17 +1,9 @@
 from pathlib import Path
 
 import pytest
-from fastapi.testclient import TestClient
 
-from app.main import app
 
 SAMPLE = Path(__file__).parent.parent / "data" / "sample_statement.csv"
-
-
-@pytest.fixture(scope="module")
-def client():
-    with TestClient(app) as c:
-        yield c
 
 
 @pytest.fixture(scope="module")

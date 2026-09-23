@@ -20,6 +20,7 @@ from app.models import (
     LineState,
     MealSlot,
     PlannedMeal,
+    PriceSource,
     ShelfLife,
     ShoppingLine,
     Transaction,
@@ -32,6 +33,7 @@ from app.kitchen.fuel import GasEstimate
 from app.weather import DayTemperature, TemperatureSource
 from app.redact import normalise
 from app.services import pantry as pantry_service
+from app.services import prices
 from app.services import shopping
 
 router = APIRouter()
@@ -582,6 +584,18 @@ def confirm_purchase(
     line.quantity = quantity
     line.transaction_id = transaction.id
     session.add(line)
+
+    # A purchase is the strongest kind of price observation: it is what this
+    # household actually paid, at a real shop, on a real date.
+    prices.record(
+        session,
+        item,
+        paid=abs(body.paid),
+        quantity=quantity,
+        source=PriceSource.PURCHASE,
+        currency=body.currency,
+        observed_on=booked_on,
+    )
     session.commit()
 
     unit_price = abs(body.paid) / quantity if quantity else 0.0

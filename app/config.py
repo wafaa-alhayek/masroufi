@@ -20,6 +20,11 @@ class Settings(BaseSettings):
 
     confidence_threshold: float = 0.70
 
+    # How similar two tidied vendor names must be to be treated as one vendor.
+    # High on purpose: a wrong merge corrupts the household's history quietly,
+    # while a missed one just leaves two rows they can merge by hand.
+    vendor_match_threshold: float = 0.92
+
     database_url: str = "sqlite:///./masroufi.db"
 
 

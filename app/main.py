@@ -4,7 +4,7 @@ from fastapi import FastAPI
 
 from app.config import settings
 from app.db import init_db
-from app.deps import close_classifier
+from app.deps import close_all
 from app.routers import transactions
 
 
@@ -12,7 +12,7 @@ from app.routers import transactions
 async def lifespan(app: FastAPI):
     init_db()
     yield
-    await close_classifier()
+    await close_all()
 
 
 app = FastAPI(

@@ -9,9 +9,11 @@ from sqlmodel import Session, select
 from app.classify import Classifier
 from app.config import settings
 from app.db import get_session
-from app.deps import get_classifier
+from app.deps import get_classifier, get_cleaner
 from app.importers.csv_import import ImportError_, parse_csv
-from app.models import CategorySource, Currency, Transaction
+from app.models import CategorySource, Currency, Transaction, Vendor
+from app.notes import NoteCleaner
+from app.services import vendors as vendor_service
 from app.services.recurring import find_patterns
 from app.taxonomy import CATEGORIES, REDUCIBILITY_SCALE, is_valid_category
 
@@ -25,9 +27,13 @@ class ImportSummary(BaseModel):
     imported: int
     auto_categorised: int
     needs_review: int
-    classifier_calls_saved: int = Field(
-        description="Transactions served from the note cache instead of a fresh classifier call."
+    from_known_vendors: int = Field(
+        description="Categorised from the vendor table with no model call at all."
     )
+    classifier_calls_saved: int = Field(
+        description="Transactions served from the cache instead of a fresh classifier call."
+    )
+    vendors_known: int = Field(description="Size of the vendor dataset after this import.")
 
 
 class TransactionOut(BaseModel):
@@ -45,6 +51,43 @@ class TransactionOut(BaseModel):
 
 class CategoryUpdate(BaseModel):
     category: str
+    apply_to_vendor: bool = Field(
+        default=True,
+        description=(
+            "Teach the vendor this category, settling its other unreviewed "
+            "transactions and every future one. Set false for a one-off."
+        ),
+    )
+
+
+class CorrectionResult(BaseModel):
+    transaction: TransactionOut
+    learned_for_vendor: str | None
+    also_settled: int = Field(
+        description="Other transactions this correction settled via the vendor."
+    )
+
+
+class VendorOut(BaseModel):
+    id: int
+    name: str
+    category: str | None
+    category_confirmed: bool
+    times_seen: int
+    total_spent: float
+    first_seen: date | None
+    last_seen: date | None
+
+
+class VendorConfirm(BaseModel):
+    category: str | None = Field(
+        default=None, description="Omit to confirm the provisional category as-is."
+    )
+
+
+class VendorConfirmResult(BaseModel):
+    vendor: VendorOut
+    settled: int = Field(description="Transactions this confirmation took out of review.")
 
 
 class PatternConfirm(BaseModel):
@@ -80,6 +123,7 @@ async def import_statement(
     currency: Currency = Query(Currency.ILS, description="Used when the file has no currency column."),
     session: Session = Depends(get_session),
     classifier: Classifier = Depends(get_classifier),
+    cleaner: NoteCleaner = Depends(get_cleaner),
 ) -> ImportSummary:
     raw = await file.read()
     if not raw:
@@ -93,19 +137,60 @@ async def import_statement(
     except ImportError_ as exc:
         raise HTTPException(422, str(exc)) from exc
 
+    # Clean every note first: redact, translate, tidy. Deduplicated, so a
+    # statement with thirty grocer lines pays for one cleaning.
+    clean_notes = await asyncio.gather(*(cleaner.clean(t.note) for t in transactions))
+
+    # Resolve vendors before classifying, so that anything the household has
+    # already confirmed skips the model entirely.
+    resolved: list[Vendor | None] = []
+    for transaction, note in zip(transactions, clean_notes):
+        vendor = vendor_service.resolve(session, note)
+        resolved.append(vendor)
+        if vendor is not None:
+            transaction.vendor_id = vendor.id
+            vendor_service.record_sighting(vendor, transaction)
+            session.add(vendor)
+
+    needs_model = [
+        i for i, vendor in enumerate(resolved) if vendor is None or not vendor.category_confirmed
+    ]
+
     before = _cache_size(classifier)
     results = await asyncio.gather(
-        *(classifier.classify(t.note, t.amount, t.currency.value) for t in transactions),
+        *(
+            classifier.classify(
+                clean_notes[i].for_classifier,
+                transactions[i].amount,
+                transactions[i].currency.value,
+            )
+            for i in needs_model
+        ),
         return_exceptions=True,
     )
+    decisions = dict(zip(needs_model, results))
 
     auto = 0
-    for transaction, result in zip(transactions, results):
-        if isinstance(result, BaseException):
+    from_vendors = 0
+    for index, transaction in enumerate(transactions):
+        vendor = resolved[index]
+
+        if vendor is not None and vendor.category_confirmed:
+            transaction.category = vendor.category
+            transaction.category_source = CategorySource.RULE
+            transaction.confidence = 1.0
+            transaction.needs_review = False
+            auto += 1
+            from_vendors += 1
+            continue
+
+        result = decisions.get(index)
+        if isinstance(result, BaseException) or result is None:
             # A failed classification is not a failed import. The transaction is
             # stored uncategorised and can be retried or set by hand.
             transaction.needs_review = True
             continue
+
         transaction.category = result.category
         transaction.confidence = result.confidence
         transaction.reducibility = result.reducibility
@@ -113,18 +198,26 @@ async def import_statement(
         transaction.needs_review = result.needs_review(settings.confidence_threshold)
         if not transaction.needs_review:
             auto += 1
+            if vendor is not None and vendor.category is None:
+                # A provisional category, so the vendor list is useful straight
+                # away and the household can confirm a vendor once instead of
+                # answering for each of its transactions. Not marked confirmed:
+                # only a person does that.
+                vendor.category = result.category
+                session.add(vendor)
 
     session.add_all(transactions)
     session.commit()
 
-    unique_after = _cache_size(classifier)
-    fresh_calls = max(unique_after - before, 0)
+    fresh_calls = max(_cache_size(classifier) - before, 0)
     return ImportSummary(
         batch=batch,
         imported=len(transactions),
         auto_categorised=auto,
         needs_review=sum(1 for t in transactions if t.needs_review),
+        from_known_vendors=from_vendors,
         classifier_calls_saved=max(len(transactions) - fresh_calls, 0),
+        vendors_known=len(list(session.exec(select(Vendor)))),
     )
 
 
@@ -147,13 +240,18 @@ def list_transactions(
     return list(session.exec(statement))
 
 
-@router.patch("/transactions/{transaction_id}/category", response_model=TransactionOut)
+@router.patch("/transactions/{transaction_id}/category", response_model=CorrectionResult)
 def set_category(
     transaction_id: int,
     update: CategoryUpdate,
     session: Session = Depends(get_session),
-) -> Transaction:
-    """The user's correction. Marked as USER so re-classification never undoes it."""
+) -> CorrectionResult:
+    """The user's correction, and the one place the app learns.
+
+    Marked USER so re-classification never undoes it. If the transaction has a
+    vendor, the vendor learns the category too — which settles that vendor's
+    other unreviewed transactions now, and every future one without a model call.
+    """
     if not is_valid_category(update.category):
         raise HTTPException(422, f"Unknown category: {update.category!r}")
 
@@ -166,9 +264,66 @@ def set_category(
     transaction.confidence = 1.0
     transaction.needs_review = False
     session.add(transaction)
+
+    also_settled = 0
+    learned_for = None
+    if update.apply_to_vendor and transaction.vendor_id is not None:
+        vendor = session.get(Vendor, transaction.vendor_id)
+        if vendor is not None:
+            also_settled = vendor_service.learn_category(session, vendor, update.category)
+            learned_for = vendor.name
+
     session.commit()
     session.refresh(transaction)
-    return transaction
+    return CorrectionResult(
+        transaction=TransactionOut.model_validate(transaction, from_attributes=True),
+        learned_for_vendor=learned_for,
+        also_settled=also_settled,
+    )
+
+
+@router.post("/vendors/{vendor_id}/confirm", response_model=VendorConfirmResult)
+def confirm_vendor(
+    vendor_id: int,
+    update: VendorConfirm,
+    session: Session = Depends(get_session),
+) -> VendorConfirmResult:
+    """Confirm a vendor's category once, for all of its transactions.
+
+    This is the cheaper half of review: one answer about 'Al Amal Supermarket'
+    settles its five transactions in this statement and every future one, with
+    no model call. Pass a category to override the provisional one.
+    """
+    vendor = session.get(Vendor, vendor_id)
+    if vendor is None:
+        raise HTTPException(404, "No such vendor.")
+
+    category = update.category or vendor.category
+    if category is None:
+        raise HTTPException(
+            422, "This vendor has no category to confirm. Supply one explicitly."
+        )
+    if not is_valid_category(category):
+        raise HTTPException(422, f"Unknown category: {category!r}")
+
+    settled = vendor_service.learn_category(session, vendor, category)
+    session.commit()
+    session.refresh(vendor)
+    return VendorConfirmResult(
+        vendor=VendorOut.model_validate(vendor, from_attributes=True), settled=settled
+    )
+
+
+@router.get("/vendors", response_model=list[VendorOut])
+def list_vendors(
+    confirmed_only: bool = False,
+    session: Session = Depends(get_session),
+) -> list[Vendor]:
+    """The vendor dataset the tidying layer builds up, most used first."""
+    statement = select(Vendor)
+    if confirmed_only:
+        statement = statement.where(Vendor.category_confirmed == True)  # noqa: E712
+    return list(session.exec(statement.order_by(Vendor.times_seen.desc())))
 
 
 @router.get("/patterns", response_model=list[PatternOut])

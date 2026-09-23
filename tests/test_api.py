@@ -53,7 +53,7 @@ def test_user_correction_sticks(client, imported):
         f"/api/transactions/{target['id']}/category", json={"category": "transport"}
     )
     assert resp.status_code == 200
-    body = resp.json()
+    body = resp.json()["transaction"]
     assert body["category"] == "transport"
     assert body["category_source"] == "user"
     assert body["needs_review"] is False
@@ -96,10 +96,55 @@ def test_confirming_an_unknown_pattern_is_404(client, imported):
     assert resp.status_code == 404
 
 
+def test_vendor_dataset_is_built_from_the_notes(client, imported):
+    vendors = client.get("/api/vendors").json()
+    names = {v["name"] for v in vendors}
+    assert "سوبر ماركت الأمل" in names, "the tidied vendor name, not the raw note"
+    assert imported["vendors_known"] == len(vendors)
+
+    grocer = next(v for v in vendors if v["name"] == "سوبر ماركت الأمل")
+    assert grocer["times_seen"] == 5
+    assert grocer["total_spent"] == pytest.approx(728.5)
+    assert grocer["category"] == "groceries", "provisional, from the model"
+    assert grocer["category_confirmed"] is False, "only a person confirms"
+
+
+def test_filler_notes_produce_no_vendor(client, imported):
+    names = {v["name"] for v in client.get("/api/vendors").json()}
+    assert not any("3352119" in n or n.strip() == "" for n in names)
+
+
+def test_confirming_a_vendor_needs_a_category(client, imported):
+    # A vendor the model never categorised has nothing to confirm implicitly.
+    resp = client.post("/api/vendors/99999/confirm", json={})
+    assert resp.status_code == 404
+
+
+def test_confirming_a_vendor_settles_all_its_transactions(client, imported):
+    vendors = client.get("/api/vendors").json()
+    grocer = next(v for v in vendors if v["name"] == "سوبر ماركت الأمل")
+
+    resp = client.post(f"/api/vendors/{grocer['id']}/confirm", json={"category": "groceries"})
+    assert resp.status_code == 200, resp.text
+    assert resp.json()["vendor"]["category_confirmed"] is True
+
+    # Re-importing the same statement now costs no model call for this vendor.
+    again = client.post(
+        "/api/import", files={"file": ("s.csv", SAMPLE.read_bytes(), "text/csv")}
+    ).json()
+    assert again["from_known_vendors"] >= 5
+
+
 def test_summary_reports_coverage(client, imported):
     body = client.get("/api/summary").json()
-    assert body["total_out"] > 0
-    assert body["total_in"] == 2400.0
+    rows = client.get("/api/transactions?limit=1000").json()
+
+    # Asserted against the rows rather than a fixed figure, so the test does not
+    # care how many statements have been imported by the time it runs.
+    assert body["total_in"] == pytest.approx(sum(t["amount"] for t in rows if t["amount"] > 0))
+    assert body["total_out"] == pytest.approx(
+        sum(abs(t["amount"]) for t in rows if t["amount"] < 0)
+    )
     assert "water" in body["by_category"]
     assert 0 < body["coverage"] <= 1
 

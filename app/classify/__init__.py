@@ -3,16 +3,16 @@ from app.config import settings
 from .base import Classifier, Decision
 from .cache import CachingClassifier
 from .mock import MockClassifier
-from .translating import TranslatingClassifier
 
 __all__ = ["Classifier", "Decision", "build_classifier"]
 
 
 def build_classifier() -> Classifier:
-    """Assemble the chain: cache → translate → decide.
+    """Pick a backend from config and wrap it in the decision cache.
 
-    The cache sits outermost and is keyed on the original note, so a repeat
-    vendor costs neither a translation nor a classification after the first time.
+    Note cleaning and translation happen before this, in NoteCleaner, so that
+    the cleaned vendor name is available to the vendor table as well as to the
+    classifier.
     """
     backend = settings.classifier_backend.lower()
     if backend == "jev":
@@ -23,10 +23,5 @@ def build_classifier() -> Classifier:
         inner = MockClassifier()
     else:
         raise ValueError(f"Unknown CLASSIFIER_BACKEND: {settings.classifier_backend!r}")
-
-    if settings.translate_notes:
-        from app.translate import build_translator
-
-        inner = TranslatingClassifier(inner, build_translator())
 
     return CachingClassifier(inner)

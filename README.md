@@ -67,6 +67,45 @@ matter how often it appears.
 **What Jev does not do:** find the patterns (arithmetic is exact and free), parse
 the file, or write the savings advice. It labels; the code decides.
 
+### The tidying layer, and the vendor dataset
+
+A statement note is not a vendor name. It is a vendor name wrapped in whatever
+the payment network added:
+
+```
+POS بطاقة سوبر ماركت الأمل 884213
+  redact      POS بطاقة سوبر ماركت الأمل [NUM]
+  translate   POS Al Amal Supermarket           (only if non-Latin)
+  tidy        Al Amal Supermarket               <- stored
+  match key   al amal supermarket               <- vendors matched on this
+```
+
+Tidying ([app/tidy.py](app/tidy.py)) is pure string work — exact, free, no model.
+It strips payment-network filler in English and Arabic, drops bare reference
+numbers, and produces a match key with sorted tokens so `AL AMAL SUPERMARKET`
+and `SUPERMARKET AL AMAL` resolve to one vendor.
+
+What survives goes into the **vendor table**, which is the dataset this layer
+exists to build. On the sample statement, 31 raw notes become 10 clean vendors
+with spend totals and date ranges.
+
+The dataset then makes the app cheaper and better the longer it is used:
+
+- The model proposes a **provisional** category for a vendor; a person
+  **confirms** it. Confirmed is never overwritten by a model.
+- `POST /api/vendors/{id}/confirm` settles one vendor's whole history and every
+  future transaction from it, **with no model call at all**. One answer about the
+  grocer covers five transactions now and all of next month's.
+- Correcting a single transaction teaches its vendor by default, backfilling
+  that vendor's unreviewed transactions — but never ones the household already
+  answered itself.
+
+Vendor matching is exact-alias first, then a conservative fuzzy merge above
+`VENDOR_MATCH_THRESHOLD` (0.92). High on purpose: a missed match leaves two rows
+the user can merge, while a wrong match quietly corrupts their history and their
+price data. Every spelling seen is kept in `vendoralias`, so a bad merge can be
+traced back to the note that caused it.
+
 ### Arabic notes, and the translation layer
 
 BOP notes are Arabic, transliterated Arabic, or a mix, and whether Jev handles
@@ -78,9 +117,10 @@ that well is **not yet measured**. Two defences are in place:
 2. An optional **translation step** normalises non-Latin notes to English before
    they reach the decision model ([app/classify/translating.py](app/classify/translating.py)).
 
-The chain assembles as **cache → translate → decide**, so a repeat vendor costs
-neither a translation nor a classification after the first sighting, and notes
-that are already Latin script skip the translation call entirely.
+The pipeline is **clean (redact → translate → tidy) → known vendor? → decide**,
+deduplicated at every step, so a repeat vendor costs neither a translation nor a
+classification after the first sighting, and a *confirmed* vendor costs nothing
+ever again. Notes already in Latin script skip the translation call entirely.
 
 Translation is **off by default**, on purpose. It adds a second provider to the
 path and a call per unique note, so it should be switched on because Jev was
@@ -135,7 +175,9 @@ pytest
 |---|---|
 | `POST /api/import` | Upload a statement export. Returns counts and how many classifier calls the cache saved. |
 | `GET /api/transactions?needs_review=true` | The review queue — the ones to actually ask about. |
-| `PATCH /api/transactions/{id}/category` | The household's correction. Marked `user`; never overwritten. |
+| `PATCH /api/transactions/{id}/category` | The household's correction. Marked `user`; never overwritten. Teaches the vendor by default. |
+| `GET /api/vendors` | The vendor dataset: tidied names, spend totals, provisional or confirmed categories. |
+| `POST /api/vendors/{id}/confirm` | Confirm a vendor once; settles its whole history and all future transactions, with no model call. |
 | `GET /api/patterns` | Detected repeat patterns with a monthly cost estimate and a question to put to the user. |
 | `POST /api/patterns/confirm` | Name a pattern once; applies to every transaction in it. Eight ₪3 fares are one question, not eight. |
 | `GET /api/summary` | Spend by category, plus what fraction is categorised. |
@@ -160,6 +202,17 @@ goes in front of the same parser.
   ranked by `reducibility` and by the gap between what the household paid and the
   going rate.
 
-Things Phase A has not solved: multi-currency conversion is stored but not
-normalised for reporting; the decision cache is per-process; there is no auth,
-so do not deploy this as-is.
+### Known gaps
+
+- **Re-importing a statement duplicates its transactions.** There is no import
+  deduplication yet. This is the same problem as reconciling a photographed
+  receipt against the statement line that arrives a week later, and both want one
+  answer rather than two.
+- **Cash is invisible.** A ₪400 withdrawal shows as `cash_withdrawal`; what it
+  was actually spent on leaves no bank trace at all. Receipts and manual entry
+  are the only way to see inside it, and whether they *draw down* the withdrawal
+  or are counted separately is an open product decision.
+- Multi-currency amounts are stored but not normalised for reporting.
+- The note and decision caches are per-process; the vendor table is the durable
+  half.
+- **No auth.** Do not deploy as-is.

@@ -16,37 +16,16 @@ from dataclasses import dataclass
 from datetime import date
 from statistics import median
 
+from app import tidy
 from app.models import Transaction
 
 MIN_OCCURRENCES = 3
 
-# Words that carry no information about who was paid. A note made only of these
-# ("POS 3352119" normalises to "pos") is treated as no note at all, so it falls
-# through to the amount-based pass rather than grouping every card purchase in
-# the statement under one meaningless key.
-_FILLER_WORDS = {
-    "pos",
-    "atm",
-    "ref",
-    "reference",
-    "misc",
-    "trx",
-    "txn",
-    "transaction",
-    "debit",
-    "credit",
-    "card",
-    "purchase",
-    "payment",
-    "withdrawal",
-    "unknown",
-}
-
-
 def _has_useful_note(note_key: str) -> bool:
-    return any(
-        word not in _FILLER_WORDS and not word.isdigit() for word in note_key.split()
-    )
+    """A note made only of payment-network filler ("POS 3352119") is no note at
+    all, so it falls through to the amount-based pass rather than grouping every
+    card purchase in the statement under one meaningless key."""
+    return bool(tidy.strip_filler(note_key))
 
 
 @dataclass

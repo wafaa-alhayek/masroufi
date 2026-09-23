@@ -205,6 +205,17 @@ pytest
 | `GET /api/kitchen/dishes/gas` | Dishes ranked by cooking gas; `max_kg` filters to what a short cylinder allows. |
 | `POST /api/kitchen/gas-budget` | Record the gas available for a period, and its price. |
 | `GET /api/kitchen/plan/gas` | What the week's plan burns, against the budget, with a way to cut it. |
+| `POST /api/kitchen/shopping-list/{id}/from-stock` | "We already have this." Clears the line and deducts from the cupboard. |
+
+### Pantry
+
+| | |
+|---|---|
+| `POST /api/pantry/parcel` | Record an aid delivery as one bundle. |
+| `POST`/`GET /api/pantry/stock` | Add a holding; read the cupboard with how much shelf life storage has used up. |
+| `PATCH /api/pantry/stock/{id}/condition` | Only the household marks something spoiled. |
+| `PUT /api/pantry/items/{id}/feeling` | Mark something they have had enough of. No reason asked. |
+| `GET /api/pantry/suggestions` | What to cook, weighing the cupboard against the fatigue. |
 
 ## Importer
 
@@ -262,6 +273,94 @@ weekly list; bread and leafy greens do not, so they go on the daily one.
 **Aggregating happens before rounding.** Seven days of 80 g of rice is 750 g for
 two adults. Rounding each meal up to a 250 g purchase step first would have
 bought 1.75 kg — the rounding waste multiplied by every meal in the week.
+
+### The cupboard comes first
+
+The planner was built assuming you buy everything you cook. For a household
+holding months of aid staples that is simply wrong, and it produced a shopping
+list that asked for **more lentils than anyone could eat**.
+
+So the list subtracts the cupboard before it asks for money. A household given
+8 kg of lentils and 12 kg of rice, planning mujaddara all week, is asked to buy
+onions and cumin — nothing else.
+
+```
+=== THE CUPBOARD at 31°C ===
+  Wheat flour     15000g   held 155d of  141d  ####################
+  Lentils          8000g   held 155d of  322d  #########
+  Rice            12000g   held 155d of  322d  #########
+
+! Wheat flour has been stored 155 days. At around 31°C that is past the
+  141 days it normally keeps — worth checking before you plan a meal around it.
+```
+
+**Aid is a first-class source, not a kind of purchase.** It arrives as a bundle,
+so `POST /api/pantry/parcel` records a whole delivery in one call — asking a
+household to enter eight items separately means nobody enters any of them.
+
+**Stock degrades, and the shelf-life model already knew how.** The same Q10
+curve that decides the daily/weekly split computes how much of a holding's life
+storage has used up. That flour warning is not a guess; it is 155 days measured
+against the 141 that flour keeps at 31 °C.
+
+Two rules the pantry follows so it can be trusted:
+
+- **Only the household can call something spoiled.** The app flags risk from time
+  and temperature and stops there. Stock marked spoiled is excluded from cover
+  entirely, because wrongly counting it suppresses a purchase someone actually
+  needs — the one failure here that costs a person a meal.
+- **Stock is spent worst-first.** At-risk before sound, then oldest before
+  newest, so the cupboard drains in the order that wastes least.
+
+`POST /api/kitchen/shopping-list/{id}/from-stock` is the one-tap "we already have
+this", and it deducts from recorded stock so next week's list knows too. A
+household that has not recorded its cupboard can pass `deduct: false` and just
+clear the line.
+
+### Eating the same thing for months
+
+A cupboard full of pulses plus a planner that optimises for cost produces one
+recommendation: lentils. Which is exactly what people have been eating for
+months, and a plan nobody will follow is worth nothing.
+
+`GET /api/pantry/suggestions` ranks dishes on what is in the cupboard, what has
+been eaten lately, and what the household has said it is tired of. Three
+decisions in it matter more than the scoring:
+
+**Weariness is absolute, not a term to trade off.** Marking lentils `weary` puts
+every dish the household is *not* tired of above every dish it is — however well
+stocked or cheap the lentils are. They are still listed, never hidden, and
+`PUT /api/pantry/items/{id}/feeling` asks for no reason and stores none. No
+explanation the app produces contains the words cheap, healthy or should; there
+is a test asserting that.
+
+**Repetition is judged on the base, not the aromatics.** Nobody gets tired of
+onions. What people report being unable to face again is lentils and bread, so
+only grains, pulses, bread, meat, fish, eggs and dairy count towards repetition —
+onion, garlic, oil and spice are background however often they appear. A test
+caught this: shakshuka was being scored as a repeat of mujaddara because they
+share an onion.
+
+**The cheapest variety is a spice, not a protein.** You cannot conjure a new
+protein out of a cupboard of pulses. But a dish whose only missing ingredient is
+a paste or a spice is a genuinely different meal for a few shekels, and the app
+can say exactly which few — that is the `flavour_only` flag, and it is the most
+useful thing here.
+
+```
+0.36  White bean stew              cover 59%   3 things to buy
+0.09  Maqluba with chicken         cover 43%   3 things to buy
+      ─── below everything else, still visible ───
+0.20  Mujaddara                    Uses Lentils, which you have had enough of.
+```
+
+That bonus is **withheld when the base is the weary one**: swapping the spice does
+not make it a different meal in the way that matters. The first version of this
+ranked weary lentil dishes top because the bonus outweighed the penalty — which
+was the app nudging back, and is now impossible by construction.
+
+What this does not do, and does not pretend to: make a household that only has
+lentils have something other than lentils.
 
 ### Heat decides what "perishable" means
 
@@ -429,7 +528,11 @@ import jawwalpay  TOP UP                +200   -> linked, excluded from spending
   process-wide config.
 - **Dietary needs per household member are not modelled.** No allergy,
   intolerance or medical-diet handling, and the portion maths treats every
-  adult alike.
+  adult alike. `ItemPreference` is about fatigue, not health.
+- **Nothing models cooking on anything but gas.** When the cylinder runs out
+  and a household cooks on wood, a borrowed electric ring, or burns spoiled
+  flour, the cost moves to a category the app does not track and the gas
+  estimate is simply wrong.
 - **AI generation for unknown dishes is not built.** The approved design is a
   seeded library plus generation for anything not in it, saved for reuse and
   flagged `needs_review`. The `Dish.source` and `needs_review` columns exist for

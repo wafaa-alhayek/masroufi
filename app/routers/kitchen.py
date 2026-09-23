@@ -31,6 +31,7 @@ from app.kitchen import fuel, spoilage
 from app.kitchen.fuel import GasEstimate
 from app.weather import DayTemperature, TemperatureSource
 from app.redact import normalise
+from app.services import pantry as pantry_service
 from app.services import shopping
 
 router = APIRouter()
@@ -881,3 +882,47 @@ async def storage_advice(
         items=out,
         notes=notes,
     )
+
+
+class FromStockIn(BaseModel):
+    quantity: float | None = Field(
+        default=None, gt=0, description="Defaults to the whole line."
+    )
+    deduct: bool = Field(
+        default=True,
+        description="Take it out of recorded stock. False just clears the line, for a "
+        "household that has not recorded its cupboard.",
+    )
+
+
+@router.post("/shopping-list/{line_id}/from-stock")
+def cover_from_stock(
+    line_id: int, body: FromStockIn, session: Session = Depends(get_session)
+) -> dict:
+    """"We already have this." Clears the line without spending anything.
+
+    Most of what is in a Gaza store cupboard right now came in an aid parcel, so a
+    staples list that keeps asking for lentils is asking for money nobody needs to
+    spend. This is the one-tap way out of that, and it deducts from recorded stock
+    so the next week's list knows too.
+    """
+    line = session.get(ShoppingLine, line_id)
+    if line is None:
+        raise HTTPException(404, "No such shopping line.")
+    if line.state is not LineState.PENDING:
+        raise HTTPException(409, f"This line is already {line.state.value}.")
+
+    quantity = body.quantity or line.quantity
+    taken = pantry_service.consume(session, line.item_id, quantity) if body.deduct else 0.0
+
+    line.state = LineState.FROM_STOCK
+    line.paid = 0.0
+    session.add(line)
+    session.commit()
+
+    return {
+        "line_id": line_id,
+        "state": line.state.value,
+        "deducted_from_stock": taken,
+        "untracked": body.deduct and taken < quantity,
+    }

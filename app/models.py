@@ -212,6 +212,88 @@ class PlannedMeal(SQLModel, table=True):
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
+class StockSource(str, Enum):
+    """Where something in the pantry came from.
+
+    Aid is first-class rather than lumped in with purchases: most of what is in a
+    Gaza household's store cupboard right now arrived in a parcel, not from a
+    shop, and the app should not ask anyone to buy what they were given.
+    """
+
+    AID = "aid"
+    PURCHASED = "purchased"
+    GIFT = "gift"
+    HOMEGROWN = "homegrown"
+    UNKNOWN = "unknown"
+
+
+class StockCondition(str, Enum):
+    """Whether what is in the cupboard is still worth cooking.
+
+    `AT_RISK` and `SPOILED` exist because a sack of flour that has sat through a
+    hot summer is not the asset an inventory count says it is.
+    """
+
+    GOOD = "good"
+    AT_RISK = "at_risk"
+    SPOILED = "spoiled"
+
+
+class PantryStock(SQLModel, table=True):
+    """What the household already has.
+
+    Without this the app assumes every ingredient must be bought, which is wrong
+    for a household holding months of aid staples — and produces a shopping list
+    that asks for more of what they already cannot get through.
+    """
+
+    id: int | None = Field(default=None, primary_key=True)
+    item_id: int = Field(foreign_key="item.id", index=True)
+    quantity: float = Field(description="In the item's own unit. May be spent down to 0.")
+    unit: Unit = Unit.GRAM
+
+    source: StockSource = StockSource.UNKNOWN
+    condition: StockCondition = StockCondition.GOOD
+    acquired_on: date = Field(index=True)
+    note: str = ""
+
+    parcel_id: int | None = Field(
+        default=None, foreign_key="aidparcel.id", index=True
+    )
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class AidParcel(SQLModel, table=True):
+    """One delivery, so a household records it once instead of item by item."""
+
+    id: int | None = Field(default=None, primary_key=True)
+    received_on: date = Field(index=True)
+    label: str = Field(default="", description="Who it came from, if worth recording.")
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class ItemFeeling(str, Enum):
+    """How the household feels about eating something.
+
+    `WEARY` is the one that matters. After months of eating the same few things,
+    not wanting lentils again is a real constraint on what a household will
+    actually cook, and a planner that ignores it produces plans nobody follows.
+    """
+
+    NEUTRAL = "neutral"
+    LIKED = "liked"
+    WEARY = "weary"
+
+
+class ItemPreference(SQLModel, table=True):
+    """Set by the household, for its own reasons, which it is never asked to give."""
+
+    id: int | None = Field(default=None, primary_key=True)
+    item_id: int = Field(foreign_key="item.id", index=True, unique=True)
+    feeling: ItemFeeling = ItemFeeling.NEUTRAL
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
 class GasBudget(SQLModel, table=True):
     """How much cooking gas the household has for a period, and what it cost.
 
@@ -234,6 +316,9 @@ class GasBudget(SQLModel, table=True):
 class LineState(str, Enum):
     PENDING = "pending"
     PURCHASED = "purchased"
+    # Covered by what the household already has, so it costs nothing and is
+    # not a gap in the plan either.
+    FROM_STOCK = "from_stock"
     UNAVAILABLE = "unavailable"
     SKIPPED = "skipped"
 

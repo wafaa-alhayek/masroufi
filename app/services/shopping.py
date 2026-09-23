@@ -19,6 +19,7 @@ from sqlmodel import Session, select
 
 from app.kitchen import get_household
 from app.kitchen.spoilage import REFERENCE_C, keeps_for
+from app.services import pantry
 from app.weather import DayTemperature
 from app.models import (
     Dish,
@@ -39,6 +40,13 @@ class Need:
     quantity: float
     buy_on: date | None
     dishes: list[str] = field(default_factory=list)
+    required: float = 0.0
+    from_stock: float = 0.0
+
+    @property
+    def fully_covered(self) -> bool:
+        """The cupboard already has all of this, so it costs nothing."""
+        return self.quantity <= 0 and self.required > 0
 
 
 def week_bounds(week_start: date) -> tuple[date, date]:
@@ -49,12 +57,18 @@ def compute_needs(
     session: Session,
     week_start: date,
     temperatures: dict[date, DayTemperature] | None = None,
+    use_stock: bool = True,
 ) -> list[Need]:
     """What the week's plan requires, scaled to the household and rounded up.
 
     When daily temperatures are supplied, whether an item must be bought on the
     day is decided by the Q10 model rather than by its static label — bread that
     lasts three days in January lasts one in August, and the list should say so.
+
+    What the household already has is subtracted before anything is asked for.
+    A household holding months of aid staples should never be told to buy more
+    lentils, and each Need reports `required`, `from_stock` and the `quantity`
+    still to buy so the list can show why a line is small or absent.
     """
     start, end = week_bounds(week_start)
     household = get_household(session)
@@ -101,15 +115,30 @@ def compute_needs(
             if dish is not None and dish.name_en not in sources[key]:
                 sources[key].append(dish.name_en)
 
-    needs = [
-        Need(
-            item=items[item_id],
-            quantity=_round_up(total, items[item_id].purchase_step),
-            buy_on=buy_on,
-            dishes=sources[(item_id, buy_on)],
+    on_hand = pantry.available(session, set(items)) if use_stock else {}
+
+    needs: list[Need] = []
+    # Perishables are drawn against first, in date order, so the cupboard covers
+    # the earliest meal rather than an arbitrary one.
+    for (item_id, buy_on), total in sorted(
+        raw.items(), key=lambda kv: (kv[0][1] is None, kv[0][1] or date.min)
+    ):
+        item = items[item_id]
+        covered = min(on_hand.get(item_id, 0.0), total)
+        if covered > 0:
+            on_hand[item_id] = round(on_hand[item_id] - covered, 4)
+
+        outstanding = total - covered
+        needs.append(
+            Need(
+                item=item,
+                quantity=_round_up(outstanding, item.purchase_step) if outstanding > 0 else 0.0,
+                buy_on=buy_on,
+                dishes=sources[(item_id, buy_on)],
+                required=round(total, 2),
+                from_stock=round(covered, 2),
+            )
         )
-        for (item_id, buy_on), total in raw.items()
-    ]
 
     # Daily items first, in date order; then the weekly shop.
     return sorted(needs, key=lambda n: (n.buy_on is None, n.buy_on or date.min, n.item.name_en))
@@ -178,6 +207,9 @@ def regenerate(
 
     created = 0
     for need in compute_needs(session, week_start, temperatures):
+        if need.quantity <= 0:
+            # Already in the cupboard. Nothing to buy, and not a gap either.
+            continue
         outstanding = need.quantity - covered[(need.item.id, need.buy_on)]
         if outstanding <= 0:
             continue

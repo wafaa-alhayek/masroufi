@@ -18,6 +18,8 @@ from datetime import date, timedelta
 from sqlmodel import Session, select
 
 from app.kitchen import get_household
+from app.kitchen.spoilage import REFERENCE_C, keeps_for
+from app.weather import DayTemperature
 from app.models import (
     Dish,
     DishItem,
@@ -43,8 +45,17 @@ def week_bounds(week_start: date) -> tuple[date, date]:
     return week_start, week_start + timedelta(days=6)
 
 
-def compute_needs(session: Session, week_start: date) -> list[Need]:
-    """What the week's plan requires, scaled to the household and rounded up."""
+def compute_needs(
+    session: Session,
+    week_start: date,
+    temperatures: dict[date, DayTemperature] | None = None,
+) -> list[Need]:
+    """What the week's plan requires, scaled to the household and rounded up.
+
+    When daily temperatures are supplied, whether an item must be bought on the
+    day is decided by the Q10 model rather than by its static label — bread that
+    lasts three days in January lasts one in August, and the list should say so.
+    """
     start, end = week_bounds(week_start)
     household = get_household(session)
     equivalents = household.adult_equivalents
@@ -85,7 +96,7 @@ def compute_needs(session: Session, week_start: date) -> list[Need]:
             item = items.get(row.item_id)
             if item is None:
                 continue
-            key = (item.id, meal.plan_date if item.shelf_life.buy_daily else None)
+            key = (item.id, meal.plan_date if _buy_daily(item, meal.plan_date, temperatures) else None)
             raw[key] += row.qty_per_adult * equivalents * factor
             if dish is not None and dish.name_en not in sources[key]:
                 sources[key].append(dish.name_en)
@@ -104,13 +115,43 @@ def compute_needs(session: Session, week_start: date) -> list[Need]:
     return sorted(needs, key=lambda n: (n.buy_on is None, n.buy_on or date.min, n.item.name_en))
 
 
+def _buy_daily(
+    item: Item, on: date, temperatures: dict[date, DayTemperature] | None
+) -> bool:
+    """Whether this item has to be bought the day it is cooked.
+
+    With no temperature available, the item's static shelf-life label decides —
+    which is the honest fallback, since a guess about the weather is worse than
+    the seasonal default the label already encodes.
+    """
+    if temperatures is None:
+        return item.shelf_life.buy_daily
+
+    reading = temperatures.get(on)
+    if reading is None:
+        return item.shelf_life.buy_daily
+
+    return keeps_for(item.keeps_days_at_20c, item.q10, reading.max_c).buy_daily
+
+
+def keeping_for_item(item: Item, reading: DayTemperature | None):
+    """The item's effective shelf life on a given day, for advice and display."""
+    if reading is None:
+        return keeps_for(item.keeps_days_at_20c, item.q10, REFERENCE_C, True)
+    return keeps_for(item.keeps_days_at_20c, item.q10, reading.max_c, reading.estimated)
+
+
 def _round_up(quantity: float, step: float) -> float:
     if step <= 0:
         return round(quantity, 2)
     return round(math.ceil(quantity / step - 1e-9) * step, 2)
 
 
-def regenerate(session: Session, week_start: date) -> tuple[int, int]:
+def regenerate(
+    session: Session,
+    week_start: date,
+    temperatures: dict[date, DayTemperature] | None = None,
+) -> tuple[int, int]:
     """Rebuild the week's shopping lines from the plan.
 
     Lines the household has already acted on — purchased, marked unavailable,
@@ -136,7 +177,7 @@ def regenerate(session: Session, week_start: date) -> tuple[int, int]:
         covered[(line.item_id, line.buy_on)] += line.quantity
 
     created = 0
-    for need in compute_needs(session, week_start):
+    for need in compute_needs(session, week_start, temperatures):
         outstanding = need.quantity - covered[(need.item.id, need.buy_on)]
         if outstanding <= 0:
             continue

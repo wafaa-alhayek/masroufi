@@ -18,6 +18,21 @@ class Settings(BaseSettings):
     openrouter_model: str = "openai/gpt-4o-mini"
     openrouter_base_url: str = "https://openrouter.ai"
 
+    # Shelf life depends on how hot it actually is. With the weather off, the
+    # seeded shelf-life labels are used as-is; with it on, Open-Meteo supplies a
+    # daily maximum and the Q10 model decides which list an item belongs on.
+    # Open-Meteo needs no API key.
+    weather_enabled: bool = False
+    latitude: float = 31.5017
+    longitude: float = 34.4668
+    open_meteo_base_url: str = "https://api.open-meteo.com"
+
+    # LPG burn rates in kg per hour, per burner. Averages over unknown stoves and
+    # pots — exposed here so a household that knows its own cylinder can correct
+    # them.
+    burner_kg_per_hour: float = 0.25
+    simmer_kg_per_hour: float = 0.10
+
     confidence_threshold: float = 0.70
 
     # How similar two tidied vendor names must be to be treated as one vendor.

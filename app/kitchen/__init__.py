@@ -24,14 +24,17 @@ def ensure_kitchen(session: Session) -> None:
         known_items = {i.slug: i for i in session.exec(select(Item))}
 
     known_dishes = {d.slug for d in session.exec(select(Dish))}
-    for slug, name_en, name_ar, slot, ingredients in SEED_DISHES:
-        if slug in known_dishes:
+    for row in SEED_DISHES:
+        if row["slug"] in known_dishes:
             continue
         dish = Dish(
-            slug=slug,
-            name_en=name_en,
-            name_ar=name_ar,
-            default_slot=slot,
+            slug=row["slug"],
+            name_en=row["name_en"],
+            name_ar=row["name_ar"],
+            default_slot=row["slot"],
+            full_flame_minutes=row["full_flame"],
+            simmer_minutes=row["simmer"],
+            burners=row["burners"],
             source=DishSource.SEED,
         )
         session.add(dish)
@@ -42,7 +45,7 @@ def ensure_kitchen(session: Session) -> None:
                 item_id=known_items[item_slug].id,
                 qty_per_adult=qty,
             )
-            for item_slug, qty in ingredients.items()
+            for item_slug, qty in row["items"].items()
             if item_slug in known_items
         )
     session.commit()

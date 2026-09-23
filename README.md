@@ -201,6 +201,10 @@ pytest
 | `POST /api/kitchen/shopping-list/{id}/purchase` | Confirm a purchase → a transaction and a price per kg. |
 | `GET /api/kitchen/shopping-list/{id}/substitutes` | Alternatives from the same role. |
 | `POST /api/kitchen/shopping-list/{id}/unavailable` | Record a gap, optionally swapping in a substitute. |
+| `GET /api/kitchen/storage-advice` | Effective shelf life at today's temperature, and advice only where it matters. |
+| `GET /api/kitchen/dishes/gas` | Dishes ranked by cooking gas; `max_kg` filters to what a short cylinder allows. |
+| `POST /api/kitchen/gas-budget` | Record the gas available for a period, and its price. |
+| `GET /api/kitchen/plan/gas` | What the week's plan burns, against the budget, with a way to cut it. |
 
 ## Importer
 
@@ -259,6 +263,93 @@ weekly list; bread and leafy greens do not, so they go on the daily one.
 two adults. Rounding each meal up to a 250 g purchase step first would have
 bought 1.75 kg — the rounding waste multiplied by every meal in the week.
 
+### Heat decides what "perishable" means
+
+A static shelf-life label is wrong half the year. Bread bought on a 17 °C January
+day can reasonably last until tomorrow; the same bread on a 31 °C August day
+cannot. So shelf life is computed, not declared, using the **Q10 rule** — the
+standard simplification of the Arrhenius relationship used in shelf-life work:
+
+```
+days(T) = days_at_20C × Q10 ** ((20 − T) / 10)
+```
+
+Q10 is the factor by which spoilage speeds up per 10 °C — about 2 for dry goods,
+2.5 for bread and fresh produce, 3.5–4 for meat and fish where microbial growth
+drives it. It is stored per item ([app/kitchen/catalogue.py](app/kitchen/catalogue.py))
+rather than as one global constant, because a sack of rice and a chicken do not
+respond to heat the same way.
+
+The same plan, same household, two different weeks of weather:
+
+| | January, 17.5 °C | August, 31.6 °C |
+|---|---|---|
+| daily lines | 3 | 12 |
+| bread | one weekly line | seven daily lines |
+
+**Temperature comes from [Open-Meteo](https://open-meteo.com/), which needs no API
+key** — one less credential to manage. It is off by default (`WEATHER_ENABLED`);
+with it off, each item's static label decides, which is exactly the behaviour from
+before this existed.
+
+Two deliberate limits:
+
+- **A weather outage never fails a shopping list.** Any day the service cannot
+  supply falls back to the Gaza [climate normals](app/weather.py) for that month,
+  flagged `estimated` so a caller can say it is a guess rather than a forecast.
+  The forecast endpoint only reaches a couple of weeks back, so planning a week
+  in the distant past falls back too.
+- **The model floor is 10 °C, not 0 °C.** Extrapolating the curve to freezing says
+  raw chicken keeps five days — true in a fridge, and precisely the assumption this
+  app does not make. Clamping there also means a real cold snap is treated as a
+  10 °C day, which understates shelf life slightly: an error towards buying fresher.
+
+`GET /api/kitchen/storage-advice` returns the effective shelf life of each item at
+today's temperature, plus a note **only where the heat changes what someone should
+do**. An empty list of notes is a valid, useful answer.
+
+### Cooking gas is part of a recipe's price
+
+Where fuel is scarce, what a dish costs to cook belongs in the budget. A pot of
+beans simmered for an hour and a quarter can cost more in gas than the beans cost
+in the shop, and nothing in a normal budgeting app would ever show that.
+
+```
+kg = burners × (full_flame_hours × 0.25 + simmer_hours × 0.10)
+```
+
+A single domestic LPG burner runs at roughly **0.25 kg/h** at full flame, and a low
+simmer well under half that. As a sanity check, a family of five or six cooking
+three meals a day is reported to use around 0.3 kg/day, which is the order of
+magnitude this produces — there is a test pinning that.
+
+The seeded library, cheapest to cook first:
+
+```
+0.000 kg    Bread with zaatar and oil     <- no cooking at all
+0.042 kg    Eggs with tomato
+0.108 kg    Mujaddara                     (soaking saves 0.023 kg)
+0.167 kg    White bean stew               (soaking saves 0.050 kg)
+0.317 kg    Maqluba with chicken          <- 65 min across two burners
+```
+
+A household records what gas it has (`POST /api/kitchen/gas-budget`) — nothing
+else can know it, since a cylinder's remaining weight is not on any statement —
+and `GET /api/kitchen/plan/gas` checks the week's plan against it:
+
+```
+This plan needs 1.212 kg of gas but only 0.5 kg is available — short by
+0.712 kg. Soaking the pulses in White bean stew overnight would save
+about 0.05 kg.
+```
+
+`GET /api/kitchen/dishes/gas?max_kg=0.1` is the other half: when the cylinder is
+short, this is how a household finds what it can still afford to cook.
+
+These rates are averages over unknown stoves, pots and lid discipline — honest to
+about a third, not to the gram — so `BURNER_KG_PER_HOUR` and `SIMMER_KG_PER_HOUR`
+are settings a household that knows its own cylinder can calibrate.
+
 **Quantities scale by adult equivalents.** The household is two numbers, adults
 and children, with a child counting as 0.6 of an adult portion by default and a
 per-dish override the app remembers for when that is wrong.
@@ -288,6 +379,9 @@ and when.
 > dishes in [app/kitchen/dishes.py](app/kitchen/dishes.py) were written by a
 > developer, not by someone who cooks these dishes or shops in Gaza. Every
 > quantity, shelf life and purchase step is a starting point.
+>
+> That now includes the Q10 values and the cooking times, which drive the
+> shelf-life and gas maths respectively.
 >
 > They are seeded as **editable rows** for exactly that reason:
 > `PUT /api/kitchen/dishes/{id}/ingredients` corrects a recipe and
@@ -330,6 +424,12 @@ import jawwalpay  TOP UP                +200   -> linked, excluded from spending
 
 ### Known gaps
 
+- **Weather is off by default.** Turn it on with `WEATHER_ENABLED=true`. There
+  is no per-household location setting yet — latitude and longitude are
+  process-wide config.
+- **Dietary needs per household member are not modelled.** No allergy,
+  intolerance or medical-diet handling, and the portion maths treats every
+  adult alike.
 - **AI generation for unknown dishes is not built.** The approved design is a
   seeded library plus generation for anything not in it, saved for reuse and
   flagged `needs_review`. The `Dish.source` and `needs_review` columns exist for

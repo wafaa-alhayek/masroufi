@@ -136,6 +136,17 @@ class Item(SQLModel, table=True):
         "Quantities are rounded up to a multiple of this after aggregating, not "
         "before, so rounding does not multiply waste across a week.",
     )
+    keeps_days_at_20c: float = Field(
+        default=180.0,
+        gt=0,
+        description="Shelf life at the 20 degree reference, without refrigeration.",
+    )
+    q10: float = Field(
+        default=2.0,
+        gt=1,
+        description="How much faster this spoils per 10 degrees. About 2 for most "
+        "foods, higher for fresh produce and meat where microbial growth drives it.",
+    )
     needs_review: bool = Field(
         default=False,
         description="Created automatically rather than from the seeded catalogue, "
@@ -161,6 +172,13 @@ class Dish(SQLModel, table=True):
     name_en: str
     name_ar: str
     default_slot: MealSlot = MealSlot.LUNCH
+
+    # Cooking fuel. Where gas is scarce, a long simmer is part of a dish's price,
+    # so a plan can be checked against the gas actually available.
+    full_flame_minutes: int = Field(default=0, ge=0)
+    simmer_minutes: int = Field(default=0, ge=0)
+    burners: int = Field(default=1, ge=0, description="Rings lit at once.")
+
     source: DishSource = DishSource.SEED
     edited_by_household: bool = Field(default=False)
     needs_review: bool = Field(
@@ -191,6 +209,25 @@ class PlannedMeal(SQLModel, table=True):
     plan_date: date = Field(index=True)
     slot: MealSlot = MealSlot.LUNCH
     dish_id: int = Field(foreign_key="dish.id", index=True)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class GasBudget(SQLModel, table=True):
+    """How much cooking gas the household has for a period, and what it cost.
+
+    Entered by the household because nothing else can know it: a cylinder's
+    remaining weight is not on any statement.
+    """
+
+    id: int | None = Field(default=None, primary_key=True)
+    starts_on: date = Field(index=True)
+    ends_on: date
+    kg_available: float = Field(gt=0)
+    price_per_kg: float | None = Field(
+        default=None, description="For costing a plan in money as well as in gas."
+    )
+    currency: Currency = Currency.ILS
+    note: str = ""
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 

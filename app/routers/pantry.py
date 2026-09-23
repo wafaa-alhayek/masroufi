@@ -22,6 +22,7 @@ from app.models import (
     StockCondition,
     StockSource,
 )
+from app.kitchen import parcels
 from app.services import pantry as pantry_service
 from app.services import suggest as suggest_service
 from app.weather import TemperatureSource
@@ -91,6 +92,23 @@ class ParcelIn(BaseModel):
     lines: list[ParcelLine] = Field(
         description="Aid arrives as a bundle, so it is recorded as one."
     )
+
+
+class TemplateLineOut(BaseModel):
+    item_id: int
+    slug: str
+    name_en: str
+    name_ar: str
+    unit: str
+    quantity: float
+
+
+class ParcelTemplateOut(BaseModel):
+    source: str = Field(
+        description='"last_parcel" when built from what this household recorded last '
+        'time, "default" for a household with no parcel history.'
+    )
+    lines: list[TemplateLineOut]
 
 
 class ConditionIn(BaseModel):
@@ -256,6 +274,21 @@ def set_condition(
     session.add(row)
     session.commit()
     return {"stock_id": stock_id, "condition": row.condition.value}
+
+
+@router.get("/parcel/template", response_model=ParcelTemplateOut)
+def parcel_template(session: Session = Depends(get_session)) -> ParcelTemplateOut:
+    """The rows a new parcel sheet opens with.
+
+    Pre-filled from the household's last parcel where there is one, because parcels
+    are broadly alike and correcting a sheet is far quicker than filling an empty
+    one. Every row is editable and removable — the next template is built from what
+    they actually recorded, so a correction carries forward.
+    """
+    lines, source = parcels.template(session)
+    return ParcelTemplateOut(
+        source=source, lines=[TemplateLineOut(**vars(line)) for line in lines]
+    )
 
 
 @router.post("/parcel")

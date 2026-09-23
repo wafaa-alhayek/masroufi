@@ -133,7 +133,10 @@ def suggest(
     recent = _recent_item_counts(session, today, items)
     known_prices = prices.estimates(session, items, on=today)
 
-    statement = select(Dish)
+    # A dish whose amounts and times no cook has checked is never offered. A wrong
+    # amount here is wasted money or a short meal, which is worse than a shorter
+    # list of dishes.
+    statement = select(Dish).where(Dish.needs_review == False)  # noqa: E712
     if slot is not None:
         statement = statement.where(Dish.default_slot == slot)
     dishes = list(session.exec(statement))

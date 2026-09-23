@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from app.config import settings
 from app.db import init_db
 from app.deps import close_all
-from app.routers import bootstrap, kitchen, pantry, prices, transactions
+from app.routers import bootstrap, home, kitchen, pantry, prices, transactions
 
 
 @asynccontextmanager
@@ -31,6 +31,7 @@ app.include_router(kitchen.router, prefix="/api/kitchen", tags=["kitchen"])
 app.include_router(pantry.router, prefix="/api/pantry", tags=["pantry"])
 app.include_router(prices.router, prefix="/api/prices", tags=["prices"])
 app.include_router(bootstrap.router, prefix="/api/bootstrap", tags=["bootstrap"])
+app.include_router(home.router, prefix="/api/home", tags=["home"])
 
 
 @app.get("/health")

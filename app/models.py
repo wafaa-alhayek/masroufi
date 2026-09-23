@@ -182,8 +182,36 @@ class Dish(SQLModel, table=True):
     source: DishSource = DishSource.SEED
     edited_by_household: bool = Field(default=False)
     needs_review: bool = Field(
-        default=False, description="True for AI-generated dishes until a person checks them."
+        default=False,
+        index=True,
+        description="True until a cook has checked the amounts and times. Such a dish "
+        "is never suggested and never enters a shopping list, because a wrong amount "
+        "here is wasted money or a short meal.",
     )
+    draft_confidence: str = Field(
+        default="high",
+        description="From the drafting step: high, medium or low. Kept so a reviewer "
+        "can start with the ones the drafter was least sure of.",
+    )
+    in_offline_bundle: bool = Field(
+        default=True,
+        index=True,
+        description="Part of the curated set shipped for offline use. The rest are "
+        "searchable when there is a connection.",
+    )
+    notes: str = Field(default="", description="Anything a reviewer should know.")
+
+
+class DishAlias(SQLModel, table=True):
+    """Another name people search for.
+
+    Households do not all call a dish the same thing, and a picker that matches only
+    one spelling is a picker nobody finds anything in.
+    """
+
+    id: int | None = Field(default=None, primary_key=True)
+    dish_id: int = Field(foreign_key="dish.id", index=True)
+    name: str = Field(index=True)
 
 
 class DishItem(SQLModel, table=True):
@@ -269,6 +297,10 @@ class StockSource(str, Enum):
     PURCHASED = "purchased"
     GIFT = "gift"
     HOMEGROWN = "homegrown"
+    # Something the household already had when it started using the app. Its own
+    # value rather than "unknown", because "we already had olive oil" is a real
+    # answer and `unknown` is where answers go to be lost.
+    ALREADY_HAD = "already_had"
     UNKNOWN = "unknown"
 
 

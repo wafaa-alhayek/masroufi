@@ -232,6 +232,9 @@ pytest
 | | |
 |---|---|
 | `GET /api/bootstrap` | One versioned payload the client stores and then works from with no connection. |
+| `GET /api/home` | The three home-screen numbers: spend against estimate, cupboard runway, stock at risk. |
+| `GET /api/pantry/parcel/template` | What a new parcel sheet opens with — the last one if there is one. |
+| `GET /api/kitchen/dishes?q=…` | Search the library by Arabic or English name, or any alias. |
 
 Every write that happens in a shop — purchase, unavailable, from-stock, parcel,
 stock — takes a client-generated `key` so a replayed queue cannot record it twice.
@@ -687,6 +690,9 @@ import jawwalpay  TOP UP                +200   -> linked, excluded from spending
   nearly every line reads "no price" until the household has bought things.
   A dated WFP/PCBS snapshot shipped in the bootstrap bundle would fix that;
   it is not built.
+- **The dish library is twelve dishes, all drafted by a developer.** A cook has
+  reviewed none of them. `needs_review` dishes are excluded from suggestions and
+  refused for planning, so the library grows only as fast as someone checks it.
 - **Receipt reading is not built.** `POST /api/receipts` → proposed line matches
   with confidence is the intended shape, and item matching is the piece it needs.
 - **No expenses UI exists, and the tab bar in the mockups was wrong.** The gas

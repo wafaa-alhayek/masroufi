@@ -35,6 +35,7 @@ from app.kitchen import get_household
 from app.kitchen.spoilage import DAILY_THRESHOLD_DAYS, REFERENCE_C, keeps_for
 from app.models import (
     Dish,
+    DishAlias,
     DishItem,
     DishPortion,
     GasBudget,
@@ -89,6 +90,10 @@ class DishBundle(BaseModel):
     ingredients: dict[int, float] = Field(
         description="item id to quantity per adult portion."
     )
+    aliases_ar: list[str] = Field(
+        default_factory=list,
+        description="Other names people search for, so the offline picker finds it too.",
+    )
 
 
 class StockBundle(BaseModel):
@@ -111,6 +116,11 @@ class PriceBundle(BaseModel):
     newest_days_old: int
     stale: bool
     certainty: str
+
+
+class ParcelTemplateBundle(BaseModel):
+    source: str
+    lines: list[dict]
 
 
 class PlanBundle(BaseModel):
@@ -172,6 +182,13 @@ class Bootstrap(BaseModel):
     prices: list[PriceBundle]
     plan: list[PlanBundle]
     lines: list[LineBundle]
+    parcel_template: ParcelTemplateBundle = Field(
+        description="What a new parcel sheet opens with, so recording one works offline."
+    )
+    dishes_offline_only: bool = Field(
+        description="True when `dishes` is the curated offline set rather than the "
+        "whole library. The rest are searchable when there is a connection."
+    )
 
 
 @router.get("", response_model=Bootstrap)
@@ -223,6 +240,16 @@ async def bootstrap(
 
     factors = {p.dish_id: p.factor for p in session.exec(select(DishPortion))}
 
+    # Only the curated set travels. The rest are searchable online, which keeps the
+    # bundle small enough to download on a poor connection.
+    dish_query = select(Dish).where(
+        Dish.needs_review == False,  # noqa: E712
+        Dish.in_offline_bundle == True,  # noqa: E712
+    )
+    aliases: dict[int, list[str]] = {}
+    for alias in session.exec(select(DishAlias)):
+        aliases.setdefault(alias.dish_id, []).append(alias.name)
+
     dish_bundles = [
         DishBundle(
             id=dish.id,
@@ -238,8 +265,9 @@ async def bootstrap(
             ).kg,
             portion_factor=factors.get(dish.id, 1.0),
             ingredients=ingredients.get(dish.id, {}),
+            aliases_ar=aliases.get(dish.id, []),
         )
-        for dish in session.exec(select(Dish))
+        for dish in session.exec(dish_query)
     ]
 
     by_id = {item.id: item for item in items}
@@ -325,6 +353,8 @@ async def bootstrap(
                 )
             )
         ],
+        parcel_template=_parcel_template(session),
+        dishes_offline_only=True,
         lines=[
             LineBundle(
                 id=line.id,
@@ -342,3 +372,10 @@ async def bootstrap(
             )
         ],
     )
+
+
+def _parcel_template(session: Session) -> ParcelTemplateBundle:
+    from app.kitchen import parcels
+
+    lines, source = parcels.template(session)
+    return ParcelTemplateBundle(source=source, lines=[vars(line) for line in lines])

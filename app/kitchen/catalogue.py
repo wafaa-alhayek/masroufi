@@ -71,6 +71,26 @@ CATALOGUE: tuple[tuple, ...] = (
     ("sugar", "Sugar", "سكر", G, STABLE, ItemRole.SWEETENER, 500, 1800, 1.2),
     ("tea", "Tea", "شاي", G, STABLE, ItemRole.DRINK, 100, 540, 1.5),
     ("coffee", "Coffee", "قهوة", G, STABLE, ItemRole.DRINK, 100, 360, 1.6),
+    # Parcel and tinned goods. Core aid-parcel contents, and without them a
+    # parcel cannot be recorded at all. Role and shelf life are independent here
+    # in a way they are not elsewhere: tinned sardines are FISH and keep two
+    # years, powdered milk is DAIRY and keeps eighteen months.
+    ("canned_tuna", "Tinned tuna", "تونة معلبة", G, STABLE, ItemRole.FISH, 150, 720, 1.3),
+    ("canned_sardines", "Tinned sardines", "سردين معلب", G, STABLE, ItemRole.FISH, 125, 720, 1.3),
+    ("canned_meat", "Tinned meat", "لحمة معلبة", G, STABLE, ItemRole.MEAT, 200, 720, 1.3),
+    ("canned_fava", "Tinned fava beans", "فول معلب", G, STABLE, ItemRole.PULSE, 400, 540, 1.4),
+    ("canned_chickpeas", "Tinned chickpeas", "حمص معلب", G, STABLE, ItemRole.PULSE, 400, 540, 1.4),
+    ("canned_white_beans", "Tinned white beans", "فاصولياء معلبة", G, STABLE, ItemRole.PULSE, 400, 540, 1.4),
+    ("canned_tomato", "Tinned tomatoes", "بندورة معلبة", G, STABLE, ItemRole.VEG_FRUIT, 400, 720, 1.4),
+    ("milk_powder", "Powdered milk", "حليب بودرة", G, STABLE, ItemRole.DAIRY, 400, 540, 1.5),
+    ("halawa", "Halawa", "حلاوة طحينية", G, STABLE, ItemRole.PASTE, 250, 360, 1.6),
+    ("dates", "Dates", "تمر", G, STABLE, ItemRole.FRUIT, 250, 270, 1.8),
+    # Named in the dish drafting notes.
+    ("sumac", "Sumac", "سماق", G, STABLE, ItemRole.SPICE, 50, 540, 1.5),
+    ("chard", "Chard", "سلق", BUNCH, PERISHABLE, ItemRole.VEG_LEAF, 1, 2, 3.0),
+    ("maftoul", "Maftoul", "مفتول", G, STABLE, ItemRole.GRAIN, 500, 540, 1.6),
+    # Baking bread from parcel flour is common enough to plan for.
+    ("yeast", "Yeast", "خميرة", G, STABLE, ItemRole.OTHER, 50, 360, 1.8),
 )
 
 

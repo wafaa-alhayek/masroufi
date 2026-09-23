@@ -11,9 +11,10 @@ from app.models import (
     CategorySource,
     Currency,
     Dish,
-    GasBudget,
+    DishAlias,
     DishItem,
     DishPortion,
+    GasBudget,
     Household,
     Item,
     ItemRole,
@@ -66,6 +67,9 @@ class DishOut(BaseModel):
     default_slot: MealSlot
     source: str
     needs_review: bool
+    draft_confidence: str
+    in_offline_bundle: bool
+    notes: str = ""
 
 
 class IngredientIn(BaseModel):
@@ -247,12 +251,52 @@ def _household_out(household: Household) -> HouseholdOut:
 
 @router.get("/dishes", response_model=list[DishOut])
 def list_dishes(
-    slot: MealSlot | None = None, session: Session = Depends(get_session)
+    slot: MealSlot | None = None,
+    q: str | None = Query(
+        None,
+        description="Search Arabic or English names and the other names people use "
+        "for the same dish.",
+    ),
+    offline_only: bool = Query(
+        False, description="Just the curated set shipped for offline use."
+    ),
+    include_unreviewed: bool = Query(
+        False,
+        description="Dishes no cook has checked. Excluded by default and never "
+        "plannable — this is for a reviewer's queue, not for a picker.",
+    ),
+    session: Session = Depends(get_session),
 ) -> list[Dish]:
+    """The dish library, searchable by name or by any alias.
+
+    Households do not all call a dish the same thing, so a search that only matches
+    the canonical name finds nothing.
+    """
     statement = select(Dish)
     if slot is not None:
         statement = statement.where(Dish.default_slot == slot)
-    return list(session.exec(statement.order_by(Dish.name_en)))
+    if offline_only:
+        statement = statement.where(Dish.in_offline_bundle == True)  # noqa: E712
+    if not include_unreviewed:
+        statement = statement.where(Dish.needs_review == False)  # noqa: E712
+
+    dishes = list(session.exec(statement.order_by(Dish.name_en)))
+    if not q:
+        return dishes
+
+    needle = q.strip().casefold()
+    aliases: dict[int, list[str]] = {}
+    for row in session.exec(select(DishAlias)):
+        aliases.setdefault(row.dish_id, []).append(row.name.casefold())
+
+    return [
+        dish
+        for dish in dishes
+        if needle in dish.name_ar.casefold()
+        or needle in dish.name_en.casefold()
+        or needle in dish.slug
+        or any(needle in alias for alias in aliases.get(dish.id, ()))
+    ]
 
 
 @router.get("/items", response_model=list[Item])
@@ -354,6 +398,12 @@ def add_meal(entry: PlanEntry, session: Session = Depends(get_session)) -> PlanO
     dish = session.get(Dish, entry.dish_id)
     if dish is None:
         raise HTTPException(404, "No such dish.")
+    if dish.needs_review:
+        raise HTTPException(
+            409,
+            f"{dish.name_en} has not been checked by a cook yet, so its amounts "
+            "cannot be trusted to build a shopping list. Review it first.",
+        )
 
     existing = session.exec(
         select(PlannedMeal).where(

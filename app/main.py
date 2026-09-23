@@ -1,0 +1,34 @@
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI
+
+from app.config import settings
+from app.db import init_db
+from app.deps import close_classifier
+from app.routers import transactions
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    init_db()
+    yield
+    await close_classifier()
+
+
+app = FastAPI(
+    title="Masroufi",
+    description=(
+        "Expense tracking built around a bank statement export and its note "
+        "field. Phase A: import, categorise, and surface repeat patterns for the "
+        "household to confirm."
+    ),
+    version="0.1.0",
+    lifespan=lifespan,
+)
+
+app.include_router(transactions.router, prefix="/api")
+
+
+@app.get("/health")
+def health() -> dict:
+    return {"status": "ok", "classifier": settings.classifier_backend}

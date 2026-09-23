@@ -173,7 +173,10 @@ pytest
 
 | | |
 |---|---|
-| `POST /api/import` | Upload a statement export. Returns counts and how many classifier calls the cache saved. |
+| `GET /api/sources` | The providers you can import from: `bop`, `jawwalpay`, `palpay`, `cash`, `manual`. |
+| `POST /api/import?source=bop` | Upload an export for one provider. Deduplicates against what that source already holds. |
+| `GET /api/transfers/pending` | Suspected movements between your own accounts that need an answer. |
+| `POST /api/transfers/link` | Confirm a pair is one movement, excluding it from spending. |
 | `GET /api/transactions?needs_review=true` | The review queue — the ones to actually ask about. |
 | `PATCH /api/transactions/{id}/category` | The household's correction. Marked `user`; never overwritten. Teaches the vendor by default. |
 | `GET /api/vendors` | The vendor dataset: tidied names, spend totals, provisional or confirmed categories. |
@@ -202,16 +205,51 @@ goes in front of the same parser.
   ranked by `reducibility` and by the gap between what the household paid and the
   going rate.
 
+## Several providers, one picture
+
+Households here pay through a bank *and* two or three wallets — Bank of
+Palestine, JawwalPay, PalPay — and no single export shows the whole picture. So
+every transaction belongs to a **source** ([app/sources.py](app/sources.py)), and
+two problems follow from that.
+
+**Re-imports must not duplicate.** Exports overlap, and people re-download them.
+Deduplication is per source, and it **counts rather than matching**
+([app/services/dedup.py](app/services/dedup.py)): treating `(date, amount, note)`
+as unique would silently delete one of two real ₪3 fares taken on the same day
+with the same useless note. If the file has three identical rows and the database
+holds two, one is new. A provider reference is used instead whenever the export
+supplies one, since that is exact.
+
+**Money moved between your own accounts is not spending.** A JawwalPay wallet
+topped up from BOP appears twice: `-200` in the bank export and `+200` in the
+wallet export. Counting both inflates the household's spending by exactly what
+they moved between their own pockets.
+
+Matching is equal-and-opposite amounts, across different sources, within three
+days — and that alone is deliberately *not* enough to act on, since two unrelated
+₪200 payments a day apart look identical. A pair is auto-linked only when one
+side's note names the other provider; everything else goes to
+`GET /api/transfers/pending` for the household to answer. Same rule as duplicate
+receipts: match confidently, ask when unsure.
+
+```
+import bop      TRANSFER TO JAWWALPAY   -200
+import jawwalpay  TOP UP                +200   -> linked, excluded from spending
+                  سوبر ماركت الأمل      -145   -> the only real expense
+```
+
 ### Known gaps
 
-- **Re-importing a statement duplicates its transactions.** There is no import
-  deduplication yet. This is the same problem as reconciling a photographed
-  receipt against the statement line that arrives a week later, and both want one
-  answer rather than two.
-- **Cash is invisible.** A ₪400 withdrawal shows as `cash_withdrawal`; what it
-  was actually spent on leaves no bank trace at all. Receipts and manual entry
-  are the only way to see inside it, and whether they *draw down* the withdrawal
-  or are counted separately is an open product decision.
+- **Only CSV import exists.** JawwalPay and PalPay may have no export at all,
+  only in-app history — which makes screenshot capture the primary ingestion path
+  for them, not a fallback. Not built yet.
+- **Receipts are not implemented.** Approved design: capture always queues
+  locally and parses when a connection appears, extraction covers total *and*
+  line items, and a receipt auto-matches against the statement line that arrives
+  later, asking only when unsure. The line items are what gives Phase B a price
+  dataset of its own.
+- Small change under ₪20 is still handled in cash and leaves no digital trace.
+  The `cash` and `manual` sources exist for it; nothing writes to them yet.
 - Multi-currency amounts are stored but not normalised for reporting.
 - The note and decision caches are per-process; the vendor table is the durable
   half.

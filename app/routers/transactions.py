@@ -11,10 +11,13 @@ from app.config import settings
 from app.db import get_session
 from app.deps import get_classifier, get_cleaner
 from app.importers.csv_import import ImportError_, parse_csv
-from app.models import CategorySource, Currency, Transaction, Vendor
+from app.models import CategorySource, Currency, Source, Transaction, Vendor
 from app.notes import NoteCleaner
+from app.services import dedup, transfers
 from app.services import vendors as vendor_service
 from app.services.recurring import find_patterns
+from app import sources as source_service
+from app.sources import DEFAULT_SOURCES
 from app.taxonomy import CATEGORIES, REDUCIBILITY_SCALE, is_valid_category
 
 router = APIRouter()
@@ -24,9 +27,16 @@ MAX_UPLOAD_BYTES = 5 * 1024 * 1024
 
 class ImportSummary(BaseModel):
     batch: str
+    source: str
     imported: int
+    duplicates_skipped: int = Field(
+        description="Rows this source already held, so re-importing is safe."
+    )
     auto_categorised: int
     needs_review: int
+    transfers_linked: int = Field(
+        description="Pairs recognised as movements between the household's own accounts."
+    )
     from_known_vendors: int = Field(
         description="Categorised from the vendor table with no model call at all."
     )
@@ -47,6 +57,9 @@ class TransactionOut(BaseModel):
     confidence: float | None
     reducibility: int | None
     needs_review: bool
+    is_internal_transfer: bool
+    source_id: int | None
+    vendor_id: int | None
 
 
 class CategoryUpdate(BaseModel):
@@ -77,6 +90,23 @@ class VendorOut(BaseModel):
     total_spent: float
     first_seen: date | None
     last_seen: date | None
+
+
+class TransferOut(BaseModel):
+    out_id: int
+    in_id: int
+    amount: float
+    currency: str
+    out_source: str
+    in_source: str
+    days_apart: int
+    prompt: str
+    reason: str
+
+
+class TransferLink(BaseModel):
+    out_id: int
+    in_id: int
 
 
 class VendorConfirm(BaseModel):
@@ -120,6 +150,7 @@ def list_categories() -> dict:
 @router.post("/import", response_model=ImportSummary)
 async def import_statement(
     file: UploadFile = File(...),
+    source: str = Query("bop", description="Provider slug; see GET /api/sources."),
     currency: Currency = Query(Currency.ILS, description="Used when the file has no currency column."),
     session: Session = Depends(get_session),
     classifier: Classifier = Depends(get_classifier),
@@ -131,14 +162,39 @@ async def import_statement(
     if len(raw) > MAX_UPLOAD_BYTES:
         raise HTTPException(413, "The file is larger than 5 MB.")
 
+    provider = source_service.by_slug(session, source)
+    if provider is None:
+        known = ", ".join(s["slug"] for s in DEFAULT_SOURCES)
+        raise HTTPException(422, f"Unknown source {source!r}. Known sources: {known}.")
+
     batch = uuid.uuid4().hex[:12]
     try:
-        transactions = parse_csv(raw, batch=batch, default_currency=currency)
+        parsed = parse_csv(raw, batch=batch, default_currency=currency)
     except ImportError_ as exc:
         raise HTTPException(422, str(exc)) from exc
 
-    # Clean every note first: redact, translate, tidy. Deduplicated, so a
-    # statement with thirty grocer lines pays for one cleaning.
+    for transaction in parsed:
+        transaction.source_id = provider.id
+
+    # Drop rows this source already holds, so re-importing an overlapping export
+    # does not duplicate a household's history.
+    transactions, duplicates = dedup.filter_new(session, parsed)
+    if not transactions:
+        return ImportSummary(
+            batch=batch,
+            source=provider.slug,
+            imported=0,
+            duplicates_skipped=duplicates,
+            auto_categorised=0,
+            needs_review=0,
+            from_known_vendors=0,
+            classifier_calls_saved=0,
+            vendors_known=len(list(session.exec(select(Vendor)))),
+            transfers_linked=0,
+        )
+
+    # Clean every note: redact, translate, tidy. Deduplicated, so a statement
+    # with thirty grocer lines pays for one cleaning.
     clean_notes = await asyncio.gather(*(cleaner.clean(t.note) for t in transactions))
 
     # Resolve vendors before classifying, so that anything the household has
@@ -209,15 +265,23 @@ async def import_statement(
     session.add_all(transactions)
     session.commit()
 
+    # Now that both sides may be present, link up the movements between the
+    # household's own accounts so they are not counted as spending.
+    linked = transfers.link_confident(session)
+    session.commit()
+
     fresh_calls = max(_cache_size(classifier) - before, 0)
     return ImportSummary(
         batch=batch,
+        source=provider.slug,
         imported=len(transactions),
+        duplicates_skipped=duplicates,
         auto_categorised=auto,
         needs_review=sum(1 for t in transactions if t.needs_review),
         from_known_vendors=from_vendors,
         classifier_calls_saved=max(len(transactions) - fresh_calls, 0),
         vendors_known=len(list(session.exec(select(Vendor)))),
+        transfers_linked=linked,
     )
 
 
@@ -391,24 +455,87 @@ def confirm_pattern(
 
 @router.get("/summary")
 def summary(session: Session = Depends(get_session)) -> dict:
-    """Spend by category, plus what is still unreviewed."""
-    transactions = list(session.exec(select(Transaction)))
+    """Spend by category, plus what is still unreviewed.
+
+    Internal transfers are excluded: a wallet top-up from the bank is the same
+    money seen twice, and counting it would inflate spending by however much the
+    household moved between its own accounts.
+    """
+    all_rows = list(session.exec(select(Transaction)))
+    spending = [t for t in all_rows if not t.is_internal_transfer]
+
     by_category: dict[str, float] = {}
-    for t in transactions:
+    for t in spending:
         if t.amount < 0 and t.category:
             by_category[t.category] = by_category.get(t.category, 0.0) + abs(t.amount)
 
     return {
-        "total_out": round(sum(abs(t.amount) for t in transactions if t.amount < 0), 2),
-        "total_in": round(sum(t.amount for t in transactions if t.amount > 0), 2),
+        "total_out": round(sum(abs(t.amount) for t in spending if t.amount < 0), 2),
+        "total_in": round(sum(t.amount for t in spending if t.amount > 0), 2),
+        "internal_transfers_excluded": round(
+            sum(abs(t.amount) for t in all_rows if t.is_internal_transfer and t.amount < 0), 2
+        ),
         "by_category": {k: round(v, 2) for k, v in sorted(by_category.items(), key=lambda kv: -kv[1])},
-        "needs_review": sum(1 for t in transactions if t.needs_review),
-        "coverage": round(
-            sum(1 for t in transactions if not t.needs_review) / len(transactions), 3
-        )
-        if transactions
+        "needs_review": sum(1 for t in spending if t.needs_review),
+        "coverage": round(sum(1 for t in spending if not t.needs_review) / len(spending), 3)
+        if spending
         else 0.0,
     }
+
+
+@router.get("/sources")
+def list_sources(session: Session = Depends(get_session)) -> list[Source]:
+    """The providers a household can import from."""
+    return list(session.exec(select(Source)))
+
+
+@router.get("/transfers/pending", response_model=list[TransferOut])
+def pending_transfers(session: Session = Depends(get_session)) -> list[TransferOut]:
+    """Suspected movements between the household's own accounts, awaiting an answer.
+
+    Confident pairs are linked during import and do not appear here. These are the
+    equal-and-opposite pairs where neither note names the other account, so they
+    could equally be two unrelated payments of the same amount.
+    """
+    return [
+        TransferOut(
+            out_id=c.out_id,
+            in_id=c.in_id,
+            amount=c.amount,
+            currency=c.currency,
+            out_source=c.out_source,
+            in_source=c.in_source,
+            days_apart=c.days_apart,
+            prompt=(
+                f"{c.currency} {c.amount:.2f} left {c.out_source} and arrived in "
+                f"{c.in_source} {'the same day' if c.days_apart == 0 else f'{c.days_apart} days later'}. "
+                "Did you move your own money?"
+            ),
+            reason=c.reason,
+        )
+        for c in transfers.find_candidates(session)
+        if not c.confident
+    ]
+
+
+@router.post("/transfers/link")
+def link_transfer(
+    pair: TransferLink,
+    session: Session = Depends(get_session),
+) -> dict:
+    """Confirm that a pair is one movement of the household's own money."""
+    debit = session.get(Transaction, pair.out_id)
+    credit = session.get(Transaction, pair.in_id)
+    if debit is None or credit is None:
+        raise HTTPException(404, "One or both transactions do not exist.")
+    if debit.amount >= 0 or credit.amount <= 0:
+        raise HTTPException(422, "Expected one outgoing and one incoming transaction.")
+    if round(debit.amount, 2) != round(-credit.amount, 2):
+        raise HTTPException(422, "The two amounts are not equal and opposite.")
+
+    transfers.link(session, debit, credit)
+    session.commit()
+    return {"linked": True, "amount": abs(debit.amount)}
 
 
 def _cache_size(classifier: Classifier) -> int:

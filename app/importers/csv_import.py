@@ -31,6 +31,16 @@ _AMOUNT_ALIASES = ("amount", "value", "المبلغ")
 _DEBIT_ALIASES = ("debit", "withdrawal", "paid out", "مدين", "سحب")
 _CREDIT_ALIASES = ("credit", "deposit", "paid in", "دائن", "إيداع")
 _CURRENCY_ALIASES = ("currency", "ccy", "العملة")
+_EXTERNAL_ID_ALIASES = (
+    "transaction id",
+    "transaction no",
+    "reference no",
+    "reference number",
+    "receipt no",
+    "id",
+    "رقم العملية",
+    "رقم المرجع",
+)
 
 _DATE_FORMATS = ("%Y-%m-%d", "%d/%m/%Y", "%d-%m-%Y", "%m/%d/%Y", "%d.%m.%Y", "%Y/%m/%d")
 
@@ -52,6 +62,7 @@ def parse_csv(raw: bytes, batch: str, default_currency: Currency = Currency.ILS)
     debit_col = _find(headers, _DEBIT_ALIASES)
     credit_col = _find(headers, _CREDIT_ALIASES)
     currency_col = _find(headers, _CURRENCY_ALIASES)
+    external_col = _find(headers, _EXTERNAL_ID_ALIASES)
 
     if date_col is None:
         raise ImportError_(f"No date column found. Saw: {', '.join(reader.fieldnames)}")
@@ -74,6 +85,7 @@ def parse_csv(raw: bytes, batch: str, default_currency: Currency = Currency.ILS)
             continue
 
         note = (row.get(note_col) or "").strip()
+        external_id = (row.get(external_col) or "").strip() if external_col else ""
         out.append(
             Transaction(
                 booked_on=booked_on,
@@ -82,6 +94,7 @@ def parse_csv(raw: bytes, batch: str, default_currency: Currency = Currency.ILS)
                 or default_currency,
                 note=note,
                 note_key=normalise(note),
+                external_id=external_id or None,
                 import_batch=batch,
             )
         )

@@ -11,6 +11,30 @@ class Currency(str, Enum):
     EGP = "EGP"
 
 
+class SourceKind(str, Enum):
+    BANK = "bank"
+    WALLET = "wallet"
+    CASH = "cash"
+    MANUAL = "manual"
+
+
+class Source(SQLModel, table=True):
+    """Where transactions came from.
+
+    Households in Gaza pay through several providers at once — a bank plus two or
+    three wallets — and no single export shows the whole picture. Every
+    transaction therefore belongs to a source, so that imports can be deduplicated
+    per provider and money moved between the household's own accounts can be
+    recognised instead of counted as spending.
+    """
+
+    id: int | None = Field(default=None, primary_key=True)
+    slug: str = Field(index=True, unique=True)
+    name: str
+    kind: SourceKind = SourceKind.WALLET
+    default_currency: Currency = Currency.ILS
+
+
 class CategorySource(str, Enum):
     """Where a transaction's current category came from.
 
@@ -73,6 +97,24 @@ class Transaction(SQLModel, table=True):
     note: str = Field(description="As it appeared on the statement, unmodified.")
     note_key: str = Field(index=True, description="Normalised note, for caching and grouping.")
     vendor_id: int | None = Field(default=None, foreign_key="vendor.id", index=True)
+
+    source_id: int | None = Field(default=None, foreign_key="source.id", index=True)
+    external_id: str | None = Field(
+        default=None,
+        index=True,
+        description="The provider's own reference, when the export supplies one. "
+        "Authoritative for deduplication when present.",
+    )
+
+    is_internal_transfer: bool = Field(
+        default=False,
+        index=True,
+        description="Money moved between the household's own accounts, e.g. a "
+        "bank-to-wallet top-up. Excluded from spending totals.",
+    )
+    transfer_peer_id: int | None = Field(
+        default=None, description="The matching transaction on the other side."
+    )
 
     category: str | None = Field(default=None, index=True)
     category_source: CategorySource = CategorySource.UNSET

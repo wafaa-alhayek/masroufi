@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field
 from sqlmodel import Session, select
 
 from app.db import get_session
+from app.idempotency import remember, replay
 from app.deps import get_temperature_source
 from app.config import settings
 from app.models import (
@@ -32,6 +33,12 @@ router = APIRouter()
 
 
 class StockIn(BaseModel):
+    key: str | None = Field(
+        default=None,
+        max_length=128,
+        description="Client-generated, so a replayed offline queue cannot record "
+        "this twice.",
+    )
     item_id: int
     quantity: float = Field(gt=0, description="In the item's own unit.")
     source: StockSource = StockSource.UNKNOWN
@@ -73,6 +80,12 @@ class ParcelLine(BaseModel):
 
 
 class ParcelIn(BaseModel):
+    key: str | None = Field(
+        default=None,
+        max_length=128,
+        description="Client-generated, so a replayed offline queue cannot record "
+        "this twice.",
+    )
     received_on: date | None = None
     label: str = ""
     lines: list[ParcelLine] = Field(
@@ -85,6 +98,12 @@ class ConditionIn(BaseModel):
 
 
 class FeelingIn(BaseModel):
+    key: str | None = Field(
+        default=None,
+        max_length=128,
+        description="Client-generated, so a replayed offline queue cannot record "
+        "this twice.",
+    )
     feeling: ItemFeeling = Field(
         description="WEARY pushes an item down the suggestions. No reason is asked for."
     )
@@ -127,6 +146,17 @@ class SuggestionOut(BaseModel):
     )
     score: float
     why: str
+
+
+class SuggestionsOut(BaseModel):
+    suggestions: list[SuggestionOut]
+    withheld: list[SuggestionOut] = Field(
+        description="Dishes built on something the household has had enough of. "
+        "Returned so a screen can say how many are hidden, never to argue for them."
+    )
+    withheld_because: list[str] = Field(
+        description="The items behind those exclusions, for a plain explanation."
+    )
 
 
 # --- the cupboard ------------------------------------------------------------
@@ -235,6 +265,10 @@ def record_parcel(body: ParcelIn, session: Session = Depends(get_session)) -> di
     Aid arrives as a bundle of staples, not as a shopping trip. Asking a household
     to enter eight items separately means nobody ever enters any of them.
     """
+    seen = replay(session, body.key, "parcel")
+    if seen is not None:
+        return seen
+
     if not body.lines:
         raise HTTPException(422, "A parcel needs at least one item.")
 
@@ -256,12 +290,14 @@ def record_parcel(body: ParcelIn, session: Session = Depends(get_session)) -> di
             acquired_on=parcel.received_on,
             parcel_id=parcel.id,
         )
-    session.commit()
-    return {
+    out = {
         "parcel_id": parcel.id,
         "received_on": parcel.received_on,
         "items_recorded": len(body.lines),
     }
+    remember(session, body.key, "parcel", out)
+    session.commit()
+    return out
 
 
 # --- how people feel about what they have ------------------------------------
@@ -308,21 +344,39 @@ def list_feelings(session: Session = Depends(get_session)) -> list[dict]:
 # --- what to cook ------------------------------------------------------------
 
 
-@router.get("/suggestions", response_model=list[SuggestionOut])
+@router.get("/suggestions", response_model=SuggestionsOut)
 def suggestions(
     on: date | None = None,
     slot: MealSlot | None = None,
     limit: int = Query(8, ge=1, le=50),
+    include_weary: bool = Query(
+        False, description='Set when the household asks to see the hidden ones anyway.'
+    ),
     session: Session = Depends(get_session),
-) -> list[SuggestionOut]:
+) -> SuggestionsOut:
     """What to cook, weighing the cupboard against what people are tired of.
 
-    `flavour_only` is the one to surface first. It means the cupboard already
-    covers the dish except for a spice or a paste — the cheapest possible way to
-    eat something that does not taste like the last two weeks.
+    Dishes built on something the household has had enough of are **withheld**, not
+    ranked lower, and reported separately with a count so a screen can say how many
+    are hidden and why. An unexplained short list looks broken, and hiding the
+    reason is its own kind of nudge.
+
+    `flavour_only` is the one to surface first. It means the cupboard already covers
+    the dish except for a spice or a paste — the cheapest way to eat something that
+    does not taste like the last two weeks.
     """
-    return [
-        SuggestionOut(
+    offered, withheld = suggest_service.suggest(
+        session, on=on, slot=slot, limit=limit, include_weary=include_weary
+    )
+    return SuggestionsOut(
+        suggestions=[_suggestion_out(s) for s in offered],
+        withheld=[_suggestion_out(s) for s in withheld],
+        withheld_because=sorted({name for s in withheld for name in s.weary_items}),
+    )
+
+
+def _suggestion_out(s) -> "SuggestionOut":
+    return SuggestionOut(
             dish_id=s.dish_id,
             name_en=s.name_en,
             name_ar=s.name_ar,
@@ -338,5 +392,3 @@ def suggestions(
             score=s.score,
             why=s.why,
         )
-        for s in suggest_service.suggest(session, on=on, slot=slot, limit=limit)
-    ]

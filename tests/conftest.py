@@ -26,6 +26,7 @@ from sqlmodel import Session, SQLModel, create_engine  # noqa: E402
 @pytest.fixture(scope="module")
 def client():
     """A TestClient backed by a fresh in-memory database, seeded like a new install."""
+    from app import idempotency  # noqa: F401  - registers its table
     from app.db import get_session
     from app.kitchen import ensure_kitchen
     from app.main import app

@@ -31,6 +31,7 @@ from app.deps import get_temperature_source
 from app.kitchen import fuel, spoilage
 from app.kitchen.fuel import GasEstimate
 from app.weather import DayTemperature, TemperatureSource
+from app.idempotency import remember, replay
 from app.redact import normalise
 from app.services import pantry as pantry_service
 from app.services import prices
@@ -122,16 +123,36 @@ class LineOut(BaseModel):
     item_id: int
     item_name_en: str
     item_name_ar: str
-    quantity: float
+    quantity: float = Field(description="What still has to be bought.")
     unit: str
     buy_on: date | None
     state: LineState
     shelf_life: str
+    required: float = Field(description="What the plan needs before the cupboard.")
+    from_stock: float = Field(description="How much the household already has.")
+    covers_through: date | None = Field(
+        default=None, description="For a weekly line, the last day it covers."
+    )
     for_dishes: list[str] = []
+
+
+class DayTemperatureOut(BaseModel):
+    on: date
+    max_c: float
+    estimated: bool = Field(
+        description="A seasonal average rather than a forecast, because the weather "
+        "service was unreachable or is switched off."
+    )
 
 
 class ShoppingListOut(BaseModel):
     week_start: date
+    temperatures: list[DayTemperatureOut] = Field(
+        default_factory=list,
+        description="What the split was decided on. Empty when the weather is off, "
+        "in which case each item's static shelf-life label decided instead.",
+    )
+    weather_source: str
     daily: dict[str, list[LineOut]] = Field(
         description="Perishables, keyed by the day they must be bought. Refrigeration "
         "is scarce, so these are bought the day they are cooked."
@@ -142,6 +163,13 @@ class ShoppingListOut(BaseModel):
 
 
 class PurchaseIn(BaseModel):
+    key: str | None = Field(
+        default=None,
+        max_length=128,
+        description="Client-generated, created when the person taps rather than "
+        "when the request is sent, so a replayed offline queue cannot record this "
+        "twice.",
+    )
     paid: float = Field(gt=0, description="What it actually cost.")
     currency: Currency = Currency.ILS
     source: str = Field(default="manual", description="Provider slug it was paid from.")
@@ -172,6 +200,13 @@ class PurchaseOut(BaseModel):
 
 
 class UnavailableIn(BaseModel):
+    key: str | None = Field(
+        default=None,
+        max_length=128,
+        description="Client-generated, created when the person taps rather than "
+        "when the request is sent, so a replayed offline queue cannot record this "
+        "twice.",
+    )
     substitute_item_id: int | None = Field(
         default=None, description="Omit to just record that it was not available."
     )
@@ -474,6 +509,9 @@ async def read_list(
             buy_on=line.buy_on,
             state=line.state,
             shelf_life=item.shelf_life.value,
+            required=line.required,
+            from_stock=line.from_stock,
+            covers_through=line.covers_through,
             for_dishes=needs.get((item.id, line.buy_on), []),
         )
         if line.buy_on is None:
@@ -481,7 +519,16 @@ async def read_list(
         else:
             daily.setdefault(line.buy_on.isoformat(), []).append(out)
 
-    return ShoppingListOut(week_start=week_start, daily=daily, weekly=weekly)
+    return ShoppingListOut(
+        week_start=week_start,
+        temperatures=[
+            DayTemperatureOut(on=r.on, max_c=r.max_c, estimated=r.estimated)
+            for r in sorted((readings or {}).values(), key=lambda r: r.on)
+        ],
+        weather_source="open-meteo" if settings.weather_enabled else "off",
+        daily=daily,
+        weekly=weekly,
+    )
 
 
 @router.get("/shopping-list/{line_id}/substitutes", response_model=list[Item])
@@ -504,6 +551,10 @@ def mark_unavailable(
     Worth recording even without a substitute: over time this is real data about
     what is scarce and when.
     """
+    seen = replay(session, body.key, "unavailable")
+    if seen is not None:
+        return seen
+
     line = session.get(ShoppingLine, line_id)
     if line is None:
         raise HTTPException(404, "No such shopping line.")
@@ -531,8 +582,14 @@ def mark_unavailable(
         session.add(line)
         replacement_id = replacement.id
 
+    out = {
+        "line_id": line_id,
+        "state": line.state.value,
+        "replacement_line_id": replacement_id,
+    }
+    remember(session, body.key, "unavailable", out)
     session.commit()
-    return {"line_id": line_id, "state": line.state.value, "replacement_line_id": replacement_id}
+    return out
 
 
 @router.post("/shopping-list/{line_id}/purchase", response_model=PurchaseOut)
@@ -545,6 +602,10 @@ def confirm_purchase(
     a shop is an item-level price observation, available before receipt reading
     exists.
     """
+    seen = replay(session, body.key, "purchase")
+    if seen is not None:
+        return PurchaseOut(**seen)
+
     line = session.get(ShoppingLine, line_id)
     if line is None:
         raise HTTPException(404, "No such shopping line.")
@@ -600,7 +661,7 @@ def confirm_purchase(
 
     unit_price = abs(body.paid) / quantity if quantity else 0.0
     bulk_units = {Unit.GRAM, Unit.ML}
-    return PurchaseOut(
+    out = PurchaseOut(
         line_id=line_id,
         transaction_id=transaction.id,
         quantity=quantity,
@@ -608,6 +669,9 @@ def confirm_purchase(
         unit_price=round(unit_price, 6),
         price_per_1000=round(unit_price * 1000, 2) if item.unit in bulk_units else None,
     )
+    remember(session, body.key, "purchase", out)
+    session.commit()
+    return out
 
 
 # --- cooking gas -------------------------------------------------------------
@@ -899,6 +963,13 @@ async def storage_advice(
 
 
 class FromStockIn(BaseModel):
+    key: str | None = Field(
+        default=None,
+        max_length=128,
+        description="Client-generated, created when the person taps rather than "
+        "when the request is sent, so a replayed offline queue cannot record this "
+        "twice.",
+    )
     quantity: float | None = Field(
         default=None, gt=0, description="Defaults to the whole line."
     )
@@ -920,6 +991,10 @@ def cover_from_stock(
     spend. This is the one-tap way out of that, and it deducts from recorded stock
     so the next week's list knows too.
     """
+    seen = replay(session, body.key, "from-stock")
+    if seen is not None:
+        return seen
+
     line = session.get(ShoppingLine, line_id)
     if line is None:
         raise HTTPException(404, "No such shopping line.")
@@ -934,9 +1009,12 @@ def cover_from_stock(
     session.add(line)
     session.commit()
 
-    return {
+    out = {
         "line_id": line_id,
         "state": line.state.value,
         "deducted_from_stock": taken,
         "untracked": body.deduct and taken < quantity,
     }
+    remember(session, body.key, "from-stock", out)
+    session.commit()
+    return out

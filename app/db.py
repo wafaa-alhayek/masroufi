@@ -9,6 +9,9 @@ engine = create_engine(settings.database_url, connect_args=connect_args)
 
 
 def init_db() -> None:
+    # Imported for their side effect of registering tables on the metadata.
+    from app import idempotency  # noqa: F401
+
     SQLModel.metadata.create_all(engine)
 
     # Imported here rather than at module scope: app.sources imports the models,

@@ -227,6 +227,15 @@ pytest
 | `GET /api/prices/estimates?stale_only=true` | What needs re-checking. |
 | `GET /api/prices/shopping-list/cost` | What a week is likely to cost, with its gaps named. |
 
+### Offline
+
+| | |
+|---|---|
+| `GET /api/bootstrap` | One versioned payload the client stores and then works from with no connection. |
+
+Every write that happens in a shop — purchase, unavailable, from-stock, parcel,
+stock — takes a client-generated `key` so a replayed queue cannot record it twice.
+
 ## Importer
 
 Written against no particular bank. Column names are matched against aliases in
@@ -283,6 +292,35 @@ weekly list; bread and leafy greens do not, so they go on the daily one.
 **Aggregating happens before rounding.** Seven days of 80 g of rice is 750 g for
 two adults. Rounding each meal up to a 250 g purchase step first would have
 bought 1.75 kg — the rounding waste multiplied by every meal in the week.
+
+### Working offline
+
+First launch may assume a connection. Nothing after it may.
+
+`GET /api/bootstrap` returns one versioned payload the client stores: items,
+dishes with their gas cost, the household, sources, categories, current stock,
+weary items, price estimates, the week's plan and lines, the week's temperatures,
+and the twelve monthly normals.
+
+**The server ships the outputs of its models, not the models.** Porting the Q10
+curve, the portion maths and the price-decay weighting to TypeScript would mean two
+implementations of the rules this app's correctness claims rest on, and they would
+drift. So each item arrives with `keeps_days_by_day` already evaluated at each of
+the week's temperatures, and the client's rule is one subtraction and one
+comparison — *does it keep longer than the days I would hold it* — with no physics
+on the device. The raw inputs (`keeps_days_at_20c`, `q10`) and the monthly normals
+come too, so a client can still split a list for a week it has no forecast for.
+
+**Writes are replayable.** Every write that happens in a shop happens with no
+signal, so purchase, unavailable, from-stock, parcel and stock all accept a
+client-generated `key`. The first call does the work and its response is stored; a
+repeat of the same key returns that response and changes nothing.
+
+The key is generated **when the person taps, not when the request is sent** — a key
+made at send time would differ between the original and the retry, which defeats
+the point. A replayed purchase that is not recognised as a replay records the spend
+twice, and an app that lies about what a household spent is worse than no app; there
+is a test pinning exactly that.
 
 ### No price is a fact
 
@@ -453,12 +491,30 @@ drives it. It is stored per item ([app/kitchen/catalogue.py](app/kitchen/catalog
 rather than as one global constant, because a sack of rice and a chicken do not
 respond to heat the same way.
 
-The same plan, same household, two different weeks of weather:
+**The comparison is against how long the item would be held, not a fixed
+threshold.** This was wrong in the first version and a reviewer caught it: the code
+asked *"does this keep at least two days"* when the question is *"will this survive
+from the weekly shop until the day it is cooked"*. Bread keeping four days is fine
+for Tuesday's meal and useless for Saturday's, so a week of bread was being put in
+one weekly line and the Saturday loaf bought five days early.
 
-| | January, 17.5 °C | August, 31.6 °C |
-|---|---|---|
-| daily lines | 3 | 12 |
-| bread | one weekly line | seven daily lines |
+Now an item goes on the weekly line only as far as it can actually be held, and the
+line says how far that is:
+
+```
+bread, every day, 17.5 °C   weekly 1000 g, covers through Thursday
+                            + fresh on Friday, Saturday, Sunday
+
+bread, every day, 31.0 °C   fresh every day, seven lines
+
+chicken, every day, 12 °C   fresh every day — under the two-day floor
+                            at any temperature
+```
+
+Shelf life is taken at the **hottest day it would be stored through**, not the day
+it is eaten: bread bought on a cool Monday for a cool Friday still has to survive a
+hot Wednesday in between. And anything under the two-day floor is always same-day,
+which is what stops an item needed on the shop day itself appearing on both lists.
 
 **Temperature comes from [Open-Meteo](https://open-meteo.com/), which needs no API
 key** — one less credential to manage. It is off by default (`WEATHER_ENABLED`);
@@ -626,6 +682,13 @@ import jawwalpay  TOP UP                +200   -> linked, excluded from spending
 - Multi-currency amounts are stored but not normalised for reporting.
 - The note and decision caches are per-process; the vendor table is the durable
   half.
+- **No reference prices are loaded.** `PriceSource.REFERENCE` and `CROWD` are
+  designed for and weighted, but nothing seeds them, so on a fresh install
+  nearly every line reads "no price" until the household has bought things.
+  A dated WFP/PCBS snapshot shipped in the bootstrap bundle would fix that;
+  it is not built.
+- **Receipt reading is not built.** `POST /api/receipts` → proposed line matches
+  with confidence is the intended shape, and item matching is the piece it needs.
 - **No expenses UI exists, and the tab bar in the mockups was wrong.** The gas
   screen was filed under expenses because a fourth tab was needed, not because
   it belongs there. The import / review / vendor / summary half of the app has

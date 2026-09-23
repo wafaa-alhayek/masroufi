@@ -18,7 +18,7 @@ from datetime import date, timedelta
 from sqlmodel import Session, select
 
 from app.kitchen import get_household
-from app.kitchen.spoilage import REFERENCE_C, keeps_for
+from app.kitchen.spoilage import DAILY_THRESHOLD_DAYS, REFERENCE_C, keeps_for
 from app.services import pantry
 from app.weather import DayTemperature
 from app.models import (
@@ -26,6 +26,8 @@ from app.models import (
     DishItem,
     DishPortion,
     Item,
+    ItemFeeling,
+    ItemPreference,
     ItemRole,
     LineState,
     PlannedMeal,
@@ -42,6 +44,7 @@ class Need:
     dishes: list[str] = field(default_factory=list)
     required: float = 0.0
     from_stock: float = 0.0
+    covers_through: date | None = None
 
     @property
     def fully_covered(self) -> bool:
@@ -102,6 +105,10 @@ def compute_needs(
     # aggregates across the week.
     raw: dict[tuple[int, date | None], float] = defaultdict(float)
     sources: dict[tuple[int, date | None], list[str]] = defaultdict(list)
+    # The last day a weekly line is expected to cover. An item that keeps four
+    # days can legitimately have both a weekly line for the first half of the week
+    # and daily lines for the rest, and the UI has to be able to say so.
+    spans: dict[int, date] = {}
 
     for meal in meals:
         factor = overrides.get(meal.dish_id, 1.0)
@@ -110,7 +117,12 @@ def compute_needs(
             item = items.get(row.item_id)
             if item is None:
                 continue
-            key = (item.id, meal.plan_date if _buy_daily(item, meal.plan_date, temperatures) else None)
+            daily = _buy_daily(item, meal.plan_date, week_start, temperatures)
+            key = (item.id, meal.plan_date if daily else None)
+            if not daily:
+                current = spans.get(item.id)
+                if current is None or meal.plan_date > current:
+                    spans[item.id] = meal.plan_date
             raw[key] += row.qty_per_adult * equivalents * factor
             if dish is not None and dish.name_en not in sources[key]:
                 sources[key].append(dish.name_en)
@@ -137,6 +149,7 @@ def compute_needs(
                 dishes=sources[(item_id, buy_on)],
                 required=round(total, 2),
                 from_stock=round(covered, 2),
+                covers_through=spans.get(item_id) if buy_on is None else None,
             )
         )
 
@@ -145,22 +158,68 @@ def compute_needs(
 
 
 def _buy_daily(
-    item: Item, on: date, temperatures: dict[date, DayTemperature] | None
+    item: Item,
+    needed_on: date,
+    shop_on: date,
+    temperatures: dict[date, DayTemperature] | None,
 ) -> bool:
-    """Whether this item has to be bought the day it is cooked.
+    """Whether this item has to be bought near the day it is cooked.
 
-    With no temperature available, the item's static shelf-life label decides —
-    which is the honest fallback, since a guess about the weather is worse than
-    the seasonal default the label already encodes.
+    The question is not "does this keep for a while" but "will this survive from
+    the weekly shop until the day it is cooked", which are different and were
+    conflated in the first version of this. Bread keeping four days is fine for
+    Tuesday's meal and useless for Saturday's, so the comparison is the item's
+    effective shelf life against the number of days it would have to be held.
+
+    Shelf life is taken at the **hottest day it would be stored through**, not the
+    day it is eaten: bread bought on a cool Monday for a cool Friday still has to
+    survive a hot Wednesday in between.
     """
-    if temperatures is None:
-        return item.shelf_life.buy_daily
+    days_to_hold = max((needed_on - shop_on).days, 0)
 
-    reading = temperatures.get(on)
-    if reading is None:
-        return item.shelf_life.buy_daily
+    keeps = _keeps_through(item, shop_on, needed_on, temperatures)
+    if keeps is None:
+        # No usable temperature. The static label decides for anything that does
+        # not keep at all, and the reference shelf life decides the rest — a
+        # coarse label should not let a five-day item sit for six.
+        if item.shelf_life.buy_daily:
+            return True
+        return item.keeps_days_at_20c <= days_to_hold
 
-    return keeps_for(item.keeps_days_at_20c, item.q10, reading.max_c).buy_daily
+    if keeps.days < DAILY_THRESHOLD_DAYS:
+        # Cannot be held even a couple of days, so it is a fresh item however the
+        # week falls. Without this floor, something needed on the shop day itself
+        # would land on the weekly list and the same item could appear on both.
+        return True
+    return keeps.days <= days_to_hold
+
+
+def _keeps_through(
+    item: Item,
+    shop_on: date,
+    needed_on: date,
+    temperatures: dict[date, DayTemperature] | None,
+):
+    """Effective shelf life across the whole holding window, worst day first."""
+    if not temperatures:
+        return None
+
+    readings = [
+        temperatures[day]
+        for day in _days_between(shop_on, needed_on)
+        if day in temperatures
+    ]
+    if not readings:
+        return None
+
+    hottest = max(readings, key=lambda r: r.max_c)
+    return keeps_for(item.keeps_days_at_20c, item.q10, hottest.max_c, hottest.estimated)
+
+
+def _days_between(start: date, end: date) -> list[date]:
+    if end < start:
+        start, end = end, start
+    return [start + timedelta(days=offset) for offset in range((end - start).days + 1)]
 
 
 def keeping_for_item(item: Item, reading: DayTemperature | None):
@@ -194,9 +253,12 @@ def regenerate(
     existing = list(
         session.exec(select(ShoppingLine).where(ShoppingLine.week_start == week_start))
     )
-    settled = [line for line in existing if line.state is not LineState.PENDING]
+    # A FROM_STOCK line the app created itself is a derived row, not an answer
+    # the household gave, so it is rebuilt like a pending one.
+    rebuildable = {LineState.PENDING, LineState.FROM_STOCK}
+    settled = [line for line in existing if line.state not in rebuildable]
     for line in existing:
-        if line.state is LineState.PENDING:
+        if line.state in rebuildable and line.paid is None:
             session.delete(line)
     session.flush()
 
@@ -208,7 +270,25 @@ def regenerate(
     created = 0
     for need in compute_needs(session, week_start, temperatures):
         if need.quantity <= 0:
-            # Already in the cupboard. Nothing to buy, and not a gap either.
+            # Already in the cupboard. Recorded as a line anyway, in the
+            # FROM_STOCK state, so the household can see that the app knew it had
+            # this — and can correct it if the stock record is wrong. A silently
+            # absent row is indistinguishable from a bug.
+            if need.required > 0 and covered[(need.item.id, need.buy_on)] <= 0:
+                session.add(
+                    ShoppingLine(
+                        week_start=week_start,
+                        buy_on=need.buy_on,
+                        item_id=need.item.id,
+                        quantity=round(need.required, 2),
+                        unit=need.item.unit,
+                        required=round(need.required, 2),
+                        from_stock=round(need.from_stock, 2),
+                        covers_through=need.covers_through,
+                        state=LineState.FROM_STOCK,
+                    )
+                )
+                created += 1
             continue
         outstanding = need.quantity - covered[(need.item.id, need.buy_on)]
         if outstanding <= 0:
@@ -220,6 +300,9 @@ def regenerate(
                 item_id=need.item.id,
                 quantity=_round_up(outstanding, need.item.purchase_step),
                 unit=need.item.unit,
+                required=round(need.required, 2),
+                from_stock=round(need.from_stock, 2),
+                covers_through=need.covers_through,
             )
         )
         created += 1
@@ -254,15 +337,27 @@ def substitutes(session: Session, item: Item, limit: int = 5) -> list[Item]:
     Same role, and for a perishable the substitute must also be one the household
     can use up quickly — suggesting a week's worth of something that will not keep
     solves the wrong problem.
+
+    Anything the household has said it has had enough of is never offered. Being
+    handed lentils as a substitute is exactly the nudge the weariness setting
+    exists to prevent, and it would be worse here than in a suggestion list because
+    it arrives at the moment someone is already having to improvise.
     """
     if item.role not in _SUBSTITUTABLE:
         return []
 
-    candidates = list(
-        session.exec(
+    weary = {
+        p.item_id
+        for p in session.exec(select(ItemPreference))
+        if p.feeling is ItemFeeling.WEARY
+    }
+    candidates = [
+        candidate
+        for candidate in session.exec(
             select(Item).where(Item.role == item.role, Item.id != item.id, Item.needs_review == False)  # noqa: E712
         )
-    )
+        if candidate.id not in weary
+    ]
 
     if item.shelf_life is not ShelfLife.PERISHABLE:
         # A longer-keeping item can always replace a shorter-keeping one.

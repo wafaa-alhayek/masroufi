@@ -110,7 +110,15 @@ def suggest(
     on: date | None = None,
     slot: MealSlot | None = None,
     limit: int = 8,
-) -> list[Suggestion]:
+    include_weary: bool = False,
+) -> tuple[list[Suggestion], list[Suggestion]]:
+    """Returns (offered, withheld).
+
+    A dish built on something the household has had enough of is withheld, not
+    ranked lower. It is returned separately rather than dropped so a screen can say
+    how many are hidden and why, and offer to show them — an unexplained short list
+    looks like a broken app, and hiding the reason is its own kind of nudge.
+    """
     today = on or date.today()
     household = session.exec(select(Household)).first()
     equivalents = household.adult_equivalents if household else 1.0
@@ -145,12 +153,15 @@ def suggest(
             )
         )
 
-    # Weariness is absolute, not a term to be traded off. A household that says it
-    # has had enough of lentils should not have to scroll past lentil dishes to
-    # find anything else, however well stocked or cheap they are. So every dish
-    # they are not tired of ranks above every dish they are.
-    out.sort(key=lambda s: (not s.weary, s.score), reverse=True)
-    return out[:limit]
+    out.sort(key=lambda s: s.score, reverse=True)
+
+    offered = [s for s in out if not s.weary]
+    withheld = [s for s in out if s.weary]
+    if include_weary:
+        # Explicitly asked for, e.g. the household tapped "show them anyway".
+        offered = offered + withheld
+        withheld = []
+    return offered[:limit], withheld
 
 
 def _recent_item_counts(

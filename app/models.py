@@ -381,8 +381,21 @@ class ShoppingLine(SQLModel, table=True):
         "time this week.",
     )
     item_id: int = Field(foreign_key="item.id", index=True)
-    quantity: float
+    quantity: float = Field(description="What still has to be bought.")
     unit: Unit = Unit.GRAM
+
+    required: float = Field(
+        default=0.0, description="What the plan needs in total, before the cupboard."
+    )
+    from_stock: float = Field(
+        default=0.0, description="How much of that the household already has."
+    )
+    covers_through: date | None = Field(
+        default=None,
+        description="For a weekly line, the last day it is expected to cover. An "
+        "item that keeps four days can have a weekly line for the start of the week "
+        "and daily lines after it.",
+    )
 
     state: LineState = Field(default=LineState.PENDING, index=True)
     paid: float | None = Field(default=None, description="What it actually cost.")

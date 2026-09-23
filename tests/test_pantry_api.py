@@ -233,31 +233,61 @@ def test_marking_weariness_needs_no_reason(client, items):
     assert any(row["name_en"] == "Lentils" for row in listed)
 
 
-def test_weary_dishes_rank_below_others(client):
-    ranked = client.get("/api/pantry/suggestions?limit=50").json()
-    by_name = {s["name_en"]: s for s in ranked}
+def test_weary_dishes_are_withheld_with_a_reason(client):
+    """The owner's rule: excluded outright, never merely ranked lower."""
+    body = client.get("/api/pantry/suggestions?limit=50").json()
 
-    mujaddara = by_name["Mujaddara"]
-    assert "Lentils" in mujaddara["weary_items"]
-    assert "enough of" in mujaddara["why"]
+    assert all(not s["weary_items"] for s in body["suggestions"]), "none offered"
+    hidden = {s["name_en"]: s for s in body["withheld"]}
+    assert "Mujaddara" in hidden
+    assert "Lentils" in hidden["Mujaddara"]["weary_items"]
+    assert "enough of" in hidden["Mujaddara"]["why"]
 
-    # Every dish they are not tired of ranks above every dish they are — not
-    # merely most of them.
-    weary_positions = [i for i, s in enumerate(ranked) if s["weary_items"]]
-    fresh_positions = [i for i, s in enumerate(ranked) if not s["weary_items"]]
-    assert weary_positions and fresh_positions
-    assert min(weary_positions) > max(fresh_positions)
+    # The reason is reported so a screen can explain a short list rather than
+    # looking broken.
+    assert "Lentils" in body["withheld_because"]
+
+
+def test_the_household_can_still_ask_to_see_them(client):
+    body = client.get("/api/pantry/suggestions?limit=50&include_weary=true").json()
+    assert "Mujaddara" in {s["name_en"] for s in body["suggestions"]}
+    assert body["withheld"] == []
+
+
+def test_a_weary_item_is_never_offered_as_a_substitute(client, items, dishes):
+    """Worse than a suggestion: it arrives when someone is already improvising."""
+    week = date(2027, 9, 6)
+    for existing in client.get(f"/api/kitchen/plan?week_start={week}").json():
+        client.delete(f"/api/kitchen/plan/{existing['id']}")
+    client.post(
+        "/api/kitchen/plan",
+        json={"plan_date": week.isoformat(), "slot": "lunch", "dish_id": dishes["fasolia"]},
+    )
+    client.post(f"/api/kitchen/shopping-list?week_start={week}")
+
+    listed = client.get(f"/api/kitchen/shopping-list?week_start={week}").json()
+    beans = next(
+        line
+        for group in [listed["weekly"], *listed["daily"].values()]
+        for line in group
+        if line["item_name_en"] == "White beans"
+    )
+    options = client.get(
+        f"/api/kitchen/shopping-list/{beans['id']}/substitutes"
+    ).json()
+    assert options, "other pulses exist"
+    assert "Lentils" not in {o["name_en"] for o in options}
 
 
 def test_suggestions_never_nudge_back(client):
-    for s in client.get("/api/pantry/suggestions?limit=50").json():
+    for s in client.get("/api/pantry/suggestions?limit=50").json()["suggestions"]:
         lowered = s["why"].lower()
         for nudge in ("should", "cheap", "healthy", "try to", "affordable"):
             assert nudge not in lowered
 
 
 def test_suggestions_report_what_is_missing_and_why(client):
-    ranked = client.get("/api/pantry/suggestions?limit=50").json()
+    ranked = client.get("/api/pantry/suggestions?limit=50").json()["suggestions"]
     assert ranked
     top = ranked[0]
     assert 0.0 <= top["stock_cover"] <= 1.0
@@ -281,7 +311,7 @@ def test_a_flavour_only_dish_is_flagged_when_one_exists(client, items):
             json={"item_id": items[slug]["id"], "quantity": qty, "source": "purchased"},
         )
 
-    ranked = client.get("/api/pantry/suggestions?limit=50").json()
+    ranked = client.get("/api/pantry/suggestions?limit=50").json()["suggestions"]
     stew = next(s for s in ranked if s["name_en"] == "Lentil and vegetable stew")
     assert stew["flavour_only"], stew["missing"]
     assert {m["name_en"] for m in stew["missing"]} == {"Tomato paste"}
@@ -289,7 +319,7 @@ def test_a_flavour_only_dish_is_flagged_when_one_exists(client, items):
 
 
 def test_filtering_suggestions_by_slot(client):
-    breakfast = client.get("/api/pantry/suggestions?slot=breakfast&limit=50").json()
+    breakfast = client.get("/api/pantry/suggestions?slot=breakfast&limit=50").json()["suggestions"]
     assert breakfast
     assert all(s["slot"] == "breakfast" for s in breakfast)
 

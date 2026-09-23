@@ -50,12 +50,22 @@ def _lines_for(session: Session, start: date, slug: str, temperatures):
     return [n for n in shopping.compute_needs(session, start, temperatures) if n.item.id == item.id]
 
 
-def test_bread_is_a_weekly_buy_in_january(session):
+def test_in_january_the_weekly_shop_covers_the_first_days_of_bread(session):
+    """Bread keeps about four days at 17 C, so it covers part of the week — not all
+    of it. Putting a whole week of bread in the weekly shop was a real bug: the
+    Saturday loaf would have been bought five days early."""
     _plan_week(session, JANUARY, "zaatar_bread")
     bread = _lines_for(session, JANUARY, "bread", _week_at(JANUARY, CLIMATE_NORMALS_C[1]))
 
-    assert len(bread) == 1, "at 17 C bread keeps, so one shop covers the week"
-    assert bread[0].buy_on is None
+    weekly = [n for n in bread if n.buy_on is None]
+    daily = [n for n in bread if n.buy_on is not None]
+
+    assert len(weekly) == 1
+    assert daily, "the end of the week has to be bought fresh"
+    assert weekly[0].covers_through is not None
+    assert weekly[0].covers_through < max(n.buy_on for n in daily)
+    # Nothing on the weekly line is held longer than the bread actually keeps.
+    assert (weekly[0].covers_through - JANUARY).days <= 4
 
 
 def test_the_same_bread_is_a_daily_buy_in_august(session):
@@ -64,6 +74,7 @@ def test_the_same_bread_is_a_daily_buy_in_august(session):
 
     assert len(bread) == 7, "at 31 C it has to be bought each day"
     assert all(n.buy_on is not None for n in bread)
+    assert all(n.covers_through is None for n in bread)
 
 
 def test_summer_and_winter_produce_different_shops(session):
@@ -106,6 +117,36 @@ def test_meat_stays_daily_however_cold_it_gets(session):
     assert all(n.buy_on is not None for n in chicken)
 
 
+def test_an_item_never_appears_on_both_lists(session):
+    """The two-day floor exists for this: without it, something needed on the shop
+    day itself landed on the weekly list while its other days were daily."""
+    _plan_week(session, JANUARY, "maqluba_chicken", MealSlot.LUNCH)
+    needs = shopping.compute_needs(session, JANUARY, _week_at(JANUARY, 12.0))
+
+    daily_items = {n.item.slug for n in needs if n.buy_on is not None}
+    weekly_items = {n.item.slug for n in needs if n.buy_on is None}
+    assert not daily_items & weekly_items
+
+
+def test_shelf_life_is_taken_at_the_hottest_day_it_is_held_through(session):
+    """Bread bought on a cool Monday for a cool Friday still has to survive a hot
+    Wednesday in between."""
+    _plan_week(session, JANUARY, "zaatar_bread")
+
+    cool_week = _week_at(JANUARY, 17.0)
+    with_hot_day = dict(cool_week)
+    midweek = JANUARY + timedelta(days=2)
+    with_hot_day[midweek] = DayTemperature(on=midweek, max_c=34.0, estimated=False)
+
+    cool = [n for n in _lines_for(session, JANUARY, "bread", cool_week) if n.buy_on is None]
+    hot = [n for n in _lines_for(session, JANUARY, "bread", with_hot_day) if n.buy_on is None]
+
+    assert cool and hot
+    # A hot Wednesday does not affect Monday's bread, which is never held through
+    # it — but it does stop the weekly shop reaching any further.
+    assert hot[0].covers_through < cool[0].covers_through
+
+
 def test_no_temperature_falls_back_to_the_static_label(session):
     """With the weather off, behaviour is exactly as before the feature existed."""
     _plan_week(session, AUGUST, "zaatar_bread")
@@ -115,17 +156,17 @@ def test_no_temperature_falls_back_to_the_static_label(session):
     assert len(bread) == 7, "bread's static label is perishable"
 
 
-def test_a_missing_day_falls_back_for_that_day_only(session):
+def test_a_missing_day_does_not_break_the_week(session):
+    """A gap in the forecast falls back for the days it affects, not the whole week."""
     _plan_week(session, AUGUST, "zaatar_bread")
     partial = _week_at(AUGUST, 17.0)
     del partial[AUGUST]
 
     bread = _lines_for(session, AUGUST, "bread", partial)
-    daily = [n for n in bread if n.buy_on is not None]
-    weekly = [n for n in bread if n.buy_on is None]
-
-    assert len(daily) == 1 and daily[0].buy_on == AUGUST
-    assert len(weekly) == 1
+    assert bread, "a missing reading must not drop the item from the list"
+    assert sum(n.required for n in bread) > 0
+    # The day with no reading falls back to the static label, which is perishable.
+    assert any(n.buy_on == AUGUST for n in bread)
 
 
 def test_regenerate_respects_temperature(session):

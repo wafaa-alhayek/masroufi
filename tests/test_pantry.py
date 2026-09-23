@@ -15,6 +15,7 @@ from app.models import (
     Item,
     ItemFeeling,
     ItemPreference,
+    LineState,
     MealSlot,
     PantryStock,
     PlannedMeal,
@@ -98,19 +99,27 @@ def test_partial_stock_asks_only_for_the_difference(session):
     assert reduced.quantity < full
 
 
-def test_covered_lines_are_not_created_at_all(session):
+def test_covered_lines_are_marked_not_dropped(session):
+    """A silently absent row is indistinguishable from a bug, so items the cupboard
+    covers are recorded as FROM_STOCK and can be shown — and corrected if the stock
+    record is wrong."""
     _stock(session, "lentils", 5000)
     _stock(session, "rice", 5000)
     _plan(session, "mujaddara", 2)
 
     shopping.regenerate(session, MONDAY)
-    listed = {
-        session.get(Item, line.item_id).slug
+    lines = {
+        session.get(Item, line.item_id).slug: line
         for line in session.exec(select(shopping.ShoppingLine))
     }
-    assert "lentils" not in listed
-    assert "rice" not in listed
-    assert "onion" in listed, "what is not in the cupboard is still asked for"
+
+    assert lines["lentils"].state is LineState.FROM_STOCK
+    assert lines["lentils"].from_stock > 0
+    assert lines["lentils"].required > 0
+    assert lines["rice"].state is LineState.FROM_STOCK
+
+    assert lines["onion"].state is LineState.PENDING, "what is missing is still asked for"
+    assert lines["onion"].from_stock == 0
 
 
 def test_spoiled_stock_does_not_count(session):
@@ -259,31 +268,37 @@ def test_suggestions_prefer_what_is_in_the_cupboard(session):
     _stock(session, "cumin", 200)
     _stock(session, "salt", 500)
 
-    top = suggest.suggest(session, on=MONDAY, slot=MealSlot.LUNCH)[0]
+    top = suggest.suggest(session, on=MONDAY, slot=MealSlot.LUNCH)[0][0]
     assert top.name_en == "Mujaddara"
     assert top.stock_cover == 1.0
     assert top.missing == []
 
 
-def test_weariness_pushes_a_dish_down_without_removing_it(session):
+def test_weariness_withholds_a_dish_rather_than_demoting_it(session):
     for slug, qty in (("lentils", 5000), ("rice", 5000), ("onion", 2000), ("veg_oil", 1000), ("cumin", 200), ("salt", 500)):
         _stock(session, slug, qty)
 
-    before = suggest.suggest(session, on=MONDAY, slot=MealSlot.LUNCH)
+    before = suggest.suggest(session, on=MONDAY, slot=MealSlot.LUNCH)[0]
     assert before[0].name_en == "Mujaddara"
 
     session.add(ItemPreference(item_id=_item(session, "lentils").id, feeling=ItemFeeling.WEARY))
     session.commit()
 
-    ranked = suggest.suggest(session, on=MONDAY, slot=MealSlot.LUNCH, limit=50)
-    after = {s.name_en: s for s in ranked}
-    assert after["Mujaddara"].score < before[0].score
-    assert "Lentils" in after["Mujaddara"].weary_items
-    assert "enough of" in after["Mujaddara"].why
-    assert "Mujaddara" in after, "still offered, never hidden"
+    offered, withheld = suggest.suggest(
+        session, on=MONDAY, slot=MealSlot.LUNCH, limit=50
+    )
+    assert "Mujaddara" not in {s.name_en for s in offered}, "withheld, not demoted"
 
-    names = [s.name_en for s in ranked]
-    assert names[0] != "Mujaddara", "a weary dish is never the top suggestion"
+    hidden = {s.name_en: s for s in withheld}
+    assert "Mujaddara" in hidden
+    assert "Lentils" in hidden["Mujaddara"].weary_items
+    assert "enough of" in hidden["Mujaddara"].why
+
+    # Still reachable when the household explicitly asks.
+    anyway, _ = suggest.suggest(
+        session, on=MONDAY, slot=MealSlot.LUNCH, limit=50, include_weary=True
+    )
+    assert "Mujaddara" in {s.name_en for s in anyway}
 
 
 def test_a_weary_base_gets_no_credit_for_a_cheap_spice(session):
@@ -296,14 +311,16 @@ def test_a_weary_base_gets_no_credit_for_a_cheap_spice(session):
         _stock(session, slug, qty)
 
     name = "Lentil and vegetable stew"
-    before = {s.name_en: s for s in suggest.suggest(session, on=MONDAY, limit=50)}[name]
+    before = {s.name_en: s for s in suggest.suggest(session, on=MONDAY, limit=50)[0]}[name]
     assert before.flavour_only
 
     session.add(ItemPreference(item_id=_item(session, "lentils").id, feeling=ItemFeeling.WEARY))
     session.commit()
 
-    after = {s.name_en: s for s in suggest.suggest(session, on=MONDAY, limit=50)}[name]
-    # Still factually true that only a paste is missing, but it earns no bonus.
+    _, withheld = suggest.suggest(session, on=MONDAY, limit=50)
+    after = {s.name_en: s for s in withheld}[name]
+    # Still factually true that only a paste is missing, but it earns no bonus and
+    # is not offered at all.
     assert after.flavour_only
     assert after.score < before.score - 0.3
     assert "price of a spice" not in after.why
@@ -314,7 +331,8 @@ def test_the_explanation_never_argues_back(session):
     session.add(ItemPreference(item_id=_item(session, "lentils").id, feeling=ItemFeeling.WEARY))
     session.commit()
 
-    why = {s.name_en: s.why for s in suggest.suggest(session, on=MONDAY, limit=50)}["Mujaddara"]
+    offered, withheld = suggest.suggest(session, on=MONDAY, limit=50)
+    why = {s.name_en: s.why for s in offered + withheld}["Mujaddara"]
     for nudge in ("cheap", "should", "try", "healthy", "affordable"):
         assert nudge not in why.lower()
 
@@ -323,7 +341,7 @@ def test_repetition_is_counted_from_the_plan(session):
     for day in range(2, 9):
         _plan(session, "mujaddara", day)
 
-    found = {s.name_en: s for s in suggest.suggest(session, on=MONDAY.replace(day=9))}
+    found = {s.name_en: s for s in suggest.suggest(session, on=MONDAY.replace(day=9))[0]}
     assert found["Mujaddara"].repetition >= 4
     assert "last 14 days" in found["Mujaddara"].why
 
@@ -333,7 +351,7 @@ def test_spices_do_not_count_as_repetition(session):
     for day in range(2, 9):
         _plan(session, "mujaddara", day)
 
-    found = {s.name_en: s for s in suggest.suggest(session, on=MONDAY.replace(day=9), limit=50)}
+    found = {s.name_en: s for s in suggest.suggest(session, on=MONDAY.replace(day=9), limit=50)[0]}
     # Shakshuka shares onions, oil and salt with mujaddara, but shares no base:
     # mujaddara is rice and lentils, shakshuka is eggs and bread. Nobody gets
     # tired of onions.
@@ -354,7 +372,7 @@ def test_the_flavour_only_insight(session):
     ):
         _stock(session, slug, qty)
 
-    stew = {s.name_en: s for s in suggest.suggest(session, on=MONDAY)}[
+    stew = {s.name_en: s for s in suggest.suggest(session, on=MONDAY)[0]}[
         "Lentil and vegetable stew"
     ]
     assert stew.flavour_only, "only the tomato paste is missing"
@@ -371,7 +389,7 @@ def test_flavour_only_beats_an_equally_stocked_repeat(session):
     for day in range(2, 9):
         _plan(session, "mujaddara", day)
 
-    ranked = suggest.suggest(session, on=MONDAY.replace(day=9), slot=MealSlot.LUNCH)
+    ranked = suggest.suggest(session, on=MONDAY.replace(day=9), slot=MealSlot.LUNCH)[0]
     names = [s.name_en for s in ranked]
     assert names.index("Lentil and vegetable stew") < names.index("Mujaddara")
 
@@ -381,7 +399,7 @@ def test_a_dish_needing_nothing_and_no_gas_is_called_out(session):
     _stock(session, "zaatar", 300)
     _stock(session, "olive_oil", 500)
 
-    found = {s.name_en: s for s in suggest.suggest(session, on=MONDAY, slot=MealSlot.BREAKFAST)}
+    found = {s.name_en: s for s in suggest.suggest(session, on=MONDAY, slot=MealSlot.BREAKFAST)[0]}
     zaatar = found["Bread with zaatar and oil"]
     assert zaatar.missing == []
     assert zaatar.gas_kg == 0.0
@@ -389,7 +407,7 @@ def test_a_dish_needing_nothing_and_no_gas_is_called_out(session):
 
 
 def test_empty_cupboard_still_returns_suggestions(session):
-    out = suggest.suggest(session, on=MONDAY)
+    out = suggest.suggest(session, on=MONDAY)[0]
     assert out
     assert all(s.stock_cover == 0.0 for s in out)
     assert all(s.missing for s in out)

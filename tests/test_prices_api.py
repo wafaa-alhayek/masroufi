@@ -215,7 +215,7 @@ def test_a_suggestion_says_what_the_missing_piece_costs(client, items):
         },
     )
 
-    ranked = client.get("/api/pantry/suggestions?limit=50").json()
+    ranked = client.get("/api/pantry/suggestions?limit=50").json()["suggestions"]
     stew = next(s for s in ranked if s["name_en"] == "Lentil and vegetable stew")
 
     assert stew["flavour_only"]
@@ -227,7 +227,7 @@ def test_a_suggestion_says_what_the_missing_piece_costs(client, items):
 
 
 def test_a_partial_cost_is_flagged_rather_than_understated(client, items):
-    ranked = client.get("/api/pantry/suggestions?limit=50").json()
+    ranked = client.get("/api/pantry/suggestions?limit=50").json()["suggestions"]
     partial = [s for s in ranked if s["missing_cost_partial"]]
     assert partial, "most dishes have some unpriced ingredient"
     for s in partial:

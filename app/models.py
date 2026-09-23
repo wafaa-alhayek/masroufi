@@ -48,6 +48,184 @@ class CategorySource(str, Enum):
     UNSET = "unset"
 
 
+class Household(SQLModel, table=True):
+    """Who eats, so quantities can be scaled to them.
+
+    Two numbers rather than a profile per person: it is enough to stop the app
+    over-buying, and it stores less about a family than the alternative.
+    """
+
+    id: int | None = Field(default=None, primary_key=True)
+    adults: int = Field(default=2, ge=0)
+    children: int = Field(default=0, ge=0)
+    child_portion_ratio: float = Field(
+        default=0.6,
+        gt=0,
+        le=1,
+        description="A child's share of an adult portion. Adjustable, because a "
+        "teenager eats like an adult.",
+    )
+
+    @property
+    def adult_equivalents(self) -> float:
+        return self.adults + self.children * self.child_portion_ratio
+
+
+class ShelfLife(str, Enum):
+    """How long something keeps without refrigeration.
+
+    This drives the whole shopping-list shape: refrigeration is scarce, so
+    perishables are bought the day they are cooked, while anything that keeps is
+    aggregated into one weekly shop for the better unit price.
+    """
+
+    PERISHABLE = "perishable"
+    KEEPS_DAYS = "keeps_days"
+    STABLE = "stable"
+
+    @property
+    def buy_daily(self) -> bool:
+        return self is ShelfLife.PERISHABLE
+
+
+class ItemRole(str, Enum):
+    """What an ingredient does in a dish, so a substitute can be suggested when
+    it is not available at the shop."""
+
+    GRAIN = "grain"
+    PULSE = "pulse"
+    MEAT = "meat"
+    POULTRY = "poultry"
+    FISH = "fish"
+    EGG = "egg"
+    DAIRY = "dairy"
+    VEG_LEAF = "veg_leaf"
+    VEG_FRUIT = "veg_fruit"
+    VEG_ROOT = "veg_root"
+    FRUIT = "fruit"
+    BREAD = "bread"
+    FAT = "fat"
+    SWEETENER = "sweetener"
+    SPICE = "spice"
+    PASTE = "paste"
+    DRINK = "drink"
+    OTHER = "other"
+
+
+class Unit(str, Enum):
+    GRAM = "g"
+    ML = "ml"
+    PIECE = "piece"
+    BUNCH = "bunch"
+
+
+class Item(SQLModel, table=True):
+    """A grocery item the household might buy."""
+
+    id: int | None = Field(default=None, primary_key=True)
+    slug: str = Field(index=True, unique=True)
+    name_en: str
+    name_ar: str
+    unit: Unit = Unit.GRAM
+    shelf_life: ShelfLife = ShelfLife.STABLE
+    role: ItemRole = ItemRole.OTHER
+    purchase_step: float = Field(
+        default=1.0,
+        gt=0,
+        description="Smallest sensible amount to buy, e.g. 50 g of rice or 1 egg. "
+        "Quantities are rounded up to a multiple of this after aggregating, not "
+        "before, so rounding does not multiply waste across a week.",
+    )
+    needs_review: bool = Field(
+        default=False,
+        description="Created automatically rather than from the seeded catalogue, "
+        "so its unit, role and shelf life are a guess until someone checks.",
+    )
+
+
+class DishSource(str, Enum):
+    SEED = "seed"
+    AI = "ai"
+    USER = "user"
+
+
+class MealSlot(str, Enum):
+    BREAKFAST = "breakfast"
+    LUNCH = "lunch"
+    DINNER = "dinner"
+
+
+class Dish(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    slug: str = Field(index=True, unique=True)
+    name_en: str
+    name_ar: str
+    default_slot: MealSlot = MealSlot.LUNCH
+    source: DishSource = DishSource.SEED
+    edited_by_household: bool = Field(default=False)
+    needs_review: bool = Field(
+        default=False, description="True for AI-generated dishes until a person checks them."
+    )
+
+
+class DishItem(SQLModel, table=True):
+    """An ingredient of a dish, quantified per adult portion."""
+
+    id: int | None = Field(default=None, primary_key=True)
+    dish_id: int = Field(foreign_key="dish.id", index=True)
+    item_id: int = Field(foreign_key="item.id", index=True)
+    qty_per_adult: float = Field(gt=0)
+    optional: bool = Field(default=False)
+
+
+class DishPortion(SQLModel, table=True):
+    """The household's remembered 'we need more/less than this for that dish'."""
+
+    id: int | None = Field(default=None, primary_key=True)
+    dish_id: int = Field(foreign_key="dish.id", index=True, unique=True)
+    factor: float = Field(default=1.0, gt=0)
+
+
+class PlannedMeal(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    plan_date: date = Field(index=True)
+    slot: MealSlot = MealSlot.LUNCH
+    dish_id: int = Field(foreign_key="dish.id", index=True)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class LineState(str, Enum):
+    PENDING = "pending"
+    PURCHASED = "purchased"
+    UNAVAILABLE = "unavailable"
+    SKIPPED = "skipped"
+
+
+class ShoppingLine(SQLModel, table=True):
+    """One thing to buy, in one of the two lists."""
+
+    id: int | None = Field(default=None, primary_key=True)
+
+    week_start: date = Field(index=True)
+    buy_on: date | None = Field(
+        default=None,
+        index=True,
+        description="The day it must be bought, for perishables. None means any "
+        "time this week.",
+    )
+    item_id: int = Field(foreign_key="item.id", index=True)
+    quantity: float
+    unit: Unit = Unit.GRAM
+
+    state: LineState = Field(default=LineState.PENDING, index=True)
+    paid: float | None = Field(default=None, description="What it actually cost.")
+    transaction_id: int | None = Field(default=None, foreign_key="transaction.id")
+    replaced_by_id: int | None = Field(
+        default=None, description="The substitute line created when this was unavailable."
+    )
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
 class Vendor(SQLModel, table=True):
     """A place the household pays, accumulated across imports.
 

@@ -186,6 +186,22 @@ pytest
 | `GET /api/summary` | Spend by category, plus what fraction is categorised. |
 | `GET /api/categories` | The taxonomy, for building a picker. |
 
+### Kitchen
+
+| | |
+|---|---|
+| `GET`/`PATCH /api/kitchen/household` | Adults, children, and the child portion ratio. |
+| `GET /api/kitchen/dishes` · `/items` | The seeded dish library and grocery catalogue. |
+| `GET`/`PUT /api/kitchen/dishes/{id}/ingredients` | Read and correct a recipe's per-adult quantities. |
+| `PATCH /api/kitchen/items/{id}` | Correct an item's unit, shelf life or purchase step. |
+| `PUT /api/kitchen/dishes/{id}/portion` | Remember that this household needs more or less of a dish. |
+| `POST`/`GET`/`DELETE /api/kitchen/plan` | Plan a meal into a day and slot; read or clear the week. |
+| `POST /api/kitchen/shopping-list` | Build the week's lists. Preserves anything already bought. |
+| `GET /api/kitchen/shopping-list` | The two lists: `daily` keyed by day, `weekly` aggregated. |
+| `POST /api/kitchen/shopping-list/{id}/purchase` | Confirm a purchase → a transaction and a price per kg. |
+| `GET /api/kitchen/shopping-list/{id}/substitutes` | Alternatives from the same role. |
+| `POST /api/kitchen/shopping-list/{id}/unavailable` | Record a gap, optionally swapping in a substitute. |
+
 ## Importer
 
 Written against no particular bank. Column names are matched against aliases in
@@ -199,11 +215,85 @@ goes in front of the same parser.
 
 ## Roadmap
 
-- **A — now.** Import, classify, review, patterns.
-- **B.** HDX price ingest; in-app crowdsourced price reports; basket comparison.
-- **C.** Forecast next month from the confirmed patterns; savings suggestions
-  ranked by `reducibility` and by the gap between what the household paid and the
-  going rate.
+- **A — done.** Multi-source import, note cleaning, categorisation, vendor
+  dataset, recurring patterns, deduplication, internal transfers.
+- **A2 — done.** Meal planning, the two shopping lists, purchase confirmation.
+- **B — next.** Screenshot and receipt capture. This is the real unlock: JawwalPay
+  and PalPay may have no export at all, so a screenshot is the only way in, and a
+  receipt's line items are the price dataset. Approved shape: capture always
+  queues locally and parses when a connection appears; extraction covers total
+  *and* line items; a receipt auto-matches the statement line that arrives later
+  and asks only when unsure.
+- **C.** HDX price ingest to compare against; forecast next month from the
+  confirmed patterns; savings suggestions ranked by `reducibility` and by the gap
+  between what the household paid and the going rate.
+
+## Meal planning and the two shopping lists
+
+A week of planned meals becomes a shopping list with quantities scaled to the
+household. The point is not convenience — it is that buying the right amount
+costs less and, with refrigeration scarce, does not go bad.
+
+**The split is by shelf life, not by meal.** Aggregating the whole week means
+perishables spoil; splitting everything daily means seven trips and no bulk
+pricing. So each item carries a shelf life judged *without* refrigeration, and one
+plan produces two lists:
+
+```
+=== BUY TODAY (perishable) ===
+  2026-07-06    500 g   خبز        for Ful medames
+               1000 g   دجاج       for Maqluba with chicken
+  2026-07-08    500 g   خبز        for Ful medames
+               1000 g   دجاج       for Molokhia
+
+=== BUY ONCE THIS WEEK (keeps) ===
+   2500 g  أرز        1000 g  عدس        1500 g  بصل
+    500 ml زيت نباتي   2250 g  فول         300 g  معجون بندورة
+```
+
+Chicken appears only on the two days it is cooked. Rice, lentils and oil appear
+once. Eggs and root vegetables keep a few days without a fridge, so they go on the
+weekly list; bread and leafy greens do not, so they go on the daily one.
+
+**Aggregating happens before rounding.** Seven days of 80 g of rice is 750 g for
+two adults. Rounding each meal up to a 250 g purchase step first would have
+bought 1.75 kg — the rounding waste multiplied by every meal in the week.
+
+**Quantities scale by adult equivalents.** The household is two numbers, adults
+and children, with a child counting as 0.6 of an adult portion by default and a
+per-dish override the app remembers for when that is wrong.
+
+A consequence worth knowing: for a small household over a short week, the
+**purchase step decides the quantity more than the portion maths does** — you
+cannot buy 120 g of lentils. The listed amount is what a shop can actually sell,
+which is the honest number to show, but it means a modest portion override may
+not change the list at all.
+
+**Confirming a purchase writes a transaction** — category `groceries`, marked as
+the household's own answer — and records a price per kg. That means **the planner
+seeds the price dataset before receipt reading exists**: a quantity, a price, a
+date and a shop is an item-level price observation, in the same units the
+[WFP](https://data.humdata.org/dataset/wfp-food-prices-for-state-of-palestine) and
+PCBS datasets use.
+
+**When something is not at the shop**, one call marks it unavailable and offers
+substitutes from the same role — a pulse for a pulse, never meat for a pulse, and
+never something perishable in place of something that keeps. Recording the gap is
+worth it even without a substitute: over time it is real data about what is scarce
+and when.
+
+> ### The seeded quantities need a local check
+>
+> The catalogue in [app/kitchen/catalogue.py](app/kitchen/catalogue.py) and the
+> dishes in [app/kitchen/dishes.py](app/kitchen/dishes.py) were written by a
+> developer, not by someone who cooks these dishes or shops in Gaza. Every
+> quantity, shelf life and purchase step is a starting point.
+>
+> They are seeded as **editable rows** for exactly that reason:
+> `PUT /api/kitchen/dishes/{id}/ingredients` corrects a recipe and
+> `PATCH /api/kitchen/items/{id}` corrects an item. Shelf life is the
+> consequential one — changing it moves an item between the two lists.
+> An over-stated quantity here is money wasted, which is the opposite of the point.
 
 ## Several providers, one picture
 
@@ -239,6 +329,12 @@ import jawwalpay  TOP UP                +200   -> linked, excluded from spending
 ```
 
 ### Known gaps
+
+- **AI generation for unknown dishes is not built.** The approved design is a
+  seeded library plus generation for anything not in it, saved for reuse and
+  flagged `needs_review`. The `Dish.source` and `needs_review` columns exist for
+  it; nothing writes `source="ai"` yet. Until then, a dish outside the seeded
+  twelve has to be added by hand.
 
 - **Only CSV import exists.** JawwalPay and PalPay may have no export at all,
   only in-app history — which makes screenshot capture the primary ingestion path

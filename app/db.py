@@ -13,10 +13,12 @@ def init_db() -> None:
 
     # Imported here rather than at module scope: app.sources imports the models,
     # which must be registered on the metadata above before this runs.
+    from app.kitchen import ensure_kitchen
     from app.sources import ensure_sources
 
     with Session(engine) as session:
         ensure_sources(session)
+        ensure_kitchen(session)
 
 
 def get_session() -> Iterator[Session]:

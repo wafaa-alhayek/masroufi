@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from app.config import settings
 from app.db import init_db
 from app.deps import close_all
-from app.routers import transactions
+from app.routers import kitchen, transactions
 
 
 @asynccontextmanager
@@ -27,6 +27,7 @@ app = FastAPI(
 )
 
 app.include_router(transactions.router, prefix="/api")
+app.include_router(kitchen.router, prefix="/api/kitchen", tags=["kitchen"])
 
 
 @app.get("/health")

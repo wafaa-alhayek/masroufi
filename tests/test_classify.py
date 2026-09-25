@@ -143,6 +143,11 @@ def test_malformed_response_falls_back_to_review():
     assert d.needs_review(threshold=0.70)
 
 
-def test_missing_api_key_is_a_clear_error():
+def test_missing_api_key_is_a_clear_error(monkeypatch):
+    """Forced empty rather than assumed empty, so the test does not break the day a
+    developer puts a real key in their environment."""
+    from app.config import settings
+
+    monkeypatch.setattr(settings, "typesafe_api_key", "")
     with pytest.raises(RuntimeError, match="TYPESAFE_API_KEY"):
         JevClassifier(api_key="")

@@ -12,7 +12,9 @@ from app.db import get_session
 from app.deps import get_classifier, get_cleaner
 from app.importers.csv_import import ImportError_, parse_csv
 from app.models import CategorySource, Currency, Source, Transaction, Vendor
+from app.idempotency import remember, replay
 from app.notes import NoteCleaner
+from app.redact import normalise
 from app.services import dedup, transfers
 from app.services import vendors as vendor_service
 from app.services.recurring import find_patterns
@@ -540,3 +542,158 @@ def link_transfer(
 
 def _cache_size(classifier: Classifier) -> int:
     return getattr(classifier, "size", 0)
+
+
+# --- entering a transaction by hand ------------------------------------------
+
+
+class ManualEntry(BaseModel):
+    """One transaction typed in by the household.
+
+    The first way in, not a fallback. A household whose wallet has no export at
+    all — which may be most of them — has to be able to use the whole money side
+    from day one, and asking them to produce a CSV first would mean they never
+    start.
+    """
+
+    booked_on: date
+    amount: float = Field(
+        description="Negative for money out, positive for money in. Zero is refused."
+    )
+    note: str = Field(min_length=1, description="Shop or person, in their own words.")
+    currency: Currency = Currency.ILS
+    source: str = Field(
+        default="manual", description="Provider slug, for money that came from one."
+    )
+    category: str | None = Field(
+        default=None,
+        description="Set when the household already knows. Marked as their own answer "
+        "and no model is consulted at all.",
+    )
+    key: str | None = Field(
+        default=None,
+        max_length=128,
+        description="Client-generated at the moment of tapping, so a replayed offline "
+        "queue cannot record the same entry twice.",
+    )
+
+
+class ManualEntryOut(BaseModel):
+    transaction: TransactionOut
+    vendor_id: int | None
+    vendor_name: str | None
+    categorised_by: CategorySource
+    needs_review: bool
+    settled_by_vendor: bool = Field(
+        description="True when a vendor the household had already confirmed supplied "
+        "the category, so nothing was asked and no model was called."
+    )
+    transfers_linked: int = 0
+
+
+@router.post("/transactions", response_model=ManualEntryOut)
+async def add_transaction(
+    entry: ManualEntry,
+    session: Session = Depends(get_session),
+    classifier: Classifier = Depends(get_classifier),
+    cleaner: NoteCleaner = Depends(get_cleaner),
+) -> ManualEntryOut:
+    """Record a transaction the household entered themselves.
+
+    It goes through the same path an imported row does — the note is cleaned, the
+    vendor resolved and remembered, the category decided — so a manual household
+    builds the same vendor dataset and gets the same patterns detected. It is a
+    slower-filling way in, not a poorer one, and in one respect a cleaner one:
+    there is no bank filler to strip and no parsing to get wrong.
+
+    Deduplication is deliberately **not** applied here. Two identical ₪3 fares
+    entered on the same day are two fares, and a household that typed something
+    twice on purpose meant it. A double tap is handled by `key` instead.
+    """
+    seen = replay(session, entry.key, "manual-entry")
+    if seen is not None:
+        return ManualEntryOut(**seen)
+
+    if entry.amount == 0:
+        raise HTTPException(422, "A transaction needs an amount.")
+    if entry.category is not None and not is_valid_category(entry.category):
+        raise HTTPException(422, f"Unknown category: {entry.category!r}")
+
+    provider = source_service.by_slug(session, entry.source)
+    if provider is None:
+        known = ", ".join(s["slug"] for s in DEFAULT_SOURCES)
+        raise HTTPException(422, f"Unknown source {entry.source!r}. Known: {known}.")
+
+    note = await cleaner.clean(entry.note)
+    transaction = Transaction(
+        booked_on=entry.booked_on,
+        amount=entry.amount,
+        currency=entry.currency,
+        note=entry.note,
+        note_key=note.match_key or normalise(entry.note),
+        source_id=provider.id,
+        import_batch="manual",
+    )
+
+    vendor = vendor_service.resolve(session, note)
+    settled_by_vendor = False
+    if vendor is not None:
+        session.flush()
+        transaction.vendor_id = vendor.id
+        vendor_service.record_sighting(vendor, transaction)
+        session.add(vendor)
+
+    if entry.category is not None:
+        # The household said so. Cheapest possible path: no model, no question.
+        transaction.category = entry.category
+        transaction.category_source = CategorySource.USER
+        transaction.confidence = 1.0
+        transaction.needs_review = False
+    elif vendor is not None and vendor.category_confirmed:
+        transaction.category = vendor.category
+        transaction.category_source = CategorySource.RULE
+        transaction.confidence = 1.0
+        transaction.needs_review = False
+        settled_by_vendor = True
+    else:
+        try:
+            decision = await classifier.classify(
+                note.for_classifier, entry.amount, entry.currency.value
+            )
+        except Exception:
+            # A classifier outage must not lose what someone typed.
+            transaction.needs_review = True
+        else:
+            transaction.category = decision.category
+            transaction.confidence = decision.confidence
+            transaction.reducibility = decision.reducibility
+            transaction.category_source = CategorySource.MODEL
+            transaction.needs_review = decision.needs_review(
+                settings.confidence_threshold
+            )
+            if vendor is not None and vendor.category is None and not transaction.needs_review:
+                vendor.category = decision.category
+                session.add(vendor)
+
+    session.add(transaction)
+    session.commit()
+    session.refresh(transaction)
+
+    # A hand-entered top-up is exactly as much an internal transfer as an imported
+    # one, so the same matching runs.
+    linked = transfers.link_confident(session)
+    session.commit()
+    session.refresh(transaction)
+
+    out = ManualEntryOut(
+        transaction=TransactionOut.model_validate(transaction, from_attributes=True),
+        vendor_id=vendor.id if vendor else None,
+        vendor_name=vendor.name if vendor else None,
+        categorised_by=transaction.category_source,
+        needs_review=transaction.needs_review,
+        settled_by_vendor=settled_by_vendor,
+        transfers_linked=linked,
+    )
+    remember(session, entry.key, "manual-entry", out)
+    session.commit()
+    return out

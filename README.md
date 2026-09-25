@@ -14,6 +14,13 @@ required for it to be useful.
 
 ## Why it is shaped this way
 
+**A household can start with nothing but a phone.** `POST /api/transactions` takes
+one hand-entered transaction through the same path an imported row takes — note
+cleaned, vendor resolved and remembered, category decided, patterns detected. It
+fills the vendor table more slowly but cleaner: there is no bank filler to misread
+and nothing to parse. Deliberately **not** deduplicated, because two ₪3 fares in a
+day are two fares; a double tap is handled by an idempotency key instead.
+
 **There is no Bank of Palestine API.** Palestine is not a regulated open-banking
 market, and the aggregators that paper over that elsewhere (Plaid, Tink,
 TrueLayer) have no coverage there. So the statement export is not a fallback path
@@ -174,6 +181,7 @@ pytest
 | | |
 |---|---|
 | `GET /api/sources` | The providers you can import from: `bop`, `jawwalpay`, `palpay`, `cash`, `manual`. |
+| `POST /api/transactions` | Enter one transaction by hand. The first way in, not a fallback — needs no file at all. |
 | `POST /api/import?source=bop` | Upload an export for one provider. Deduplicates against what that source already holds. |
 | `GET /api/transfers/pending` | Suspected movements between your own accounts that need an answer. |
 | `POST /api/transfers/link` | Confirm a pair is one movement, excluding it from spending. |

@@ -61,7 +61,13 @@ def test_empty_translation_falls_back():
     assert asyncio.run(_translator(_reply("  ")).to_english("مياه")) == "مياه"
 
 
-def test_missing_key_is_a_clear_error():
+def test_missing_key_is_a_clear_error(monkeypatch):
+    """Forced empty rather than assumed empty: a developer may well have
+    OPENROUTER_API_KEY in their own environment, and this is about the message
+    someone sees when there is genuinely no key."""
+    from app.config import settings
+
+    monkeypatch.setattr(settings, "openrouter_api_key", "")
     with pytest.raises(RuntimeError, match="OPENROUTER_API_KEY"):
         OpenRouterTranslator(api_key="")
 

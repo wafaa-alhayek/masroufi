@@ -205,3 +205,51 @@ def test_a_manual_entry_can_be_corrected_like_any_other(client):
     )
     assert resp.status_code == 200
     assert resp.json()["transaction"]["category_source"] == "user"
+
+
+# --- both forms of the note are kept -----------------------------------------
+
+
+def test_the_bank_note_and_the_read_note_are_both_kept(client):
+    """The raw note is what the household recognises; the cleaned one is what the
+    model read. Keeping both is what makes a wrong category diagnosable."""
+    body = client.post(
+        "/api/transactions", json=_entry(note="POS بطاقة سوبر ماركت السلام 884213")
+    ).json()
+
+    t = body["transaction"]
+    assert t["note"] == "POS بطاقة سوبر ماركت السلام 884213", "unmodified, as written"
+    assert t["note_clean"], "and what the classifier was given"
+    assert "884213" not in t["note_clean"], "the reference number never left the machine"
+
+
+def test_both_forms_reach_the_review_queue(client):
+    """Question 04 is 'what was this?' — the raw note is the thing that jogs a memory."""
+    client.post("/api/transactions", json=_entry(note="QRS 7781 REF"))
+    queued = client.get("/api/transactions?needs_review=true").json()
+    row = next(t for t in queued if t["note"] == "QRS 7781 REF")
+    assert "note_clean" in row
+    assert "note_translated" in row
+
+
+def test_an_imported_row_keeps_both_forms_too(client):
+    statement = (
+        "Date,Description,Debit,Credit,Currency\n"
+        "2029-12-03,POS مياه تانكر 5512119,60.00,,ILS\n"
+    ).encode()
+    client.post("/api/import?source=bop", files={"file": ("s.csv", statement, "text/csv")})
+
+    row = next(
+        t
+        for t in client.get("/api/transactions?limit=1000").json()
+        if t["note"].startswith("POS مياه")
+    )
+    assert "5512119" in row["note"], "the household sees what the bank wrote"
+    assert "5512119" not in row["note_clean"], "the model did not"
+
+
+def test_translation_is_reported_not_assumed(client):
+    """With the weather of the moment — translation off by default — nothing is
+    translated, and the row says so rather than leaving it ambiguous."""
+    body = client.post("/api/transactions", json=_entry(note="مياه تانكر")).json()
+    assert body["transaction"]["note_translated"] is False

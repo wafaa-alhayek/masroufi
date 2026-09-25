@@ -486,6 +486,22 @@ class Transaction(SQLModel, table=True):
 
     note: str = Field(description="As it appeared on the statement, unmodified.")
     note_key: str = Field(index=True, description="Normalised note, for caching and grouping.")
+
+    # Both forms are kept on purpose. The raw note above is what the household will
+    # recognise — it is what their bank actually wrote, and it is the thing that jogs
+    # the memory when they are asked what a transaction was. The cleaned form below is
+    # what the model was given, which is what makes a wrong category diagnosable: you
+    # can see whether the reading was wrong or the decision was.
+    note_clean: str = Field(
+        default="",
+        description="What the classifier actually saw: redacted, translated if it was "
+        "not already Latin script, and tidied of payment-network filler.",
+    )
+    note_translated: bool = Field(
+        default=False,
+        description="Whether the translation step ran on this note, as opposed to it "
+        "passing through unchanged.",
+    )
     vendor_id: int | None = Field(default=None, foreign_key="vendor.id", index=True)
 
     source_id: int | None = Field(default=None, foreign_key="source.id", index=True)

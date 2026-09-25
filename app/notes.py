@@ -1,5 +1,18 @@
 """The note cleaning pipeline: redact, translate, tidy.
 
+Jev turns out to handle Arabic natively, so translation is no longer what makes
+classification work. It earns its place for two other reasons, which is why it stays:
+
+  * **Vendor identity.** Exact-alias and close-match comparisons work far better
+    against one normalised form than against a mix of Arabic and transliterated
+    spellings of the same shop.
+  * **Two forms are better than one.** The raw note is what the household recognises;
+    the cleaned note is what the model read. Keeping both is what makes a wrong
+    category diagnosable rather than merely wrong.
+
+Redaction is unconditional either way — it does not depend on any model's language
+ability, and it is the step that keeps account numbers off the network.
+
 Runs once per unique note, before anything is classified or stored, and produces
 everything downstream needs:
 

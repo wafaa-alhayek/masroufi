@@ -53,7 +53,13 @@ class TransactionOut(BaseModel):
     booked_on: date
     amount: float
     currency: Currency
-    note: str
+    note: str = Field(description="As the bank wrote it. Show this to the household.")
+    note_clean: str = Field(
+        default="",
+        description="What the classifier read. Useful when a category looks wrong — it "
+        "separates a misreading from a misjudgement.",
+    )
+    note_translated: bool = False
     category: str | None
     category_source: CategorySource
     confidence: float | None
@@ -203,6 +209,10 @@ async def import_statement(
     # already confirmed skips the model entirely.
     resolved: list[Vendor | None] = []
     for transaction, note in zip(transactions, clean_notes):
+        # Keep what the model saw beside what the bank wrote.
+        transaction.note_clean = note.for_classifier
+        transaction.note_translated = note.translated
+
         vendor = vendor_service.resolve(session, note)
         resolved.append(vendor)
         if vendor is not None:
@@ -631,6 +641,8 @@ async def add_transaction(
         currency=entry.currency,
         note=entry.note,
         note_key=note.match_key or normalise(entry.note),
+        note_clean=note.for_classifier,
+        note_translated=note.translated,
         source_id=provider.id,
         import_batch="manual",
     )

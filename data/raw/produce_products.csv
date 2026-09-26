@@ -1,0 +1,83 @@
+item_slug,brand,name_en,name_ar,pack_size,pack_unit,pack_type,origin_country,in_aid_parcels,confidence,source_url,notes
+tomato,generic,"Tomato, 1 kg loose",بندورة - كيلو,1000,g,loose,Palestine,no,high,https://www.motqdmon.com/2020/09/7.html,sold by the kilo
+tomato,generic,"Tomato, 4 kg loose",بندورة - 4 كيلو,4000,g,loose,Palestine,no,medium,https://www.motqdmon.com/2022/04/863.html,4 kg deal seen in a Gaza price list
+cucumber,generic,"Cucumber, 1 kg loose",خيار - كيلو,1000,g,loose,Palestine,no,high,https://www.motqdmon.com/2020/09/7.html,sold by the kilo
+cucumber,generic,"Local cucumber (baladi), 1 kg loose",خيار بلدي - كيلو,1000,g,loose,Palestine,no,high,https://www.motqdmon.com/2020/09/7.html,sold by the kilo
+aubergine,generic,"Aubergine, 1 kg loose",باذنجان - كيلو,1000,g,loose,Palestine,no,high,https://www.motqdmon.com/2020/09/7.html,sold by the kilo
+courgette,generic,"Courgette, 1 kg loose",كوسا - كيلو,1000,g,loose,Palestine,no,high,https://www.motqdmon.com/2020/09/7.html,sold by the kilo
+pepper,generic,"Green pepper, 1 kg loose",فلفل أخضر - كيلو,1000,g,loose,Palestine,no,high,https://www.motqdmon.com/2020/09/7.html,sold by the kilo
+pepper,generic,"Sweet bell pepper, 1 kg loose",فلفل رومي - كيلو,1000,g,loose,Palestine,no,high,https://www.motqdmon.com/2020/09/7.html,sold by the kilo
+onion,generic,"Onion (local), 1 kg loose",بصل بلدي - كيلو,1000,g,loose,Palestine,no,high,https://www.motqdmon.com/2020/09/7.html,sold by the kilo
+onion,generic,"Red onion, 1 kg loose",بصل أحمر - كيلو,1000,g,loose,Palestine,no,high,https://www.motqdmon.com/2020/09/7.html,sold by the kilo
+onion,generic,"Onion, 4 kg loose",بصل - 4 كيلو,4000,g,loose,Palestine,no,medium,https://www.motqdmon.com/2022/04/863.html,4 kg deal seen in a Gaza price list
+garlic,generic,"Garlic, wiqiya (~250 g) loose",ثوم - وقية,250,g,loose,unknown,no,high,https://www.motqdmon.com/2020/09/7.html,priced per wiqiya; wiqiya = 250 g (quarter kilo); often imported
+garlic,generic,"Garlic, 1 kg loose",ثوم - كيلو,1000,g,loose,unknown,no,high,https://www.motqdmon.com/2022/07/461.html,sold by the kilo; often imported
+potato,generic,"Potato (local), 1 kg loose",بطاطا بلدية - كيلو,1000,g,loose,Palestine,no,high,https://www.motqdmon.com/2020/09/7.html,sold by the kilo
+potato,generic,"Small potatoes, 10 kg",بطاطا صغيرة - 10 كيلو,10000,g,bag,Palestine,no,high,https://www.motqdmon.com/2020/09/7.html,listed as 10 kg in a Gaza price list
+carrot,generic,"Carrot, 1 kg loose",جزر - كيلو,1000,g,loose,Palestine,no,high,https://www.motqdmon.com/2020/09/7.html,sold by the kilo
+spinach,generic,"Spinach, 1 kg loose",سبانخ - كيلو,1000,g,loose,Palestine,no,high,https://www.motqdmon.com/2020/09/7.html,sold by the kilo
+spinach,generic,"Spinach, 1 bunch",سبانخ - ربطة,1,piece,loose,Palestine,no,medium,,bunch (ربطة); weight varies
+parsley,generic,"Parsley, 1 bunch",بقدونس - ربطة,1,piece,loose,Palestine,no,high,https://www.motqdmon.com/2020/09/7.html,bunch (ربطة); weight varies
+mint,generic,"Mint, 1 bunch",نعنع - ربطة,1,piece,loose,Palestine,no,high,https://www.motqdmon.com/2020/09/7.html,bunch (ربطة); weight varies
+lemon,generic,"Lemon, 1 kg loose",ليمون - كيلو,1000,g,loose,Palestine,no,high,https://www.motqdmon.com/2020/09/7.html,sold by the kilo
+lemon,generic,"Lemon, 500 g loose",ليمون - نصف كيلو,500,g,loose,Palestine,no,low,,half-kilo purchase; not in any Gaza price list found
+khubeiza,generic,"Mallow (khubeiza), 1 bunch",خبيزة - ربطة,1,piece,loose,Palestine,no,medium,https://news.un.org/en/story/2024/02/1147077,bunch (ربطة); weight varies; often foraged rather than bought
+khubeiza,generic,"Mallow (khubeiza), 1 kg loose",خبيزة - كيلو,1000,g,loose,Palestine,no,medium,https://news.un.org/en/story/2024/02/1147077,sold by the kilo; often foraged rather than bought
+chard,generic,"Chard (silq), 1 bunch",سلق - ربطة,1,piece,loose,Palestine,no,medium,https://tastecooking.com/dill-fish-resilience-holy-trinity-gazan-cuisine/,bunch (ربطة); weight varies
+chard,generic,"Chard (silq), 1 kg loose",سلق - كيلو,1000,g,loose,Palestine,no,medium,https://tastecooking.com/dill-fish-resilience-holy-trinity-gazan-cuisine/,sold by the kilo
+dill,generic,"Dill (jarada), 1 bunch",جرادة - ربطة,1,piece,loose,Palestine,no,high,https://www.motqdmon.com/2020/09/7.html,bunch (ربطة); weight varies
+green_onion,generic,"Green onion, 1 bunch",بصل أخضر - ربطة,1,piece,loose,Palestine,no,medium,,bunch (ربطة); weight varies
+coriander_fresh,generic,"Fresh coriander, 1 bunch",كزبرة خضراء - ربطة,1,piece,loose,Palestine,no,high,https://www.motqdmon.com/2020/09/7.html,bunch (ربطة); weight varies
+rocket,generic,"Rocket, 1 bunch",جرجير - ربطة,1,piece,loose,Palestine,no,medium,,bunch (ربطة); weight varies
+lettuce,generic,"Lettuce, 1 piece",خس - حبة,1,piece,piece,Palestine,no,high,https://www.motqdmon.com/2020/09/7.html,sold per piece
+molokhia_fresh,generic,"Fresh jew's mallow, 1 kg loose",ملوخية خضراء - كيلو,1000,g,loose,Palestine,no,high,https://www.motqdmon.com/2022/07/461.html,sold by the kilo
+grape_leaves,generic,"Fresh grape leaves, wiqiya (~250 g) loose",ورق عنب - وقية,250,g,loose,Palestine,no,high,https://www.alwatanvoice.com/arabic/news/2021/07/27/1425115.html,priced per wiqiya; wiqiya = 250 g (quarter kilo)
+grape_leaves,generic,"Fresh grape leaves, 1 kg loose",ورق عنب - كيلو,1000,g,loose,Palestine,no,medium,,sold by the kilo
+cabbage,generic,"Cabbage, 1 kg loose",ملفوف - كيلو,1000,g,loose,Palestine,no,high,https://www.motqdmon.com/2020/09/7.html,sold by the kilo
+cabbage,generic,"Cabbage, 1 piece",ملفوف - حبة,1,piece,piece,Palestine,no,low,https://www.motqdmon.com/2020/09/7.html,sold per piece; no Gaza price list found pricing it per piece
+red_cabbage,generic,"Red cabbage, 1 kg loose",ملفوف أحمر - كيلو,1000,g,loose,Palestine,no,medium,https://www.motqdmon.com/2020/09/7.html,sold by the kilo; cited list gives no unit
+cauliflower,generic,"Cauliflower, 1 kg loose",زهرة - كيلو,1000,g,loose,Palestine,no,high,https://www.motqdmon.com/2020/09/7.html,sold by the kilo
+cauliflower,generic,"Cauliflower, 1 piece",زهرة - حبة,1,piece,piece,Palestine,no,low,https://www.motqdmon.com/2020/09/7.html,sold per piece; no Gaza price list found pricing it per piece
+hot_green_chilli,generic,"Hot green chilli, wiqiya (~250 g) loose",فلفل حار أخضر - وقية,250,g,loose,Palestine,no,medium,https://tastecooking.com/dill-fish-resilience-holy-trinity-gazan-cuisine/,priced per wiqiya; wiqiya = 250 g (quarter kilo)
+hot_green_chilli,generic,"Hot green chilli, 1 kg loose",فلفل حار أخضر - كيلو,1000,g,loose,Palestine,no,medium,https://tastecooking.com/dill-fish-resilience-holy-trinity-gazan-cuisine/,sold by the kilo
+okra,generic,"Okra, wiqiya (~250 g) loose",بامية - وقية,250,g,loose,Palestine,no,high,https://www.motqdmon.com/2020/09/7.html,priced per wiqiya; wiqiya = 250 g (quarter kilo)
+okra,generic,"Okra, 1 kg loose",بامية - كيلو,1000,g,loose,Palestine,no,medium,https://www.motqdmon.com/2020/09/7.html,sold by the kilo; cited list prices per wiqiya only
+green_beans,generic,"Green beans, 1 kg loose",فاصوليا خضراء - كيلو,1000,g,loose,Palestine,no,high,https://www.motqdmon.com/2022/07/461.html,sold by the kilo
+peas_fresh,generic,"Fresh peas, 1 kg loose",بازيلاء - كيلو,1000,g,loose,Palestine,no,high,https://www.motqdmon.com/2020/09/7.html,sold by the kilo
+fava_beans_fresh,generic,"Green broad beans, 1 kg loose",فول أخضر - كيلو,1000,g,loose,Palestine,no,high,https://www.motqdmon.com/2020/09/7.html,sold by the kilo
+green_chickpeas,generic,"Green chickpeas, 1 bunch",حاملة - ربطة,1,piece,loose,Palestine,no,low,,bunch (ربطة); weight varies
+green_chickpeas,generic,"Green chickpeas, 500 g loose",حاملة - نصف كيلو,500,g,loose,Palestine,no,low,,half-kilo purchase
+yellow_squash,generic,"Yellow squash, 1 kg loose",قرع أصفر - كيلو,1000,g,loose,Palestine,no,high,https://www.motqdmon.com/2020/09/7.html,sold by the kilo; often sold as a cut slice by weight
+local_squash,generic,"Local squash, 1 kg loose",قرع بلدي - كيلو,1000,g,loose,Palestine,no,high,https://www.motqdmon.com/2020/09/7.html,sold by the kilo
+corn_cob,generic,"Corn cob, 1 piece",ذرة - حبة,1,piece,piece,Palestine,no,medium,,sold per piece
+sweet_potato,generic,"Sweet potato, 1 kg loose",بطاطا حلوة - كيلو,1000,g,loose,Palestine,no,medium,,sold by the kilo
+beetroot,generic,"Beetroot, 1 kg loose",شمندر - كيلو,1000,g,loose,Palestine,no,medium,,sold by the kilo
+radish,generic,"Radish, 1 bunch",فجل - ربطة,1,piece,loose,Palestine,no,medium,,bunch (ربطة); weight varies
+turnip,generic,"Turnip, 1 kg loose",لفت - كيلو,1000,g,loose,Palestine,no,medium,,sold by the kilo
+ginger_fresh,generic,"Fresh ginger, wiqiya (~250 g) loose",زنجبيل أخضر - وقية,250,g,loose,unknown,no,high,https://www.motqdmon.com/2020/09/7.html,priced per wiqiya; wiqiya = 250 g (quarter kilo); imported
+guava,generic,"Guava, 1 kg loose",جوافة - كيلو,1000,g,loose,Palestine,no,high,https://www.newarab.com/news/guava-season-gaza-surviving-trees-struggle-bear-fruit,sold by the kilo
+orange,generic,"Orange, 1 kg loose",برتقال - كيلو,1000,g,loose,Palestine,no,medium,https://www.aljazeera.com/news/longform/2024/7/2/how-israel-destroyed-gazas-ability-to-feed-itself,sold by the kilo
+mandarin,generic,"Clementine / mandarin, 1 kg loose",كلمنتينا - كيلو,1000,g,loose,Palestine,no,high,https://www.alaraby.co.uk/gallery/%D9%83%D9%84%D9%85%D9%86%D8%AA%D9%8A%D9%86%D8%A7-%D8%BA%D8%B2%D8%A9-%D9%81%D8%A7%D9%83%D9%87%D8%A9-%D8%AA%D8%B7%D8%BA%D9%89-%D8%B9%D9%84%D9%89-%D8%A8%D9%82%D9%8A%D8%A9-%D8%A7%D9%84%D8%AD%D9%85%D8%B6%D9%8A%D8%A7%D8%AA,sold by the kilo
+grapefruit,generic,"Grapefruit, 1 kg loose",جريب فروت - كيلو,1000,g,loose,Palestine,no,medium,https://www.aljazeera.com/news/longform/2024/7/2/how-israel-destroyed-gazas-ability-to-feed-itself,sold by the kilo
+strawberry,generic,"Strawberry, 1 kg loose",فراولة - كيلو,1000,g,loose,Palestine,no,medium,https://mondoweiss.net/2021/12/photo-essay-strawberry-season-in-the-gaza-strip/,sold by the kilo
+dates_fresh,generic,"Fresh Hayani dates, 1 kg loose",بلح حياني - كيلو,1000,g,loose,Palestine,no,high,https://ar.wikipedia.org/wiki/%D8%AF%D9%8A%D8%B1_%D8%A7%D9%84%D8%A8%D9%84%D8%AD,sold by the kilo
+dates_dried,generic,"Dates (loose), 1 kg loose",تمر - كيلو,1000,g,loose,unknown,no,medium,,sold by the kilo
+dates_dried,generic,"Dates (loose), 500 g loose",تمر - نصف كيلو,500,g,loose,unknown,no,medium,,half-kilo purchase
+fig,generic,"Fig, 1 kg loose",تين - كيلو,1000,g,loose,Palestine,no,medium,,sold by the kilo
+prickly_pear,generic,"Prickly pear, 1 kg loose",صبر - كيلو,1000,g,loose,Palestine,no,medium,https://www.noonpost.com/19275/,sold by the kilo
+prickly_pear,generic,"Prickly pear, 1 piece",صبر - حبة,1,piece,piece,Palestine,no,medium,https://www.noonpost.com/19275/,sold per piece
+watermelon,generic,"Watermelon, 1 kg loose",بطيخ - كيلو,1000,g,loose,Palestine,no,high,https://www.alwatanvoice.com/arabic/news/2021/07/27/1425115.html,sold by the kilo; whole fruit priced by weight
+watermelon,generic,"Watermelon (whole, about 5-8 kg), 1 piece",بطيخة - حبة,1,piece,piece,Palestine,no,medium,,sold per piece
+melon,generic,"Melon, 1 kg loose",شمام - كيلو,1000,g,loose,Palestine,no,medium,https://www.alwatanvoice.com/arabic/news/2021/07/27/1425115.html,sold by the kilo
+banana,generic,"Banana, 1 kg loose",موز - كيلو,1000,g,loose,unknown,no,high,https://www.alwatanvoice.com/arabic/news/2021/07/27/1425115.html,sold by the kilo
+banana,generic,"Banana, 3 kg loose",موز - 3 كيلو,3000,g,loose,unknown,no,high,https://www.motqdmon.com/2020/09/7.html,priced per 3 kg in a Gaza price list
+apple,generic,"Apple, 1 kg loose",تفاح - كيلو,1000,g,loose,unknown,no,high,https://www.motqdmon.com/2020/09/7.html,sold by the kilo; imported
+pomegranate,generic,"Pomegranate, 1 kg loose",رمان - كيلو,1000,g,loose,Palestine,no,high,https://www.motqdmon.com/2020/09/7.html,sold by the kilo
+grapes,generic,"Grapes, 1 kg loose",عنب - كيلو,1000,g,loose,Palestine,no,medium,https://www.alwatanvoice.com/arabic/news/2021/07/27/1425115.html,sold by the kilo
+avocado,generic,"Avocado, 1 kg loose",أفوكادو - كيلو,1000,g,loose,Palestine,no,high,https://www.motqdmon.com/2020/09/7.html,sold by the kilo
+mango,generic,"Mango, 1 kg loose",مانجا - كيلو,1000,g,loose,unknown,no,medium,https://gaza.goodforum.net/t20985-%D8%A3%D8%B3%D8%B9%D8%A7%D8%B1-%D8%A7%D9%84%D8%AE%D8%B6%D8%A7%D8%B1-%D9%88%D8%A7%D9%84%D9%81%D9%88%D8%A7%D9%83%D9%87-%D9%81%D9%8A-%D8%A3%D8%B3%D9%88%D8%A7%D9%82-%D8%BA%D8%B2%D8%A9-%D8%A7%D9%84%D8%B3%D8%A8%D8%AA-29-08-2026,sold by the kilo; mostly imported
+apricot,generic,"Apricot, 1 kg loose",مشمش - كيلو,1000,g,loose,Palestine,no,medium,https://www.alwatanvoice.com/arabic/news/2021/07/27/1425115.html,sold by the kilo
+plum,generic,"Plum (santa rosa), 1 kg loose",سانتروزا - كيلو,1000,g,loose,Palestine,no,medium,https://www.alwatanvoice.com/arabic/news/2021/07/27/1425115.html,sold by the kilo
+loquat,generic,"Loquat, 1 kg loose",أسكدنيا - كيلو,1000,g,loose,Palestine,no,medium,https://www.alquds.com/ar/posts/235271,sold by the kilo
+green_almonds,generic,"Green almonds, wiqiya (~250 g) loose",لوز أخضر - وقية,250,g,loose,Palestine,no,medium,https://www.wafa.ps/Videos/Details/3712,priced per wiqiya; wiqiya = 250 g (quarter kilo)
+dates_dried,Al'Ard,Quality Palestinian Medjool Dates,تمر مجهول فلسطيني - الأرض,907,g,box,Palestine,no,low,https://www.alardproducts.com/products/quality-palestinian-medjool-dates-907g-2lb,Jericho-grown export product; not confirmed that it reaches Gaza

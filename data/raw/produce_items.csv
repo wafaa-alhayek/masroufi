@@ -1,0 +1,48 @@
+slug,name_en,name_ar,aliases_ar,category,unit,shelf_life,role,purchase_step,keeps_days_at_20c,q10,origin,confidence,source_url,notes
+khubeiza,mallow (khubeiza),خبيزة,خبيزه|خبّيزة,produce,bunch,perishable,veg_leaf,1,1,2.5,market,high,https://news.un.org/en/story/2024/02/1147077,"Wild winter green, often foraged free; also sold by bunch in markets. Cooked with onion and oil or stewed."
+chard,chard (silq),سلق,سلق بلدي,produce,bunch,keeps_days,veg_leaf,1,2,2.5,market,high,https://tastecooking.com/dill-fish-resilience-holy-trinity-gazan-cuisine/,Key ingredient in sumagiyya; sold by bunch.
+dill,dill (jarada),جرادة,شبت|شبث|جراده,produce,bunch,keeps_days,veg_leaf,1,2,2.5,market,high,https://www.motqdmon.com/2020/09/7.html,Core Gazan herb (dagga salad and fish). Gaza price lists call it jarada (جرادة) and sell it by the bunch. Dill seed belongs with spices.
+green_onion,green onion,بصل أخضر,بصل أخضر|بصل ناعم,produce,bunch,keeps_days,veg_leaf,1,3,2.5,market,medium,,Sold by bunch.
+coriander_fresh,coriander (fresh),كزبرة خضراء,كزبرة|كزبره,produce,bunch,keeps_days,veg_leaf,1,2,2.5,market,high,https://www.motqdmon.com/2020/09/7.html,Listed by bunch in Gaza price lists.
+rocket,rocket (arugula),جرجير,جرجير بلدي,produce,bunch,keeps_days,veg_leaf,1,2,2.5,market,medium,,Common salad green in Palestine; sold by bunch.
+lettuce,lettuce,خس,خس بلدي|خسة,produce,piece,keeps_days,veg_leaf,1,3,2.5,market,high,https://www.motqdmon.com/2020/09/7.html,Sold per head in Gaza price lists.
+molokhia_fresh,jew's mallow (fresh),ملوخية خضراء,ملوخية|ملوخيه,produce,g,keeps_days,veg_leaf,1000,2,2.5,market,high,https://www.motqdmon.com/2022/07/461.html,Summer crop; bought by kg and picked/chopped at home. Distinct from existing molokhia_dry.
+grape_leaves,grape leaves (fresh),ورق عنب,ورق دوالي,produce,g,keeps_days,veg_leaf,250,3,2.5,market,high,https://www.alwatanvoice.com/arabic/news/2021/07/27/1425115.html,Spring; for stuffing (dawali); priced per wiqiya in Gaza. Brined jars are a pantry item.
+cabbage,cabbage,ملفوف,ملفوفة|كرنب,produce,g,keeps_days,veg_leaf,1000,10,2,market,high,https://www.motqdmon.com/2020/09/7.html,Whole heads keep well unrefrigerated.
+red_cabbage,red cabbage,ملفوف أحمر,ملفوف احمر,produce,g,keeps_days,veg_leaf,1000,10,2,market,medium,https://www.motqdmon.com/2020/09/7.html,
+cauliflower,cauliflower,زهرة,قرنبيط|زهره,produce,g,keeps_days,veg_fruit,1000,4,2.5,market,high,https://www.motqdmon.com/2020/09/7.html,Gaza name is zahra.
+hot_green_chilli,hot green chilli (fresh),فلفل حار أخضر,فلفل حار|شطة خضراء|فلفل أخضر حار,produce,g,keeps_days,veg_fruit,250,5,2.5,market,high,https://tastecooking.com/dill-fish-resilience-holy-trinity-gazan-cuisine/,"Fresh chilli, basic to Gazan cooking; may overlap with existing 'chilli' (spice), so the reviewer should decide."
+okra,okra,بامية,باميه,produce,g,keeps_days,veg_fruit,250,3,2.5,market,high,https://www.motqdmon.com/2020/09/7.html,Priced per wiqiya in a Gaza price list; for tabeekh bamia.
+green_beans,green beans,فاصوليا خضراء,فاصوليا|فاصولياء,produce,g,keeps_days,veg_fruit,1000,4,2.5,market,high,https://www.motqdmon.com/2022/07/461.html,
+peas_fresh,peas (fresh in pod),بازيلاء,بازيلا|بسلة,produce,g,keeps_days,veg_fruit,1000,3,2.5,market,high,https://www.motqdmon.com/2020/09/7.html,
+fava_beans_fresh,broad beans (fresh green),فول أخضر,فول اخضر,produce,g,keeps_days,veg_fruit,1000,4,2.5,market,high,https://www.motqdmon.com/2020/09/7.html,Spring. Distinct from existing dried fava_beans.
+green_chickpeas,green chickpeas (fresh),حاملة,حملة|حمص أخضر,produce,g,keeps_days,veg_fruit,500,3,2.5,market,low,,"Spring snack in Palestine, sold on the stem; not confirmed in Gaza sources."
+yellow_squash,yellow pumpkin squash,قرع أصفر,قرع|يقطين,produce,g,keeps_days,veg_fruit,1000,30,1.8,market,high,https://www.motqdmon.com/2020/09/7.html,Whole squash keeps weeks; cut pieces are perishable.
+local_squash,local green squash,قرع بلدي,قرع أخضر,produce,g,keeps_days,veg_fruit,1000,14,2,market,medium,https://www.motqdmon.com/2020/09/7.html,Listed separately from yellow squash; the reviewer should confirm the variety.
+corn_cob,corn on the cob,ذرة,عرنوس ذرة|كوز ذرة,produce,piece,keeps_days,veg_fruit,1,3,2.5,market,medium,,Summer; boiled or roasted street snack.
+sweet_potato,sweet potato,بطاطا حلوة,بطاطا حلوه|بطاطا صفرا,produce,g,keeps_days,veg_root,1000,14,2,market,medium,,Grown in Gaza; keeps a couple of weeks unrefrigerated.
+beetroot,beetroot,شمندر,شوندر|بنجر,produce,g,keeps_days,veg_root,1000,10,2,market,medium,,
+radish,radish,فجل,فجل أحمر,produce,bunch,keeps_days,veg_root,1,4,2.5,market,medium,,Sold by bunch.
+turnip,turnip,لفت,لفت أبيض,produce,g,keeps_days,veg_root,1000,10,2,market,medium,,"Mostly bought for pickling (pink pickled turnip, لفت مخلل)."
+ginger_fresh,ginger (fresh),زنجبيل أخضر,زنجبيل,produce,g,keeps_days,veg_root,250,14,2,market,high,https://www.motqdmon.com/2020/09/7.html,Priced per wiqiya.
+guava,guava,جوافة,جوافه,produce,g,keeps_days,fruit,1000,4,2.5,market,high,https://www.newarab.com/news/guava-season-gaza-surviving-trees-struggle-bear-fruit,Local; season Sept to Dec.
+orange,orange,برتقال,برتقان|بردقان,produce,g,keeps_days,fruit,1000,10,2,market,high,https://www.aljazeera.com/news/longform/2024/7/2/how-israel-destroyed-gazas-ability-to-feed-itself,Traditional Gaza citrus (Khan Younis); winter.
+mandarin,mandarin / clementine,كلمنتينا,يوسفي|كلمنتينة|مندلينا|منتلينا,produce,g,keeps_days,fruit,1000,7,2,market,high,https://www.alaraby.co.uk/gallery/%D9%83%D9%84%D9%85%D9%86%D8%AA%D9%8A%D9%86%D8%A7-%D8%BA%D8%B2%D8%A9-%D9%81%D8%A7%D9%83%D9%87%D8%A9-%D8%AA%D8%B7%D8%BA%D9%89-%D8%B9%D9%84%D9%89-%D8%A8%D9%82%D9%8A%D8%A9-%D8%A7%D9%84%D8%AD%D9%85%D8%B6%D9%8A%D8%A7%D8%AA,Winter citrus; clementine is the main citrus grown in Gaza (from mid-November).
+grapefruit,grapefruit,جريب فروت,ليمون هندي|جريفون,produce,g,keeps_days,fruit,1000,14,2,market,medium,https://www.aljazeera.com/news/longform/2024/7/2/how-israel-destroyed-gazas-ability-to-feed-itself,
+strawberry,strawberry,فراولة,فراوله|توت أرضي,produce,g,keeps_days,fruit,500,2,2.5,market,high,https://mondoweiss.net/2021/12/photo-essay-strawberry-season-in-the-gaza-strip/,Beit Lahia; season Dec to Apr.
+dates_fresh,fresh dates (balah),بلح,بلح رطب|بلح حياني|رطب,produce,g,keeps_days,fruit,1000,4,2.5,market,high,https://ar.wikipedia.org/wiki/%D8%AF%D9%8A%D8%B1_%D8%A7%D9%84%D8%A8%D9%84%D8%AD,Local red Hayani dates from Deir al-Balah; late summer to autumn.
+dates_dried,dates (dried),تمر,تمر مجهول,produce,g,stable,fruit,500,180,1.5,market,high,https://nakheelpal.com/en,Dried and semi-dry dates keep months. Date paste (agwa) is a sweets or pantry item.
+fig,fig (fresh),تين,تين أخضر|تين بلدي,produce,g,keeps_days,fruit,500,2,2.5,market,medium,,Summer.
+prickly_pear,prickly pear (cactus fruit),صبر,تين شوكي|صبر بلدي,produce,g,keeps_days,fruit,1000,4,2.5,market,high,https://www.noonpost.com/19275/,Summer (from July); grown in southern Gaza; sold on pavements and in markets.
+watermelon,watermelon,بطيخ,بطيخة|بطيخ أحمر,produce,g,keeps_days,fruit,5000,10,2,market,high,https://www.alwatanvoice.com/arabic/news/2021/07/27/1425115.html,Whole fruit keeps about a week or more; cut is perishable. Usually sold whole by weight.
+melon,melon,شمام,شمّام,produce,g,keeps_days,fruit,1000,5,2.5,market,medium,https://www.alwatanvoice.com/arabic/news/2021/07/27/1425115.html,Whole melons; a Gaza list prices them in multi-kilo lots (8 kg).
+banana,banana,موز,موزة,produce,g,keeps_days,fruit,1000,4,2.5,market,high,https://www.motqdmon.com/2020/09/7.html,Priced per 3 kg in one Gaza list.
+apple,apple,تفاح,تفاحة,produce,g,keeps_days,fruit,1000,14,2,market,high,https://www.motqdmon.com/2020/09/7.html,
+pomegranate,pomegranate,رمان,رمانة,produce,g,keeps_days,fruit,1000,14,2,market,high,https://www.motqdmon.com/2020/09/7.html,Sour pomegranate is used as souring in Gazan dishes.
+grapes,grapes,عنب,عنب بلدي,produce,g,keeps_days,fruit,1000,3,2.5,market,medium,https://www.alwatanvoice.com/arabic/news/2021/07/27/1425115.html,Summer.
+avocado,avocado,أفوكادو,افوكادو,produce,g,keeps_days,fruit,1000,5,2.5,market,high,https://www.motqdmon.com/2020/09/7.html,
+mango,mango,مانجا,مانجو|منجا,produce,g,keeps_days,fruit,1000,4,2.5,market,medium,https://gaza.goodforum.net/t20985-%D8%A3%D8%B3%D8%B9%D8%A7%D8%B1-%D8%A7%D9%84%D8%AE%D8%B6%D8%A7%D8%B1-%D9%88%D8%A7%D9%84%D9%81%D9%88%D8%A7%D9%83%D9%87-%D9%81%D9%8A-%D8%A3%D8%B3%D9%88%D8%A7%D9%82-%D8%BA%D8%B2%D8%A9-%D8%A7%D9%84%D8%B3%D8%A8%D8%AA-29-08-2026,"Summer; seen in Gaza price lists (2021, 2026); mostly imported."
+apricot,apricot,مشمش,مشمش بلدي,produce,g,keeps_days,fruit,1000,3,2.5,market,medium,https://www.alwatanvoice.com/arabic/news/2021/07/27/1425115.html,Short early-summer season; per kg in a Gaza price list.
+plum,plum,سانتروزا,سنطروزة|برقوق,produce,g,keeps_days,fruit,1000,4,2.5,market,medium,https://www.alwatanvoice.com/arabic/news/2021/07/27/1425115.html,Gaza price lists name plums santa rosa (سنطروزة/سانتروزا); خوخ there means peach.
+loquat,loquat,أسكدنيا,إسكدنيا|اكدنيا|أكي دنيا,produce,g,keeps_days,fruit,500,3,2.5,market,medium,https://www.alquds.com/ar/posts/235271,Spring; priced per kg in Gaza news reports.
+green_almonds,green almonds,لوز أخضر,لوز اخضر,produce,g,keeps_days,fruit,500,5,2.5,market,medium,https://www.wafa.ps/Videos/Details/3712,"Short spring season (about 8 weeks from late March); sold by street vendors in Gaza, eaten with salt."

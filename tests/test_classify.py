@@ -102,6 +102,30 @@ def test_jev_parses_documented_response_shape():
     assert d.reducibility == 1
 
 
+def test_jev_reducibility_takes_most_likely_level_not_truncated_score():
+    """Pinned against a live jev-1.13 response via OpenRouter: the score is a
+    weighted mean, so int() would have turned level 1 into level 0."""
+    payload = {
+        "answers": {
+            "category": {"type": "choice", "choice": "groceries", "confidence": 1,
+                         "probabilities": {"groceries": 1}},
+            "reducibility": {"type": "score", "score": 0.69, "confidence": 0.68,
+                             "probabilities": {"0": 0.32, "1": 0.68, "2": 0, "3": 0}},
+        },
+    }
+
+    async def run():
+        transport = httpx.MockTransport(lambda request: httpx.Response(200, json=payload))
+        client = JevClassifier(api_key="test-key")
+        client._client = httpx.AsyncClient(transport=transport, base_url="https://api.typesafe.ai")
+        try:
+            return await client.classify("سوبرماركت - مواد غذائية", -45.0, "ILS")
+        finally:
+            await client.aclose()
+
+    assert asyncio.run(run()).reducibility == 1
+
+
 def test_jev_sends_redacted_state():
     seen = {}
 

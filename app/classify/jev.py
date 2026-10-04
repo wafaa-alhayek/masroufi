@@ -89,13 +89,12 @@ class JevClassifier:
             # or error response. Fail to review rather than guessing.
             return Decision("other", 0.0, {})
 
-        reducibility = answers.get("reducibility", {}).get("score")
         return Decision(
             category=category,
             confidence=float(cat.get("confidence", 0.0)),
             probabilities={k: float(v) for k, v in (cat.get("probabilities") or {}).items()},
             is_merchant=_maybe_float(answers.get("is_merchant", {}).get("noul")),
-            reducibility=int(reducibility) if reducibility is not None else None,
+            reducibility=_level(answers.get("reducibility", {})),
         )
 
     async def _post(self, payload: dict, attempts: int = 3) -> dict:
@@ -123,3 +122,13 @@ class JevClassifier:
 
 def _maybe_float(value) -> float | None:
     return None if value is None else float(value)
+
+
+def _level(answer: dict) -> int | None:
+    # A score is the probability-weighted mean of the levels (0.69 when level 1
+    # has 0.68), so truncating it drops a level. Take the most likely level.
+    probs = answer.get("probabilities")
+    if probs:
+        return int(max(probs, key=probs.get))
+    score = answer.get("score")
+    return None if score is None else round(score)

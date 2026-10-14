@@ -11,6 +11,9 @@ at all.
     particular should be checked against how these things are actually sold.
 """
 
+import csv
+from pathlib import Path
+
 from app.models import Item, ItemRole, ShelfLife, Unit
 
 G, ML, PIECE, BUNCH = Unit.GRAM, Unit.ML, Unit.PIECE, Unit.BUNCH
@@ -94,7 +97,24 @@ CATALOGUE: tuple[tuple, ...] = (
 )
 
 
-def seed_items() -> list[Item]:
+# The researched catalogue: one *_items.csv per food group, each row sourced.
+RAW_DIR = Path(__file__).resolve().parents[2] / "data" / "raw"
+
+# Researched slugs that name something the hand-written catalogue already has
+# under another slug. Same Arabic name, same thing on the shelf — two rows would
+# split one item's price history and stock in half.
+RAW_SLUG_ALIASES: dict[str, str] = {
+    "dates_dried": "dates",
+    "canned_tomatoes": "canned_tomato",
+    "canned_corned_beef": "canned_meat",
+}
+
+
+def canonical_slug(slug: str) -> str:
+    return RAW_SLUG_ALIASES.get(slug, slug)
+
+
+def _hand_written() -> list[Item]:
     return [
         Item(
             slug=slug,
@@ -109,3 +129,44 @@ def seed_items() -> list[Item]:
         )
         for slug, name_en, name_ar, unit, shelf_life, role, step, keeps, q10 in CATALOGUE
     ]
+
+
+def raw_items(raw_dir: Path = RAW_DIR) -> list[Item]:
+    """Items from the researched catalogue, skipping any the hand-written one has.
+
+    Where both describe an item the hand-written row wins: the dishes, the tests
+    and every shelf-life decision so far were tuned against it. The researched
+    row is still in data/raw with its source, for whoever reconciles the two.
+
+    Rows the research itself marked low-confidence arrive as `needs_review`, so
+    they are kept out of substitutes until someone checks them.
+    """
+    known = {row[0] for row in CATALOGUE}
+    items: list[Item] = []
+    for path in sorted(raw_dir.glob("*_items.csv")):
+        with path.open(encoding="utf-8", newline="") as f:
+            for row in csv.DictReader(f):
+                slug = canonical_slug(row["slug"])
+                if slug in known:
+                    continue
+                known.add(slug)
+                name = row["name_en"].strip()
+                items.append(
+                    Item(
+                        slug=slug,
+                        name_en=name[:1].upper() + name[1:],
+                        name_ar=row["name_ar"].strip(),
+                        unit=Unit(row["unit"]),
+                        shelf_life=ShelfLife(row["shelf_life"]),
+                        role=ItemRole(row["role"]),
+                        purchase_step=float(row["purchase_step"]),
+                        keeps_days_at_20c=float(row["keeps_days_at_20c"]),
+                        q10=float(row["q10"]),
+                        needs_review=row["confidence"].strip() == "low",
+                    )
+                )
+    return items
+
+
+def seed_items() -> list[Item]:
+    return _hand_written() + raw_items()

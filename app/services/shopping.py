@@ -18,6 +18,7 @@ from datetime import date, timedelta
 from sqlmodel import Session, select
 
 from app.kitchen import get_household
+from app.kitchen.catalogue import CATALOGUE
 from app.kitchen.spoilage import DAILY_THRESHOLD_DAYS, REFERENCE_C, keeps_for
 from app.services import pantry
 from app.weather import DayTemperature
@@ -328,7 +329,15 @@ _SUBSTITUTABLE: tuple[ItemRole, ...] = (
     ItemRole.SPICE,
     ItemRole.PASTE,
     ItemRole.DRINK,
+    ItemRole.CANNED_PROTEIN,
+    ItemRole.NUTS_SEEDS,
+    ItemRole.CONDIMENT,
+    ItemRole.SWEETS,
+    ItemRole.SNACK,
 )
+# Never BABY: formula and baby food are chosen for a child's age and needs, and
+# an automatic swap is not a decision this app should make. READY_MEAL is a
+# whole meal, not an ingredient, so "the same role" says nothing about it.
 
 
 def substitutes(session: Session, item: Item, limit: int = 5) -> list[Item]:
@@ -370,5 +379,16 @@ def substitutes(session: Session, item: Item, limit: int = 5) -> list[Item]:
             select(ShoppingLine).where(ShoppingLine.state == LineState.PURCHASED)
         )
     }
-    candidates.sort(key=lambda c: (c.id not in bought, c.name_en))
+    # Then the same food in another form — tinned white beans for dried — then
+    # the hand-written staples, before the long tail of the researched catalogue.
+    # Alphabetical alone stopped being an answer once a role held dozens of items.
+    staples = {row[0] for row in CATALOGUE}
+    candidates.sort(
+        key=lambda c: (
+            c.id not in bought,
+            not (item.slug in c.slug or c.slug in item.slug),
+            c.slug not in staples,
+            c.name_en,
+        )
+    )
     return candidates[:limit]

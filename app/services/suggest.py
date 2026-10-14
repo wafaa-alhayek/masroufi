@@ -62,6 +62,7 @@ SIGNATURE_ROLES = frozenset(
         ItemRole.MEAT,
         ItemRole.POULTRY,
         ItemRole.FISH,
+        ItemRole.CANNED_PROTEIN,
         ItemRole.EGG,
         ItemRole.DAIRY,
     }

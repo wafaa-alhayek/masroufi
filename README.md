@@ -629,6 +629,30 @@ and when.
 > consequential one — changing it moves an item between the two lists.
 > An over-stated quantity here is money wasted, which is the opposite of the point.
 
+### The researched catalogue
+
+`data/raw/` holds a second, larger catalogue: 335 items and 2,605 brand and
+pack-size products across nine food groups, each row with a source URL and a
+confidence. It is loaded alongside the hand-written one, and the item table seeds
+**380 items**.
+
+- **The hand-written row wins** where both describe an item. Dishes, tests and
+  every shelf-life decision so far were tuned against it; the researched row stays
+  in `data/raw` with its source for whoever reconciles the two.
+- **One thing on the shelf is one item.** Three researched slugs name something
+  the catalogue already has (`canned_corned_beef` is `canned_meat`, same Arabic
+  name, same tin) and are folded into it, so a price history is never split.
+- **Low-confidence research arrives as `needs_review`**, which keeps it out of
+  substitutes until someone checks it.
+- **Seven roles were added** for what a pantry is mostly made of:
+  `canned_protein`, `nuts_seeds`, `condiment`, `sweets`, `snack`, `ready_meal`,
+  `baby`. Tinned protein counts as a meal's base for repetition. Baby items are
+  **never** offered as a substitute, and neither are ready meals.
+
+The products are not loaded yet. They are what receipt lines will be matched
+against, and they carry no prices: the sources are online grocers, mostly outside
+Gaza, cited to show a brand and pack size exist rather than what they cost.
+
 ## Several providers, one picture
 
 Households here pay through a bank *and* two or three wallets — Bank of
@@ -689,7 +713,8 @@ import jawwalpay  TOP UP                +200   -> linked, excluded from spending
   later, asking only when unsure. The line items are what gives Phase B a price
   dataset of its own.
 - Small change under ₪20 is still handled in cash and leaves no digital trace.
-  The `cash` and `manual` sources exist for it; nothing writes to them yet.
+  `POST /api/transactions` records it by hand under the `manual` source; there is
+  no faster cash-specific entry yet.
 - Multi-currency amounts are stored but not normalised for reporting.
 - The note and decision caches are per-process; the vendor table is the durable
   half.
@@ -701,6 +726,16 @@ import jawwalpay  TOP UP                +200   -> linked, excluded from spending
 - **The dish library is twelve dishes, all drafted by a developer.** A cook has
   reviewed none of them. `needs_review` dishes are excluded from suggestions and
   refused for planning, so the library grows only as fast as someone checks it.
+- **Dish quantities look about 52% too high, and nobody has checked yet.**
+  The shared [kitchen vocabulary](https://github.com/wafaa-alhayek/kitchen-vocabulary)
+  compares these dishes with Zaytoun's portions, after taking out the rice or bread
+  served alongside. Masroufi reads higher on all eight comparable dishes, from +22%
+  (hummus, fasolia) to +132% (molokhia). A bias in one direction on every dish
+  points at the per-adult quantities in `app/kitchen/dishes.py`, which overstate
+  what a household needs to buy. Deliberately **flagged, not corrected**: Zaytoun's
+  portions are also estimates, so the fix is a cook's check, not a scale factor.
+- **`bamia_vegetarian` contains no okra.** It is lentils, rice, carrot and potato.
+  The slug should be renamed before anything else joins on it.
 - **Receipt reading is not built.** `POST /api/receipts` → proposed line matches
   with confidence is the intended shape, and item matching is the piece it needs.
 - **No expenses UI exists, and the tab bar in the mockups was wrong.** The gas

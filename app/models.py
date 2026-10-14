@@ -109,6 +109,15 @@ class ItemRole(str, Enum):
     SPICE = "spice"
     PASTE = "paste"
     DRINK = "drink"
+    # Added with the researched catalogue in data/raw. Tinned meat and fish that
+    # is not one species, and the shelf-stable groups a pantry is mostly made of.
+    CANNED_PROTEIN = "canned_protein"
+    NUTS_SEEDS = "nuts_seeds"
+    CONDIMENT = "condiment"
+    SWEETS = "sweets"
+    SNACK = "snack"
+    READY_MEAL = "ready_meal"
+    BABY = "baby"
     OTHER = "other"
 
 

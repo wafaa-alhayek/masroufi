@@ -734,8 +734,6 @@ import jawwalpay  TOP UP                +200   -> linked, excluded from spending
   points at the per-adult quantities in `app/kitchen/dishes.py`, which overstate
   what a household needs to buy. Deliberately **flagged, not corrected**: Zaytoun's
   portions are also estimates, so the fix is a cook's check, not a scale factor.
-- **`bamia_vegetarian` contains no okra.** It is lentils, rice, carrot and potato.
-  The slug should be renamed before anything else joins on it.
 - **Receipt reading is not built.** `POST /api/receipts` → proposed line matches
   with confidence is the intended shape, and item matching is the piece it needs.
 - **No expenses UI exists, and the tab bar in the mockups was wrong.** The gas

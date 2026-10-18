@@ -355,3 +355,35 @@ def test_portion_override_endpoint(client, dishes):
         ).status_code
         == 422
     )
+
+
+def test_a_renamed_dish_keeps_its_row():
+    """An install that stored the old slug gets it renamed, not duplicated."""
+    from sqlalchemy.pool import StaticPool
+    from sqlmodel import Session, SQLModel, create_engine, select
+
+    from app.kitchen import ensure_kitchen
+    from app.models import Dish, MealSlot
+
+    engine = create_engine(
+        "sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool
+    )
+    SQLModel.metadata.create_all(engine)
+    with Session(engine) as session:
+        old = Dish(
+            slug="bamia_vegetarian",
+            name_en="Lentil and vegetable stew",
+            name_ar="يخنة عدس وخضار",
+            default_slot=MealSlot.LUNCH,
+        )
+        session.add(old)
+        session.commit()
+        old_id = old.id
+
+        ensure_kitchen(session)
+
+        slugs = [d.slug for d in session.exec(select(Dish))]
+        assert "bamia_vegetarian" not in slugs
+        assert slugs.count("lentil_vegetable_stew") == 1
+        renamed = session.exec(select(Dish).where(Dish.slug == "lentil_vegetable_stew")).one()
+        assert renamed.id == old_id

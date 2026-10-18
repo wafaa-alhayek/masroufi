@@ -16,6 +16,14 @@ Anything not in this list is generated on request and marked for review.
 
 from app.models import MealSlot
 
+# Seed slugs that were renamed after installs already stored them. Startup
+# renames the stored row in place, so its plan entries, portions and history
+# stay attached rather than a second copy of the dish being seeded beside it.
+RENAMED_DISHES: dict[str, str] = {
+    # It was never bamia: there is no okra in it.
+    "bamia_vegetarian": "lentil_vegetable_stew",
+}
+
 SEED_DISHES: tuple[dict, ...] = (
     {
         "slug": "mujaddara",
@@ -85,7 +93,7 @@ SEED_DISHES: tuple[dict, ...] = (
         },
     },
     {
-        "slug": "bamia_vegetarian",
+        "slug": "lentil_vegetable_stew",
         "name_en": "Lentil and vegetable stew",
         "name_ar": "يخنة عدس وخضار",
         "slot": MealSlot.LUNCH,

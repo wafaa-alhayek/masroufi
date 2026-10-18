@@ -5,7 +5,7 @@ from sqlmodel import Session, select
 from app.models import Dish, DishItem, DishSource, Household, Item
 
 from .catalogue import seed_items
-from .dishes import SEED_DISHES
+from .dishes import RENAMED_DISHES, SEED_DISHES
 
 __all__ = ["ensure_kitchen", "get_household"]
 
@@ -22,6 +22,13 @@ def ensure_kitchen(session: Session) -> None:
         session.add_all(new_items)
         session.commit()
         known_items = {i.slug: i for i in session.exec(select(Item))}
+
+    stored = {d.slug: d for d in session.exec(select(Dish))}
+    for old, new in RENAMED_DISHES.items():
+        if old in stored and new not in stored:
+            stored[old].slug = new
+            session.add(stored[old])
+    session.commit()
 
     known_dishes = {d.slug for d in session.exec(select(Dish))}
     for row in SEED_DISHES:

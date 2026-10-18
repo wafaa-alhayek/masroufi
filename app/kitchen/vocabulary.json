@@ -1075,9 +1075,9 @@
       "serves_with": []
     },
     {
-      "masroufi": "bamia_vegetarian",
+      "masroufi": "lentil_vegetable_stew",
       "zaytoun": null,
-      "note": "The slug says bamia but the recipe contains no okra - it is lentils, rice, carrot and potato. Masroufi should rename this; Zaytoun bamia IS okra with meat and joining them would be wrong.",
+      "note": "Lentils, rice, carrot and potato. Masroufi called it bamia_vegetarian until it was renamed, though it contains no okra; Zaytoun's bamia is okra with meat, so the two must never be joined.",
       "scope": "meal",
       "serves_with": [
         "rice"

@@ -1,0 +1,1112 @@
+{
+  "$schema": "./schema.md",
+  "version": "1.0.0",
+  "generated": "2026-09-23",
+  "owns": "The join between Masroufi item slugs and Zaytoun nutrition ids, plus the yield factors needed to convert a purchase weight into an eaten weight. It deliberately does NOT duplicate names, units, purchase steps or shelf lives (Masroufi owns those) or as-eaten nutrient panels (Zaytoun owns those).",
+  "conventions": {
+    "per_100g_as_purchased": "Nutrients actually delivered by 100 g of the thing you BUY, with inedible waste already discounted. Bone, shell, peel and stalk are removed here, not later, so that cost-per-nutrient divides correctly against a per-kilo price.",
+    "edible_fraction": "Edible mass / purchased mass. Informational once the panel above is waste-discounted, but kept because a shopper needs it to judge a bone-in price against a boneless one.",
+    "cooked_yield": "Cooked mass / edible raw mass. Above 1 for anything that absorbs water (rice, pulses), below 1 for anything that loses it (meat, aubergine).",
+    "invariant": "zaytoun_per_100g ~= per_100g_as_purchased / (edible_fraction * cooked_yield)",
+    "check": "How hard the validator enforces that invariant. 'strict' where nutrients are genuinely conserved and only water moves. 'loose' where fat renders out or water is lost unevenly, so only protein is a reliable tracer. 'none' where the two apps are describing different things.",
+    "density_g_per_ml": "Only for items Masroufi sells by volume. Consumers multiply ml by this before applying the panel.",
+    "scope": "Masroufi dishes are whole MEALS: the recipe carries the rice or bread served with it. Zaytoun foods are named dishes only, with accompaniments logged separately. 'serves_with' lists the Masroufi ingredients that are the accompaniment, so a comparison can subtract them. Ignoring this makes Masroufi look 100-270% higher than Zaytoun for the same food.",
+    "zaytoun_portion": "Which Zaytoun household portion corresponds to one adult serving. Defaults to the first portion listed, which is wrong for dishes counted in pieces."
+  },
+  "items": [
+    {
+      "slug": "rice",
+      "state": "dry",
+      "edible_fraction": 1,
+      "cooked_yield": 2.8,
+      "per_100g_as_purchased": {
+        "kcal": 365,
+        "protein": 7.1,
+        "carbs": 80,
+        "fat": 0.7,
+        "fiber": 1.3,
+        "sodium": 5
+      },
+      "zaytoun_food_id": "rice-white",
+      "check": "strict",
+      "note": "The single most dangerous slug to share unqualified: 100 g bought becomes 280 g eaten."
+    },
+    {
+      "slug": "flour",
+      "state": "dry",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 364,
+        "protein": 10.3,
+        "carbs": 76.3,
+        "fat": 1,
+        "fiber": 2.7,
+        "sodium": 2
+      },
+      "zaytoun_food_id": "flour-wheat",
+      "check": "strict",
+      "note": "Yield is 1.0 because flour is an input to bread, not a cooked form of itself. Do not use this to cost bread; use the bread item."
+    },
+    {
+      "slug": "freekeh",
+      "state": "dry",
+      "edible_fraction": 1,
+      "cooked_yield": 2.98,
+      "per_100g_as_purchased": {
+        "kcal": 352,
+        "protein": 12.5,
+        "carbs": 72,
+        "fat": 2.3,
+        "fiber": 13,
+        "sodium": 8
+      },
+      "zaytoun_food_id": "freekeh",
+      "check": "strict"
+    },
+    {
+      "slug": "bulgur",
+      "state": "dry",
+      "edible_fraction": 1,
+      "cooked_yield": 4.12,
+      "per_100g_as_purchased": {
+        "kcal": 342,
+        "protein": 12.3,
+        "carbs": 75.9,
+        "fat": 1.3,
+        "fiber": 18.3,
+        "sodium": 17
+      },
+      "zaytoun_food_id": "bulgur",
+      "check": "strict",
+      "note": "The largest expansion in the catalogue. Bulgur is also the cheapest fibre here by a wide margin."
+    },
+    {
+      "slug": "pasta",
+      "state": "dry",
+      "edible_fraction": 1,
+      "cooked_yield": 2.35,
+      "per_100g_as_purchased": {
+        "kcal": 371,
+        "protein": 13,
+        "carbs": 74.7,
+        "fat": 1.5,
+        "fiber": 3.2,
+        "sodium": 6
+      },
+      "zaytoun_food_id": "pasta",
+      "check": "strict"
+    },
+    {
+      "slug": "lentils",
+      "state": "dry",
+      "edible_fraction": 1,
+      "cooked_yield": 3.03,
+      "per_100g_as_purchased": {
+        "kcal": 352,
+        "protein": 24.6,
+        "carbs": 63.4,
+        "fat": 1.1,
+        "fiber": 10.7,
+        "sodium": 6
+      },
+      "zaytoun_food_id": "lentils",
+      "check": "strict",
+      "note": "Matches Zaytoun's slug exactly today and means a three-times-different quantity. Fix this before anything reads the two together."
+    },
+    {
+      "slug": "chickpeas",
+      "state": "dry",
+      "edible_fraction": 1,
+      "cooked_yield": 2.3,
+      "per_100g_as_purchased": {
+        "kcal": 378,
+        "protein": 20.5,
+        "carbs": 63,
+        "fat": 6,
+        "fiber": 12.2,
+        "sodium": 24
+      },
+      "zaytoun_food_id": "chickpeas",
+      "check": "strict"
+    },
+    {
+      "slug": "white_beans",
+      "state": "dry",
+      "edible_fraction": 1,
+      "cooked_yield": 2.4,
+      "per_100g_as_purchased": {
+        "kcal": 333,
+        "protein": 23.4,
+        "carbs": 60.3,
+        "fat": 0.9,
+        "fiber": 15.2,
+        "sodium": 16
+      },
+      "zaytoun_food_id": "white-beans",
+      "check": "strict"
+    },
+    {
+      "slug": "fava_beans",
+      "state": "dry",
+      "edible_fraction": 1,
+      "cooked_yield": 3.05,
+      "per_100g_as_purchased": {
+        "kcal": 341,
+        "protein": 26.1,
+        "carbs": 58.3,
+        "fat": 1.5,
+        "fiber": 25,
+        "sodium": 13
+      },
+      "zaytoun_food_id": "foul",
+      "check": "none",
+      "note": "Zaytoun's 'foul' is the dressed dish with olive oil and lemon, not plain boiled fava. The oil dilutes protein per 100 g by about a quarter, so no invariant holds between them. Cost the beans from this panel; read the eaten portion from Zaytoun."
+    },
+    {
+      "slug": "chicken",
+      "state": "raw",
+      "edible_fraction": 0.7,
+      "cooked_yield": 0.7,
+      "per_100g_as_purchased": {
+        "kcal": 150,
+        "protein": 12.7,
+        "carbs": 0,
+        "fat": 10.6,
+        "fiber": 0,
+        "sodium": 58
+      },
+      "zaytoun_food_id": "chicken-thigh",
+      "check": "loose",
+      "note": "Priced and sold bone-in, skin-on. Roughly 30% of what you pay for is bone you cannot eat, which is the whole reason this field exists: a boneless price 30% higher is the same money per gram of protein."
+    },
+    {
+      "slug": "beef",
+      "state": "raw",
+      "edible_fraction": 1,
+      "cooked_yield": 0.72,
+      "per_100g_as_purchased": {
+        "kcal": 215,
+        "protein": 18.6,
+        "carbs": 0,
+        "fat": 15,
+        "fiber": 0,
+        "sodium": 66
+      },
+      "zaytoun_food_id": "beef-mince",
+      "check": "loose",
+      "note": "Assumes mince at about 15% fat, which is what the stuffed-courgette dish uses."
+    },
+    {
+      "slug": "lamb",
+      "state": "raw",
+      "edible_fraction": 0.75,
+      "cooked_yield": 0.7,
+      "per_100g_as_purchased": {
+        "kcal": 212,
+        "protein": 12.5,
+        "carbs": 0,
+        "fat": 17.6,
+        "fiber": 0,
+        "sodium": 54
+      },
+      "zaytoun_food_id": "lamb",
+      "check": "loose",
+      "note": "Bone-in. The most expensive protein per shekel in this catalogue almost anywhere it is sold."
+    },
+    {
+      "slug": "fish",
+      "state": "raw",
+      "edible_fraction": 0.5,
+      "cooked_yield": 0.8,
+      "per_100g_as_purchased": {
+        "kcal": 65,
+        "protein": 10,
+        "carbs": 0,
+        "fat": 2.5,
+        "fiber": 0,
+        "sodium": 45
+      },
+      "zaytoun_food_id": "fish-fried",
+      "check": "none",
+      "note": "Whole fish: head, bones and guts are half the purchased weight. Zaytoun's counterpart is fried and battered, so no invariant holds between them."
+    },
+    {
+      "slug": "eggs",
+      "state": "raw",
+      "unit_override": "piece",
+      "grams_per_unit": 58,
+      "edible_fraction": 0.88,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 126,
+        "protein": 11.1,
+        "carbs": 0.6,
+        "fat": 8.4,
+        "fiber": 0,
+        "sodium": 124
+      },
+      "zaytoun_food_id": "egg-boiled",
+      "check": "loose",
+      "note": "Per 100 g of whole egg including shell. One medium egg is about 58 g bought, 51 g eaten, 73 kcal."
+    },
+    {
+      "slug": "yoghurt",
+      "state": "as_sold",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 61,
+        "protein": 3.5,
+        "carbs": 4.7,
+        "fat": 3.3,
+        "fiber": 0,
+        "sodium": 46
+      },
+      "zaytoun_food_id": "yogurt",
+      "check": "strict"
+    },
+    {
+      "slug": "white_cheese",
+      "state": "as_sold",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 258,
+        "protein": 17.4,
+        "carbs": 3.2,
+        "fat": 19.6,
+        "fiber": 0,
+        "sodium": 1120
+      },
+      "zaytoun_food_id": "jibneh-baladi",
+      "check": "strict",
+      "note": "Brined, so the sodium is high and real. Worth flagging when a plan leans on it daily."
+    },
+    {
+      "slug": "labneh",
+      "state": "as_sold",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 148,
+        "protein": 7.8,
+        "carbs": 5.4,
+        "fat": 11,
+        "fiber": 0,
+        "sodium": 320
+      },
+      "zaytoun_food_id": "labneh",
+      "check": "strict"
+    },
+    {
+      "slug": "tomato",
+      "state": "raw",
+      "edible_fraction": 0.97,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 17.5,
+        "protein": 0.87,
+        "carbs": 3.8,
+        "fat": 0.19,
+        "fiber": 1.16,
+        "sodium": 5
+      },
+      "zaytoun_food_id": "tomato",
+      "check": "strict"
+    },
+    {
+      "slug": "cucumber",
+      "state": "raw",
+      "edible_fraction": 0.97,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 14.6,
+        "protein": 0.68,
+        "carbs": 3.5,
+        "fat": 0.1,
+        "fiber": 0.49,
+        "sodium": 2
+      },
+      "zaytoun_food_id": "cucumber",
+      "check": "strict"
+    },
+    {
+      "slug": "aubergine",
+      "state": "raw",
+      "edible_fraction": 0.81,
+      "cooked_yield": 0.66,
+      "per_100g_as_purchased": {
+        "kcal": 20.3,
+        "protein": 0.81,
+        "carbs": 4.8,
+        "fat": 0.16,
+        "fiber": 2.43,
+        "sodium": 2
+      },
+      "zaytoun_food_id": "eggplant-grilled",
+      "check": "strict",
+      "note": "Grilled, not fried. Frying aubergine adds 100-150 kcal per 100 g in absorbed oil and breaks this factor completely - which is exactly the maqluba saving Zaytoun already tells people about."
+    },
+    {
+      "slug": "courgette",
+      "state": "raw",
+      "edible_fraction": 0.95,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 16.2,
+        "protein": 1.14,
+        "carbs": 2.95,
+        "fat": 0.29,
+        "fiber": 0.95,
+        "sodium": 8
+      },
+      "zaytoun_food_id": "zucchini",
+      "check": "strict"
+    },
+    {
+      "slug": "pepper",
+      "state": "raw",
+      "edible_fraction": 0.82,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 16.4,
+        "protein": 0.74,
+        "carbs": 3.77,
+        "fat": 0.16,
+        "fiber": 1.39,
+        "sodium": 3
+      },
+      "zaytoun_food_id": null,
+      "check": "none",
+      "note": "No Zaytoun counterpart. Green pepper is a useful vitamin C source alongside pulses, which matters for iron absorption."
+    },
+    {
+      "slug": "onion",
+      "state": "raw",
+      "edible_fraction": 0.9,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 36,
+        "protein": 0.99,
+        "carbs": 8.37,
+        "fat": 0.09,
+        "fiber": 1.53,
+        "sodium": 4
+      },
+      "zaytoun_food_id": "onion",
+      "check": "strict"
+    },
+    {
+      "slug": "garlic",
+      "state": "raw",
+      "edible_fraction": 0.87,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 129.6,
+        "protein": 5.57,
+        "carbs": 28.8,
+        "fat": 0.44,
+        "fiber": 1.83,
+        "sodium": 15
+      },
+      "zaytoun_food_id": null,
+      "check": "none"
+    },
+    {
+      "slug": "potato",
+      "state": "raw",
+      "edible_fraction": 0.81,
+      "cooked_yield": 0.89,
+      "per_100g_as_purchased": {
+        "kcal": 62.4,
+        "protein": 1.62,
+        "carbs": 14.2,
+        "fat": 0.08,
+        "fiber": 1.78,
+        "sodium": 5
+      },
+      "zaytoun_food_id": "potato-boiled",
+      "check": "strict",
+      "note": "Boiled. Holt's satiety index put boiled potato highest of every food tested, which makes it unusually good value where fullness is the goal."
+    },
+    {
+      "slug": "carrot",
+      "state": "raw",
+      "edible_fraction": 0.89,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 36.5,
+        "protein": 0.8,
+        "carbs": 8.54,
+        "fat": 0.18,
+        "fiber": 2.49,
+        "sodium": 60
+      },
+      "zaytoun_food_id": null,
+      "check": "none",
+      "note": "No Zaytoun counterpart, and it is the cheapest vitamin A in the catalogue. Worth adding on the nutrition side."
+    },
+    {
+      "slug": "molokhia_dry",
+      "state": "dry",
+      "edible_fraction": 1,
+      "cooked_yield": 8,
+      "per_100g_as_purchased": {
+        "kcal": 290,
+        "protein": 25,
+        "carbs": 45,
+        "fat": 3.5,
+        "fiber": 28,
+        "sodium": 45
+      },
+      "zaytoun_food_id": null,
+      "check": "none",
+      "note": "Dried leaf, rehydrating roughly eightfold. Zaytoun's molokhia is the finished dish with chicken and oil, so it is not the same thing. Exceptional calcium and vitamin A per shekel."
+    },
+    {
+      "slug": "spinach",
+      "state": "raw",
+      "unit_override": "bunch",
+      "grams_per_unit": 200,
+      "edible_fraction": 0.72,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 16.6,
+        "protein": 2.09,
+        "carbs": 2.59,
+        "fat": 0.29,
+        "fiber": 1.58,
+        "sodium": 56
+      },
+      "zaytoun_food_id": "spinach-cooked",
+      "check": "strict",
+      "note": "Sold by the bunch, roughly 200 g with stems and roots. Cooked yield is set to 1.0 because spinach loses water and is then drained, so the panel per gram barely moves even though the volume collapses."
+    },
+    {
+      "slug": "parsley",
+      "state": "raw",
+      "unit_override": "bunch",
+      "grams_per_unit": 60,
+      "edible_fraction": 0.75,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 27,
+        "protein": 2.25,
+        "carbs": 4.73,
+        "fat": 0.6,
+        "fiber": 2.48,
+        "sodium": 42
+      },
+      "zaytoun_food_id": null,
+      "check": "none",
+      "note": "Very high vitamin C and K for almost no calories or money. A tabbouleh-sized bunch alongside lentils measurably improves iron absorption."
+    },
+    {
+      "slug": "mint",
+      "state": "raw",
+      "unit_override": "bunch",
+      "grams_per_unit": 50,
+      "edible_fraction": 0.6,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 26.4,
+        "protein": 1.98,
+        "carbs": 5.04,
+        "fat": 0.42,
+        "fiber": 4.08,
+        "sodium": 18
+      },
+      "zaytoun_food_id": null,
+      "check": "none"
+    },
+    {
+      "slug": "lemon",
+      "state": "raw",
+      "edible_fraction": 0.47,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 13.6,
+        "protein": 0.52,
+        "carbs": 4.4,
+        "fat": 0.14,
+        "fiber": 1.3,
+        "sodium": 1
+      },
+      "zaytoun_food_id": null,
+      "check": "none",
+      "note": "More than half the purchased weight is peel. The nutritional point of lemon here is not its own panel: squeezed over lentils or foul it multiplies non-haem iron absorption, which is the cheapest nutritional intervention in this whole catalogue."
+    },
+    {
+      "slug": "bread",
+      "state": "as_sold",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 274,
+        "protein": 9,
+        "carbs": 55,
+        "fat": 1.6,
+        "fiber": 2.4,
+        "sodium": 520
+      },
+      "zaytoun_food_id": "pita",
+      "check": "strict",
+      "note": "Khubz kmaj. Usually the largest single line in both a food log and a grocery bill."
+    },
+    {
+      "slug": "olive_oil",
+      "state": "as_sold",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "density_g_per_ml": 0.916,
+      "per_100g_as_purchased": {
+        "kcal": 884,
+        "protein": 0,
+        "carbs": 0,
+        "fat": 100,
+        "fiber": 0,
+        "sodium": 2
+      },
+      "zaytoun_food_id": "olive-oil",
+      "check": "strict",
+      "note": "Masroufi measures this in ml; multiply by the density before applying the panel. 15 ml in a dish is 13.7 g and 121 kcal."
+    },
+    {
+      "slug": "veg_oil",
+      "state": "as_sold",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "density_g_per_ml": 0.92,
+      "per_100g_as_purchased": {
+        "kcal": 884,
+        "protein": 0,
+        "carbs": 0,
+        "fat": 100,
+        "fiber": 0,
+        "sodium": 0
+      },
+      "zaytoun_food_id": null,
+      "check": "none",
+      "note": "Identical in energy to olive oil and usually much cheaper, so a pure cost optimiser will always pick it. The difference is fat quality, not calories, and that is a judgement the optimiser cannot make on price alone."
+    },
+    {
+      "slug": "tahini",
+      "state": "as_sold",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 595,
+        "protein": 17,
+        "carbs": 21.2,
+        "fat": 53.8,
+        "fiber": 9.3,
+        "sodium": 115
+      },
+      "zaytoun_food_id": "tahini",
+      "check": "strict",
+      "note": "One of the few calcium sources here that is not dairy, and it keeps without refrigeration."
+    },
+    {
+      "slug": "tomato_paste",
+      "state": "as_sold",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 82,
+        "protein": 4.3,
+        "carbs": 18.9,
+        "fat": 0.5,
+        "fiber": 4.1,
+        "sodium": 59
+      },
+      "zaytoun_food_id": null,
+      "check": "none"
+    },
+    {
+      "slug": "salt",
+      "state": "as_sold",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 0,
+        "protein": 0,
+        "carbs": 0,
+        "fat": 0,
+        "fiber": 0,
+        "sodium": 38758
+      },
+      "zaytoun_food_id": null,
+      "check": "none",
+      "note": "Carries no energy and dominates the sodium column. Check the household's is iodised: it is the only iodine source in this catalogue."
+    },
+    {
+      "slug": "cumin",
+      "state": "dry",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 375,
+        "protein": 17.8,
+        "carbs": 44.2,
+        "fat": 22.3,
+        "fiber": 10.5,
+        "sodium": 168
+      },
+      "zaytoun_food_id": null,
+      "check": "none"
+    },
+    {
+      "slug": "black_pepper",
+      "state": "dry",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 251,
+        "protein": 10.4,
+        "carbs": 63.9,
+        "fat": 3.3,
+        "fiber": 25.3,
+        "sodium": 20
+      },
+      "zaytoun_food_id": null,
+      "check": "none"
+    },
+    {
+      "slug": "seven_spice",
+      "state": "dry",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 320,
+        "protein": 11,
+        "carbs": 55,
+        "fat": 10,
+        "fiber": 25,
+        "sodium": 40
+      },
+      "zaytoun_food_id": null,
+      "check": "none",
+      "note": "A blend, so this panel is an average of its parts and should not be trusted to better than about 25%. It contributes so little mass to a dish that it does not matter."
+    },
+    {
+      "slug": "zaatar",
+      "state": "dry",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 382,
+        "protein": 11,
+        "carbs": 42,
+        "fat": 19,
+        "fiber": 21,
+        "sodium": 620
+      },
+      "zaytoun_food_id": "zaatar",
+      "check": "strict"
+    },
+    {
+      "slug": "chilli",
+      "state": "dry",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 282,
+        "protein": 12,
+        "carbs": 50,
+        "fat": 14,
+        "fiber": 28,
+        "sodium": 30
+      },
+      "zaytoun_food_id": null,
+      "check": "none",
+      "note": "Masroufi's is dried chilli by weight. Zaytoun's 'shatta' is the wet paste and is a different item; do not join them."
+    },
+    {
+      "slug": "sugar",
+      "state": "as_sold",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 387,
+        "protein": 0,
+        "carbs": 100,
+        "fat": 0,
+        "fiber": 0,
+        "sodium": 1
+      },
+      "zaytoun_food_id": "sugar",
+      "check": "strict"
+    },
+    {
+      "slug": "tea",
+      "state": "dry",
+      "edible_fraction": 0.01,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 1,
+        "protein": 0,
+        "carbs": 0.2,
+        "fat": 0,
+        "fiber": 0,
+        "sodium": 3
+      },
+      "zaytoun_food_id": "tea-plain",
+      "check": "none",
+      "note": "The leaves are discarded, so tea delivers essentially no energy and the panel is a placeholder. The calories attributed to tea in a food log belong to the sugar item, not this one. Tea drunk WITH a meal also blocks non-haem iron absorption, which is the one thing a planner should know about it."
+    },
+    {
+      "slug": "coffee",
+      "state": "dry",
+      "edible_fraction": 0.01,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 2,
+        "protein": 0.1,
+        "carbs": 0.3,
+        "fat": 0.1,
+        "fiber": 0,
+        "sodium": 3
+      },
+      "zaytoun_food_id": "arabic-coffee",
+      "check": "none",
+      "note": "Same as tea: negligible energy, and the same iron-absorption caveat."
+    },
+    {
+      "slug": "canned_tuna",
+      "state": "as_sold",
+      "edible_fraction": 0.75,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 148.5,
+        "protein": 21.8,
+        "carbs": 0,
+        "fat": 6.2,
+        "fiber": 0,
+        "sodium": 266
+      },
+      "zaytoun_food_id": "tuna-canned",
+      "check": "loose",
+      "note": "Masroufi weighs the whole tin; about a quarter is oil and brine that gets drained. Zaytoun's panel is drained. Loose because how much oil is drained varies."
+    },
+    {
+      "slug": "canned_sardines",
+      "state": "as_sold",
+      "edible_fraction": 0.85,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 177,
+        "protein": 20.9,
+        "carbs": 0,
+        "fat": 9.8,
+        "fiber": 0,
+        "sodium": 261
+      },
+      "zaytoun_food_id": "sardines",
+      "check": "loose",
+      "note": "Tin weight includes oil, mostly drained. Bones are soft and eaten, which makes this one of the best calcium sources in the catalogue."
+    },
+    {
+      "slug": "canned_meat",
+      "state": "as_sold",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 250,
+        "protein": 27.1,
+        "carbs": 0,
+        "fat": 14.9,
+        "fiber": 0,
+        "sodium": 897
+      },
+      "zaytoun_food_id": null,
+      "check": "none",
+      "note": "Corned-beef style. Zaytoun's beef-mince is home-cooked fresh mince with a different fat and salt profile, so no join. Very high sodium."
+    },
+    {
+      "slug": "canned_fava",
+      "state": "as_sold",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 71,
+        "protein": 5.5,
+        "carbs": 12.4,
+        "fat": 0.2,
+        "fiber": 3.7,
+        "sodium": 453
+      },
+      "zaytoun_food_id": null,
+      "check": "none",
+      "note": "Whole tin including liquid, which goes into foul. Not joined to Zaytoun's foul for the same reason as fava_beans: that panel is the dressed dish with oil and lemon."
+    },
+    {
+      "slug": "canned_chickpeas",
+      "state": "as_sold",
+      "edible_fraction": 0.6,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 83,
+        "protein": 4.2,
+        "carbs": 13.5,
+        "fat": 1.6,
+        "fiber": 3.8,
+        "sodium": 144
+      },
+      "zaytoun_food_id": "chickpeas",
+      "check": "loose",
+      "note": "About 60% of tin weight is drained chickpeas (Zaytoun's own 'tin' portion is 240 g of a 400 g tin). Loose, not strict: tinned chickpeas hold more water than home-cooked, so energy runs ~15% under Zaytoun's panel."
+    },
+    {
+      "slug": "canned_white_beans",
+      "state": "as_sold",
+      "edible_fraction": 0.6,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 68.4,
+        "protein": 4.4,
+        "carbs": 12.6,
+        "fat": 0.2,
+        "fiber": 2.9,
+        "sodium": 180
+      },
+      "zaytoun_food_id": null,
+      "check": "none",
+      "note": "Tinned beans are wetter than Zaytoun's home-cooked white-beans and fail even the loose protein check (~25% off), so left unjoined rather than widening the tolerance."
+    },
+    {
+      "slug": "canned_tomato",
+      "state": "as_sold",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 18,
+        "protein": 0.8,
+        "carbs": 4,
+        "fat": 0.1,
+        "fiber": 1,
+        "sodium": 115
+      },
+      "zaytoun_food_id": "tomato",
+      "check": "strict",
+      "note": "Juice is used in cooking, so the whole tin counts. Energy matches fresh tomato; sodium is higher from added salt."
+    },
+    {
+      "slug": "milk_powder",
+      "state": "dry",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 496,
+        "protein": 26.3,
+        "carbs": 38.4,
+        "fat": 26.7,
+        "fiber": 0,
+        "sodium": 371
+      },
+      "zaytoun_food_id": "milk-powder",
+      "check": "strict",
+      "note": "Whole milk powder. Both sides describe the dry powder; about 30 g makes a 240 ml cup."
+    },
+    {
+      "slug": "halawa",
+      "state": "as_sold",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 500,
+        "protein": 12,
+        "carbs": 55,
+        "fat": 29,
+        "fiber": 4,
+        "sodium": 190
+      },
+      "zaytoun_food_id": "halva",
+      "check": "strict",
+      "note": "Values vary by brand with the tahini-to-sugar ratio."
+    },
+    {
+      "slug": "dates",
+      "state": "as_sold",
+      "edible_fraction": 0.9,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 249,
+        "protein": 1.6,
+        "carbs": 67.5,
+        "fat": 0.2,
+        "fiber": 6,
+        "sodium": 1
+      },
+      "zaytoun_food_id": "dates",
+      "check": "strict",
+      "note": "Sold with pits, about 10% of weight."
+    },
+    {
+      "slug": "sumac",
+      "state": "dry",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 300,
+        "protein": 4,
+        "carbs": 72,
+        "fat": 13,
+        "fiber": 36,
+        "sodium": 20
+      },
+      "zaytoun_food_id": null,
+      "check": "none",
+      "note": "Approximate: published panels for ground sumac vary widely. Used in grams per dish, so the error barely matters for nutrition."
+    },
+    {
+      "slug": "chard",
+      "state": "raw",
+      "unit_override": "bunch",
+      "grams_per_unit": 200,
+      "edible_fraction": 0.85,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 16.2,
+        "protein": 1.53,
+        "carbs": 3.15,
+        "fat": 0.17,
+        "fiber": 1.36,
+        "sodium": 181
+      },
+      "zaytoun_food_id": "chard",
+      "check": "strict",
+      "note": "Sold by the bunch, ~200 g. Stems are eaten in sumagiyya and most local dishes; only the base is trimmed. Yield 1.0 for the same reason as spinach."
+    },
+    {
+      "slug": "maftoul",
+      "state": "dry",
+      "edible_fraction": 1,
+      "cooked_yield": 2.3,
+      "per_100g_as_purchased": {
+        "kcal": 370,
+        "protein": 12.5,
+        "carbs": 75,
+        "fat": 1.5,
+        "fiber": 4,
+        "sodium": 10
+      },
+      "zaytoun_food_id": "maftoul",
+      "check": "strict",
+      "note": "Dry hand-rolled wheat. Zaytoun's cooked panel includes some oil and salt, so fat and sodium differ even though energy agrees."
+    },
+    {
+      "slug": "yeast",
+      "state": "dry",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 325,
+        "protein": 40.4,
+        "carbs": 41.2,
+        "fat": 7.6,
+        "fiber": 26.9,
+        "sodium": 51
+      },
+      "zaytoun_food_id": null,
+      "check": "none",
+      "note": "Active dry yeast. Used in grams per loaf; nutritionally negligible, present so bread baked from parcel flour can be costed."
+    }
+  ],
+  "dishes": [
+    {
+      "masroufi": "mujaddara",
+      "zaytoun": "mujaddara",
+      "scope": "meal",
+      "serves_with": []
+    },
+    {
+      "masroufi": "maqluba_chicken",
+      "zaytoun": "maqluba",
+      "note": "Zaytoun does not distinguish the chicken and lamb versions.",
+      "scope": "meal",
+      "serves_with": []
+    },
+    {
+      "masroufi": "molokhia",
+      "zaytoun": "molokhia",
+      "scope": "meal",
+      "serves_with": [
+        "rice"
+      ]
+    },
+    {
+      "masroufi": "fasolia",
+      "zaytoun": "fasolia",
+      "scope": "meal",
+      "serves_with": [
+        "rice"
+      ]
+    },
+    {
+      "masroufi": "koosa_mahshi",
+      "zaytoun": "kousa-mahshi",
+      "note": "Same dish, two transliterations. Pick one.",
+      "scope": "meal",
+      "serves_with": [],
+      "zaytoun_portion": "plate of 3"
+    },
+    {
+      "masroufi": "ful",
+      "zaytoun": "foul",
+      "note": "Same dish, two transliterations. Pick one.",
+      "scope": "meal",
+      "serves_with": [
+        "bread"
+      ]
+    },
+    {
+      "masroufi": "hummus_breakfast",
+      "zaytoun": "hummus",
+      "scope": "meal",
+      "serves_with": [
+        "bread"
+      ]
+    },
+    {
+      "masroufi": "lentil_soup",
+      "zaytoun": "shorbat-adas",
+      "scope": "meal",
+      "serves_with": []
+    },
+    {
+      "masroufi": "lentil_vegetable_stew",
+      "zaytoun": null,
+      "note": "Lentils, rice, carrot and potato. Masroufi called it bamia_vegetarian until it was renamed, though it contains no okra; Zaytoun's bamia is okra with meat, so the two must never be joined.",
+      "scope": "meal",
+      "serves_with": [
+        "rice"
+      ]
+    },
+    {
+      "masroufi": "zaatar_bread",
+      "zaytoun": null,
+      "note": "Composed from bread + zaatar + olive_oil rather than being one Zaytoun dish. Zaytoun manaeesh-zaatar is baked and is not the same thing.",
+      "scope": "meal",
+      "serves_with": []
+    },
+    {
+      "masroufi": "eggs_tomato",
+      "zaytoun": null,
+      "note": "No Zaytoun dish. Compose from egg-fried + tomato + pita.",
+      "scope": "meal",
+      "serves_with": [
+        "bread"
+      ]
+    },
+    {
+      "masroufi": "shakshuka",
+      "zaytoun": null,
+      "note": "No Zaytoun dish. Compose from egg-fried + tomato + pita.",
+      "scope": "meal",
+      "serves_with": [
+        "bread"
+      ]
+    }
+  ]
+}

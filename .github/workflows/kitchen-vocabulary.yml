@@ -1,0 +1,40 @@
+# app/kitchen/vocabulary.json is a vendored copy of
+# github.com/wafaa-alhayek/kitchen-vocabulary. This fails if the copy drifts
+# from upstream, or if the catalogue drifts away from the vocabulary.
+#
+# Zaytoun is private: CROSS_REPO_TOKEN must be a fine-grained token with
+# read-only "Contents" access to wafaa-alhayek/Zaytoun.
+name: kitchen-vocabulary
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: masroufi
+      - uses: actions/checkout@v4
+        with:
+          repository: wafaa-alhayek/kitchen-vocabulary
+          path: kitchen-vocabulary
+      - uses: actions/checkout@v4
+        with:
+          repository: wafaa-alhayek/Zaytoun
+          path: zaytoun
+          token: ${{ secrets.CROSS_REPO_TOKEN }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: vendored copy matches upstream
+        run: diff -u kitchen-vocabulary/vocabulary.json masroufi/app/kitchen/vocabulary.json
+      - name: validate
+        working-directory: kitchen-vocabulary
+        run: node validate.mjs
+        env:
+          MASROUFI: ../masroufi
+          ZAYTOUN: ../zaytoun

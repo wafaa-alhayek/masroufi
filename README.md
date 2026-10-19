@@ -741,3 +741,7 @@ import jawwalpay  TOP UP                +200   -> linked, excluded from spending
   it belongs there. The import / review / vendor / summary half of the app has
   no screens at all.
 - **No auth.** Do not deploy as-is.
+
+## License
+
+MIT. See [LICENSE](LICENSE).

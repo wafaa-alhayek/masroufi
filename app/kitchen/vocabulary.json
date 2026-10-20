@@ -1011,6 +1011,354 @@
       "zaytoun_food_id": null,
       "check": "none",
       "note": "Active dry yeast. Used in grams per loaf; nutritionally negligible, present so bread baked from parcel flour can be costed."
+    },
+    {
+      "slug": "long_grain_rice",
+      "state": "dry",
+      "edible_fraction": 1,
+      "cooked_yield": 2.8,
+      "per_100g_as_purchased": {
+        "kcal": 365,
+        "protein": 7.1,
+        "carbs": 80,
+        "fat": 0.7,
+        "fiber": 1.3,
+        "sodium": 5
+      },
+      "zaytoun_food_id": "rice-white",
+      "check": "strict",
+      "note": "Basmati, jasmine and parboiled long grain. Same panel and yield as rice: the grain type changes the price (about 2x), not the nutrition."
+    },
+    {
+      "slug": "whole_wheat_flour",
+      "state": "dry",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 340,
+        "protein": 13.2,
+        "carbs": 72,
+        "fat": 2.5,
+        "fiber": 10.7,
+        "sodium": 2
+      },
+      "zaytoun_food_id": null,
+      "check": "none",
+      "note": "Panel from standard USDA-style composition figures. About four times the fibre of white flour. Zaytoun has only white flour."
+    },
+    {
+      "slug": "semolina",
+      "state": "dry",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 360,
+        "protein": 12.7,
+        "carbs": 72.8,
+        "fat": 1.1,
+        "fiber": 3.9,
+        "sodium": 1
+      },
+      "zaytoun_food_id": null,
+      "check": "none",
+      "note": "Panel from standard USDA-style composition figures. Mostly goes into sweets (basbousa, ma'amoul), which Zaytoun logs as finished dishes."
+    },
+    {
+      "slug": "vermicelli",
+      "state": "dry",
+      "edible_fraction": 1,
+      "cooked_yield": 2.35,
+      "per_100g_as_purchased": {
+        "kcal": 371,
+        "protein": 13,
+        "carbs": 75,
+        "fat": 1.5,
+        "fiber": 3.2,
+        "sodium": 6
+      },
+      "zaytoun_food_id": "pasta",
+      "check": "strict",
+      "note": "Durum pasta in a thinner shape; same panel and yield as pasta. When fried in oil before going into rice, the oil is costed separately."
+    },
+    {
+      "slug": "couscous",
+      "state": "dry",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 376,
+        "protein": 12.8,
+        "carbs": 77.4,
+        "fat": 0.6,
+        "fiber": 5,
+        "sodium": 10
+      },
+      "zaytoun_food_id": null,
+      "check": "none",
+      "note": "Panel from standard USDA-style composition figures. Not joined to Zaytoun's maftoul: different grain and its cooked panel includes oil and salt."
+    },
+    {
+      "slug": "wheat_berries",
+      "state": "dry",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 340,
+        "protein": 13.7,
+        "carbs": 71,
+        "fat": 2.5,
+        "fiber": 12.2,
+        "sodium": 2
+      },
+      "zaytoun_food_id": null,
+      "check": "none",
+      "note": "Panel from standard USDA-style composition figures. Bleela takes long cooking, so its real cost is mostly gas, which Masroufi's fuel model covers."
+    },
+    {
+      "slug": "corn_flour",
+      "state": "dry",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 362,
+        "protein": 8.1,
+        "carbs": 76.9,
+        "fat": 3.6,
+        "fiber": 7.3,
+        "sodium": 35
+      },
+      "zaytoun_food_id": null,
+      "check": "none",
+      "note": "Panel from standard USDA-style composition figures. Whole-grain yellow cornmeal."
+    },
+    {
+      "slug": "corn_starch",
+      "state": "dry",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 381,
+        "protein": 0.3,
+        "carbs": 91.3,
+        "fat": 0.1,
+        "fiber": 0.9,
+        "sodium": 9
+      },
+      "zaytoun_food_id": null,
+      "check": "none",
+      "note": "Panel from standard USDA-style composition figures. Pure starch: energy and nothing else."
+    },
+    {
+      "slug": "oats",
+      "state": "dry",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 379,
+        "protein": 13.2,
+        "carbs": 67.7,
+        "fat": 6.5,
+        "fiber": 10.1,
+        "sodium": 6
+      },
+      "zaytoun_food_id": null,
+      "check": "none",
+      "note": "Panel from standard USDA-style composition figures. Zaytoun has no oats entry. Cheap protein and soluble fibre; worth adding there."
+    },
+    {
+      "slug": "breakfast_cereal",
+      "state": "as_sold",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 357,
+        "protein": 7.5,
+        "carbs": 84,
+        "fat": 0.4,
+        "fiber": 3.3,
+        "sodium": 729
+      },
+      "zaytoun_food_id": null,
+      "check": "none",
+      "note": "Panel from standard USDA-style composition figures. Plain cornflakes. Many brands are fortified with iron, which this panel does not count."
+    },
+    {
+      "slug": "instant_noodles",
+      "state": "as_sold",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 450,
+        "protein": 9.5,
+        "carbs": 61,
+        "fat": 18.5,
+        "fiber": 2.4,
+        "sodium": 1500
+      },
+      "zaytoun_food_id": "noodles-instant",
+      "check": "strict",
+      "note": "Dry block with its seasoning sachet, as both apps log it. Most of the sodium is in the sachet."
+    },
+    {
+      "slug": "baking_powder",
+      "state": "as_sold",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 53,
+        "protein": 0,
+        "carbs": 27.7,
+        "fat": 0,
+        "fiber": 0.2,
+        "sodium": 10600
+      },
+      "zaytoun_food_id": null,
+      "check": "none",
+      "note": "Panel from standard USDA-style composition figures. Used a few grams at a time; only its sodium matters. The macros don't add up to the energy because the 'carbs' are mostly mineral salts."
+    },
+    {
+      "slug": "baking_soda",
+      "state": "as_sold",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 0,
+        "protein": 0,
+        "carbs": 0,
+        "fat": 0,
+        "fiber": 0,
+        "sodium": 27360
+      },
+      "zaytoun_food_id": null,
+      "check": "none",
+      "note": "Sodium bicarbonate. No energy; present only so recipes using it can be costed."
+    },
+    {
+      "slug": "breadcrumbs",
+      "state": "as_sold",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 395,
+        "protein": 13.4,
+        "carbs": 72,
+        "fat": 5.3,
+        "fiber": 4.5,
+        "sodium": 732
+      },
+      "zaytoun_food_id": null,
+      "check": "none",
+      "note": "Panel from standard USDA-style composition figures. Plain, dry."
+    },
+    {
+      "slug": "rusks",
+      "state": "as_sold",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 410,
+        "protein": 11,
+        "carbs": 73,
+        "fat": 8.5,
+        "fiber": 3,
+        "sodium": 400
+      },
+      "zaytoun_food_id": null,
+      "check": "none",
+      "note": "Estimate: qarshalla varies by bakery (some are sesame-topped, some sweetened). Twice-baked bread, so roughly bread with the water taken out."
+    },
+    {
+      "slug": "toast_bread",
+      "state": "as_sold",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 266,
+        "protein": 8.9,
+        "carbs": 49,
+        "fat": 3.3,
+        "fiber": 2.7,
+        "sodium": 490
+      },
+      "zaytoun_food_id": "bread-white",
+      "check": "strict",
+      "note": "Panel from standard USDA-style composition figures. Packaged sliced white loaf."
+    },
+    {
+      "slug": "taboon_bread",
+      "state": "as_sold",
+      "unit_override": "piece",
+      "grams_per_unit": 120,
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 270,
+        "protein": 8.6,
+        "carbs": 53,
+        "fat": 3,
+        "fiber": 3.5,
+        "sodium": 480
+      },
+      "zaytoun_food_id": "taboon",
+      "check": "strict",
+      "note": "Masroufi sells it by the loaf. 120 g per loaf is Zaytoun's own portion size, and it varies by baker."
+    },
+    {
+      "slug": "shrak_bread",
+      "state": "as_sold",
+      "unit_override": "piece",
+      "grams_per_unit": 80,
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 280,
+        "protein": 9,
+        "carbs": 56,
+        "fat": 1.5,
+        "fiber": 2.5,
+        "sodium": 500
+      },
+      "zaytoun_food_id": null,
+      "check": "none",
+      "note": "Estimate: close to pita with less water. 80 g per sheet is an estimate; sheets vary a lot in size. Zaytoun has no shrak entry."
+    },
+    {
+      "slug": "tortilla_wrap",
+      "state": "as_sold",
+      "unit_override": "piece",
+      "grams_per_unit": 50,
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 306,
+        "protein": 8.2,
+        "carbs": 50,
+        "fat": 8,
+        "fiber": 3.5,
+        "sodium": 600
+      },
+      "zaytoun_food_id": null,
+      "check": "none",
+      "note": "Panel from standard USDA-style composition figures. Flour tortilla, about 50 g per wrap. Masroufi's purchase step is a pack of 6."
+    },
+    {
+      "slug": "kaak_sesame",
+      "state": "as_sold",
+      "unit_override": "piece",
+      "grams_per_unit": 120,
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 330,
+        "protein": 10,
+        "carbs": 55,
+        "fat": 8,
+        "fiber": 3,
+        "sodium": 450
+      },
+      "zaytoun_food_id": null,
+      "check": "none",
+      "note": "Estimate: bread dough plus a sesame coating. About 120 g per ring, also an estimate."
     }
   ],
   "dishes": [

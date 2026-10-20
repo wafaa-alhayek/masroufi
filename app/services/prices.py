@@ -25,6 +25,7 @@ accumulating stale "corrections".
 import math
 from dataclasses import dataclass, field
 from datetime import date
+from pathlib import Path
 
 from sqlmodel import Session, select
 
@@ -38,6 +39,7 @@ SOURCE_WEIGHT: dict[PriceSource, float] = {
     PriceSource.MANUAL: 1.0,
     PriceSource.RECEIPT: 1.0,
     PriceSource.CROWD: 0.7,
+    PriceSource.CHANNEL: 0.6,
     PriceSource.REFERENCE: 0.6,
 }
 
@@ -215,3 +217,51 @@ def _certainty(
     if recent_count >= 1 and spread <= 0.6:
         return "fair"
     return "poor"
+
+
+# Prices parsed from the public channel t.me/asarsook, Nov 2024 – Dec 2025.
+# See app/importers/telegram_prices.py for how, and what was left out.
+CHANNEL_PRICES = Path(__file__).resolve().parents[2] / "data" / "prices" / "asarsook.csv"
+
+
+def load_channel_prices(session: Session, path: Path = CHANNEL_PRICES) -> int:
+    """Load the channel's usable prices as observations. Safe to run every startup.
+
+    Only rows the parser marked `ok` are loaded, and not ones quoted for payment
+    by app transfer: those carry the cash-shortage premium, a different price for
+    the same thing. Each observation's note links back to its message, so any
+    figure can be checked against the post it came from.
+
+    These are dated: by the time anyone reads them most are months old, and the
+    estimate says so (`stale`, `poor`). They are a starting point, not the
+    household's prices, and anything the household records outweighs them.
+    """
+    from app.importers.telegram_prices import CHANNEL, read_csv
+
+    if not path.exists():
+        return 0
+    items = {i.slug: i for i in session.exec(select(Item))}
+    seen = {
+        (o.item_id, o.observed_on, o.note)
+        for o in session.exec(
+            select(PriceObservation).where(PriceObservation.source == PriceSource.CHANNEL)
+        )
+    }
+    added = 0
+    for row in read_csv(path):
+        item = items.get(row.item_slug)
+        if not row.usable or row.payment == "app" or item is None:
+            continue
+        observed_on = date.fromisoformat(row.posted_on)
+        note = f"t.me/{CHANNEL}/{row.message_id} · {row.region} · {row.line}"
+        if (item.id, observed_on, note) in seen:
+            continue
+        paid = (row.price_low + row.price_high) / 2
+        if record(
+            session, item, paid, row.quantity, PriceSource.CHANNEL,
+            observed_on=observed_on, note=note,
+        ):
+            seen.add((item.id, observed_on, note))
+            added += 1
+    session.commit()
+    return added

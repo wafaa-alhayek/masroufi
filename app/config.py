@@ -39,6 +39,9 @@ class Settings(BaseSettings):
     price_half_life_days: float = 14.0
     price_stale_after_days: int = 30
     price_spread_window_days: int = 30
+    # Load the public channel's dated market prices (data/prices/asarsook.csv)
+    # on startup, so a new install is not "no price" on every line.
+    channel_prices: bool = True
 
     confidence_threshold: float = 0.70
 

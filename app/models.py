@@ -261,6 +261,9 @@ class PriceSource(str, Enum):
     MANUAL = "manual"
     RECEIPT = "receipt"
     CROWD = "crowd"
+    # A public market-price channel: local and dated, but second-hand and
+    # unverified, so it counts like a published reference.
+    CHANNEL = "channel"
     REFERENCE = "reference"
 
 

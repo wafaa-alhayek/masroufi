@@ -1359,6 +1359,439 @@
       "zaytoun_food_id": null,
       "check": "none",
       "note": "Estimate: bread dough plus a sesame coating. About 120 g per ring, also an estimate."
+    },
+    {
+      "slug": "fresh_milk",
+      "state": "as_sold",
+      "density_g_per_ml": 1.03,
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 61,
+        "protein": 3.2,
+        "carbs": 4.8,
+        "fat": 3.3,
+        "fiber": 0,
+        "sodium": 43
+      },
+      "zaytoun_food_id": "milk",
+      "check": "strict",
+      "note": "Panel from standard USDA-style composition figures. Full fat. Masroufi measures this in ml; multiply by the density before applying the panel."
+    },
+    {
+      "slug": "uht_milk",
+      "state": "as_sold",
+      "density_g_per_ml": 1.03,
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 61,
+        "protein": 3.2,
+        "carbs": 4.8,
+        "fat": 3.3,
+        "fiber": 0,
+        "sodium": 43
+      },
+      "zaytoun_food_id": "milk",
+      "check": "strict",
+      "note": "Panel from standard USDA-style composition figures. Same panel as fresh milk; UHT changes the shelf life, not the nutrition. Masroufi measures this in ml; multiply by the density before applying the panel."
+    },
+    {
+      "slug": "flavoured_milk",
+      "state": "as_sold",
+      "density_g_per_ml": 1.04,
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 83,
+        "protein": 3.2,
+        "carbs": 10.4,
+        "fat": 3.4,
+        "fiber": 0.7,
+        "sodium": 60
+      },
+      "zaytoun_food_id": null,
+      "check": "none",
+      "note": "Panel from standard USDA-style composition figures. Chocolate milk. About half its energy is added sugar. Masroufi measures this in ml; multiply by the density before applying the panel."
+    },
+    {
+      "slug": "sweetened_condensed_milk",
+      "state": "as_sold",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 321,
+        "protein": 7.9,
+        "carbs": 54.4,
+        "fat": 8.7,
+        "fiber": 0,
+        "sodium": 127
+      },
+      "zaytoun_food_id": null,
+      "check": "none",
+      "note": "Panel from standard USDA-style composition figures. Over half of it is sugar."
+    },
+    {
+      "slug": "evaporated_milk",
+      "state": "as_sold",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 134,
+        "protein": 6.8,
+        "carbs": 10,
+        "fat": 7.6,
+        "fiber": 0,
+        "sodium": 106
+      },
+      "zaytoun_food_id": null,
+      "check": "none",
+      "note": "Panel from standard USDA-style composition figures. Unsweetened. Diluted 1:1 with water it is roughly whole milk, so one tin makes about 340 ml."
+    },
+    {
+      "slug": "laban_drink",
+      "state": "as_sold",
+      "density_g_per_ml": 1.03,
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 40,
+        "protein": 3.3,
+        "carbs": 4.8,
+        "fat": 0.9,
+        "fiber": 0,
+        "sodium": 105
+      },
+      "zaytoun_food_id": null,
+      "check": "none",
+      "note": "Panel from standard USDA-style composition figures. Thin drinking laban, close to cultured buttermilk. Not joined to Zaytoun's yogurt, which is the thick full-fat kind. Masroufi measures this in ml; multiply by the density before applying the panel."
+    },
+    {
+      "slug": "jameed",
+      "state": "as_sold",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 390,
+        "protein": 45,
+        "carbs": 15,
+        "fat": 17,
+        "fiber": 0,
+        "sodium": 3500
+      },
+      "zaytoun_food_id": null,
+      "check": "none",
+      "note": "Estimate: dried salted yoghurt, and recipes vary a lot. Very salty, and very protein-dense once reconstituted."
+    },
+    {
+      "slug": "nabulsi_cheese",
+      "state": "as_sold",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 300,
+        "protein": 19,
+        "carbs": 2,
+        "fat": 24,
+        "fiber": 0,
+        "sodium": 2600
+      },
+      "zaytoun_food_id": null,
+      "check": "none",
+      "note": "Estimate: brined boiled cheese. Usually soaked before eating, which removes much of the salt this panel counts."
+    },
+    {
+      "slug": "akkawi_cheese",
+      "state": "as_sold",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 290,
+        "protein": 20,
+        "carbs": 2,
+        "fat": 22.5,
+        "fiber": 0,
+        "sodium": 1600
+      },
+      "zaytoun_food_id": null,
+      "check": "none",
+      "note": "Estimate: brined white cheese, softer and less salty than Nabulsi."
+    },
+    {
+      "slug": "halloumi",
+      "state": "as_sold",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 321,
+        "protein": 22,
+        "carbs": 2.2,
+        "fat": 25,
+        "fiber": 0,
+        "sodium": 1300
+      },
+      "zaytoun_food_id": null,
+      "check": "none",
+      "note": "Panel from standard USDA-style composition figures."
+    },
+    {
+      "slug": "feta_cheese",
+      "state": "as_sold",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 264,
+        "protein": 14.2,
+        "carbs": 4.1,
+        "fat": 21.3,
+        "fiber": 0,
+        "sodium": 917
+      },
+      "zaytoun_food_id": "jibneh-baladi",
+      "check": "strict",
+      "note": "Panel from standard USDA-style composition figures. Joined to Zaytoun's white cheese. Energy matches within a few percent; brands vary in salt."
+    },
+    {
+      "slug": "sweet_cheese",
+      "state": "as_sold",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 280,
+        "protein": 20,
+        "carbs": 2,
+        "fat": 21.5,
+        "fiber": 0,
+        "sodium": 100
+      },
+      "zaytoun_food_id": null,
+      "check": "none",
+      "note": "Estimate: unsalted or desalted white cheese for knafeh. Like akkawi, but with very little salt."
+    },
+    {
+      "slug": "processed_cheese_triangles",
+      "state": "as_sold",
+      "unit_override": "piece",
+      "grams_per_unit": 17.5,
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 250,
+        "protein": 10,
+        "carbs": 6,
+        "fat": 21,
+        "fiber": 0,
+        "sodium": 1000
+      },
+      "zaytoun_food_id": null,
+      "check": "none",
+      "note": "Panel from standard USDA-style composition figures. About 17.5 g per triangle (8 in a 140 g box)."
+    },
+    {
+      "slug": "processed_cheese_slices",
+      "state": "as_sold",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 300,
+        "protein": 16,
+        "carbs": 8,
+        "fat": 23,
+        "fiber": 0,
+        "sodium": 1300
+      },
+      "zaytoun_food_id": null,
+      "check": "none",
+      "note": "Panel from standard USDA-style composition figures."
+    },
+    {
+      "slug": "cheese_spread",
+      "state": "as_sold",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 290,
+        "protein": 11.6,
+        "carbs": 8.7,
+        "fat": 23,
+        "fiber": 0,
+        "sodium": 1300
+      },
+      "zaytoun_food_id": null,
+      "check": "none",
+      "note": "Panel from standard USDA-style composition figures."
+    },
+    {
+      "slug": "cream_cheese",
+      "state": "as_sold",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 342,
+        "protein": 6,
+        "carbs": 4.1,
+        "fat": 34,
+        "fiber": 0,
+        "sodium": 321
+      },
+      "zaytoun_food_id": null,
+      "check": "none",
+      "note": "Panel from standard USDA-style composition figures. Mostly fat; little protein for a cheese."
+    },
+    {
+      "slug": "yellow_cheese",
+      "state": "as_sold",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 356,
+        "protein": 25,
+        "carbs": 2.2,
+        "fat": 27.4,
+        "fiber": 0,
+        "sodium": 819
+      },
+      "zaytoun_food_id": null,
+      "check": "none",
+      "note": "Panel from standard USDA-style composition figures. Gouda. Edam and kashkaval are within about 10% of it."
+    },
+    {
+      "slug": "mozzarella",
+      "state": "as_sold",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 300,
+        "protein": 22.2,
+        "carbs": 2.2,
+        "fat": 22.4,
+        "fiber": 0,
+        "sodium": 627
+      },
+      "zaytoun_food_id": null,
+      "check": "none",
+      "note": "Panel from standard USDA-style composition figures. Whole milk."
+    },
+    {
+      "slug": "cottage_cheese",
+      "state": "as_sold",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 98,
+        "protein": 11.1,
+        "carbs": 3.4,
+        "fat": 4.3,
+        "fiber": 0,
+        "sodium": 364
+      },
+      "zaytoun_food_id": null,
+      "check": "none",
+      "note": "Panel from standard USDA-style composition figures. The leanest protein among the cheeses here."
+    },
+    {
+      "slug": "sour_cream",
+      "state": "as_sold",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 198,
+        "protein": 2.4,
+        "carbs": 4.6,
+        "fat": 19.4,
+        "fiber": 0,
+        "sodium": 31
+      },
+      "zaytoun_food_id": null,
+      "check": "none",
+      "note": "Panel from standard USDA-style composition figures."
+    },
+    {
+      "slug": "canned_cream",
+      "state": "as_sold",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 250,
+        "protein": 2.5,
+        "carbs": 3.5,
+        "fat": 25,
+        "fiber": 0,
+        "sodium": 40
+      },
+      "zaytoun_food_id": null,
+      "check": "none",
+      "note": "Estimate: tinned table cream at about 25% fat."
+    },
+    {
+      "slug": "cooking_cream",
+      "state": "as_sold",
+      "density_g_per_ml": 1,
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 195,
+        "protein": 2.7,
+        "carbs": 3.7,
+        "fat": 19,
+        "fiber": 0,
+        "sodium": 40
+      },
+      "zaytoun_food_id": null,
+      "check": "none",
+      "note": "Panel from standard USDA-style composition figures. About 20% fat. Masroufi measures this in ml; multiply by the density before applying the panel."
+    },
+    {
+      "slug": "whipping_cream",
+      "state": "as_sold",
+      "density_g_per_ml": 1,
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 340,
+        "protein": 2.1,
+        "carbs": 2.8,
+        "fat": 36,
+        "fiber": 0,
+        "sodium": 27
+      },
+      "zaytoun_food_id": null,
+      "check": "none",
+      "note": "Panel from standard USDA-style composition figures. About 35% fat. Masroufi measures this in ml; multiply by the density before applying the panel."
+    },
+    {
+      "slug": "butter",
+      "state": "as_sold",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 717,
+        "protein": 0.9,
+        "carbs": 0.1,
+        "fat": 81,
+        "fiber": 0,
+        "sodium": 11
+      },
+      "zaytoun_food_id": null,
+      "check": "none",
+      "note": "Panel from standard USDA-style composition figures. Unsalted. Salted butter has about 640 mg sodium per 100 g."
+    },
+    {
+      "slug": "dairy_pudding",
+      "state": "as_sold",
+      "edible_fraction": 1,
+      "cooked_yield": 1,
+      "per_100g_as_purchased": {
+        "kcal": 130,
+        "protein": 3,
+        "carbs": 20,
+        "fat": 4,
+        "fiber": 0.6,
+        "sodium": 120
+      },
+      "zaytoun_food_id": null,
+      "check": "none",
+      "note": "Estimate: chocolate pudding cup. Mostly sugar."
     }
   ],
   "dishes": [

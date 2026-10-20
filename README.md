@@ -374,12 +374,52 @@ Prices arrive four ways, and all four are the same kind of record:
 | `manual` | 1.0 | The household typed it, or read it off a shelf |
 | `receipt` | 1.0 | Receipt OCR, once that exists |
 | `crowd` | 0.7 | Another household's shop, later |
+| `channel` | 0.6 | A public market-price channel — loaded, see below |
 | `reference` | 0.6 | WFP / PCBS market averages, later |
 
 **A manual correction is not an override that sticks.** It is a fresh, heavily
 weighted observation — which is what keeps the estimate current instead of
 accumulating stale "fixes" that outlive their truth. Nothing is ever overwritten,
 and `GET /api/prices/observations/{id}` shows the history behind any figure.
+
+### Prices from a public market channel
+
+[أسعار السوق - غزة](https://t.me/asarsook) has posted what things cost in
+Gaza's markets most days since November 2024, area by area. Its posts are the
+closest thing to a local, dated price record there is, so the app ships them:
+`data/prices/asarsook.csv` holds every price line from 275 posts (Nov 2024 – Dec
+2025), and **1,763 of them load as observations** for 117 items on startup
+(`CHANNEL_PRICES=false` turns that off).
+
+The lines are written for people, so the parser
+([app/importers/telegram_prices.py](app/importers/telegram_prices.py)) only
+takes a line when the price, the item and the quantity are all clear, and keeps
+every other line in the CSV with a `status` saying why it was left out:
+
+- **The item must match exactly one catalogue slug** by its Arabic name. In Gaza
+  فلفل أخضر is the hot green chilli, at several times the price of a sweet pepper
+  (فليفلة), so the two are kept apart; citric acid is not lemons, and Deir
+  al-Balah is a town, not dates.
+- **A quantity must be stated** — a kilo, a وقية, a litre, 700 g — or be the kilo
+  that loose produce, grains, pulses, sugar and fresh meat are customarily quoted
+  by (marked `unit_inferred`). A tin, a packet or a sack with no weight is left
+  out: read as a per-kilo price it would be wrong by an order of magnitude.
+- **A وقية is taken as 250 g.** The channel never defines it; the raw unit is on
+  every row, so the prices can be recomputed if that is wrong.
+- **Prices paid by app transfer are not loaded.** Posts often quote two prices,
+  cash and app (`27₪ (33₪ تطبيق)`); the app one carries the cash-shortage premium.
+- Wartime swings are real and kept. Sugar went from about 45 to over 400 shekels
+  a kilo in July 2025; nothing here smooths that away.
+
+Each observation's note links to its post (`t.me/asarsook/<message>`), so any
+figure can be checked. To refresh, export the channel from Telegram Desktop
+(*Export chat history*, HTML) and run:
+
+```bash
+python -m app.importers.telegram_prices path/to/messages.html data/prices/asarsook.csv
+```
+
+The raw export is never committed.
 
 Costing a whole list names its own gaps rather than quietly covering half of it:
 
@@ -718,11 +758,11 @@ import jawwalpay  TOP UP                +200   -> linked, excluded from spending
 - Multi-currency amounts are stored but not normalised for reporting.
 - The note and decision caches are per-process; the vendor table is the durable
   half.
-- **No reference prices are loaded.** `PriceSource.REFERENCE` and `CROWD` are
-  designed for and weighted, but nothing seeds them, so on a fresh install
-  nearly every line reads "no price" until the household has bought things.
-  A dated WFP/PCBS snapshot shipped in the bootstrap bundle would fix that;
-  it is not built.
+- **The only seeded prices are a year old.** The channel prices (below) end in
+  December 2025, so every estimate they produce is `stale` and `poor`, which is
+  the honest answer. WFP/PCBS reference prices (`PriceSource.REFERENCE`) are
+  still not loaded, and the channel export has to be re-run by hand to bring
+  newer posts in.
 - **The dish library is twelve dishes, all drafted by a developer.** A cook has
   reviewed none of them. `needs_review` dishes are excluded from suggestions and
   refused for planning, so the library grows only as fast as someone checks it.

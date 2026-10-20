@@ -22,6 +22,10 @@ def init_db() -> None:
     with Session(engine) as session:
         ensure_sources(session)
         ensure_kitchen(session)
+        if settings.channel_prices:
+            from app.services.prices import load_channel_prices
+
+            load_channel_prices(session)
 
 
 def get_session() -> Iterator[Session]:

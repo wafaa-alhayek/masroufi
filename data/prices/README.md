@@ -21,6 +21,7 @@ Every row keeps the original line and a link to its post. `flags`:
 | `unit_assumed_kg` | no unit was given; produce, meat and fish are quoted per kilo by convention there |
 | `unit_unknown` | no unit was given, and it is a packaged item, so the price can't be used without one |
 | `question_not_quote` | the line asks a question ("who sold sugar at 500?"), not a quote |
+| `colloquial_name_unverified` | matched through a Gaza word whose meaning isn't certain: سيرج (vegetable or sesame oil?) and plain لحمة (meat, not necessarily beef) |
 | `two_prices_in_line` | old and new price in one line; the parser took the first |
 
 A row with no flags gave an explicit unit. Item matching runs on Arabic names

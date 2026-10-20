@@ -9,7 +9,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2024-11-21,tomato,60,kg,1000,south,,https://t.me/asarsook/5,كيلو بندورة 60 شيكل
 2024-11-21,rice,30,kg,1000,south,,https://t.me/asarsook/5,كيلو أرز  30 شيكل
 2024-11-21,sugar,35,kg,1000,south,,https://t.me/asarsook/5,كيلو سكر 35 شيكل
-2024-11-21,veg_oil,45,l,1000,south,,https://t.me/asarsook/5,لتر سيرج 45 شيكل
+2024-11-21,veg_oil,45,l,1000,south,colloquial_name_unverified,https://t.me/asarsook/5,لتر سيرج 45 شيكل
 2024-11-21,brown_lentils_whole,25,kg,1000,south,,https://t.me/asarsook/5,كيلو عدس حب 25 شيكل
 2024-11-21,red_lentils_split,17,kg,1000,south,,https://t.me/asarsook/5,كيلو عدس مجروش 17 شيكل
 2024-11-21,canned_chickpeas,25,kg,1000,south,,https://t.me/asarsook/5,كيلو حمص حب 25 شيكل
@@ -22,7 +22,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2024-11-22,tomato,130,kg,1000,north,,https://t.me/asarsook/7,كيلو بندورة 130 شيكل
 2024-11-22,carrot,80,kg,1000,north,,https://t.me/asarsook/7,كيلو جزر 80 شيكل
 2024-11-22,garlic,12,head,1,north,,https://t.me/asarsook/7,راس ثومة 12 شيكل
-2024-11-22,veg_oil,80,l,1000,north,,https://t.me/asarsook/7,لتر سيرج 80 شيكل
+2024-11-22,veg_oil,80,l,1000,north,colloquial_name_unverified,https://t.me/asarsook/7,لتر سيرج 80 شيكل
 2024-11-22,sugar,110,kg,1000,north,,https://t.me/asarsook/7,كيلو سكر 110 شيكل
 2024-11-23,potato,60,kg,1000,north,,https://t.me/asarsook/12,كيلو بطاطا 60 شيكل
 2024-11-23,tomato,130,kg,1000,north,,https://t.me/asarsook/12,كيلو بندورة 130 شيكل
@@ -33,7 +33,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2024-11-23,avocado,120,kg,1000,north,,https://t.me/asarsook/12,كيلو أفوكادو 120 شيكل
 2024-11-23,garlic,15,head,1,north,,https://t.me/asarsook/12,راس ثومة 15 شيكل
 2024-11-23,pepper,120,g,250,north,,https://t.me/asarsook/12,وقية فلفل أخضر 100- 120 شيكل
-2024-11-23,veg_oil,80,l,1000,north,,https://t.me/asarsook/12,لتر سيرج 80 شيكل
+2024-11-23,veg_oil,80,l,1000,north,colloquial_name_unverified,https://t.me/asarsook/12,لتر سيرج 80 شيكل
 2024-11-23,olive_oil,120,l,1000,north,,https://t.me/asarsook/12,لتر زيت زيتون 120 شيكل
 2024-11-23,sugar,120,kg,1000,north,,https://t.me/asarsook/12,كيلو سكر 120 شيكل
 2024-11-24,potato,60,kg,1000,north,,https://t.me/asarsook/13,كيلو بطاطا 60 شيكل
@@ -49,7 +49,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2024-11-24,radish,12,head,1,north,,https://t.me/asarsook/13,راس فجل 12 شيكل
 2024-11-24,garlic,15,head,1,north,,https://t.me/asarsook/13,راس ثومة 15 شيكل
 2024-11-24,sugar,120,kg,1000,north,,https://t.me/asarsook/13,كيلو سكر 120 شيكل
-2024-11-24,veg_oil,80,l,1000,north,,https://t.me/asarsook/13,لتر سيرج 80 شيكل
+2024-11-24,veg_oil,80,l,1000,north,colloquial_name_unverified,https://t.me/asarsook/13,لتر سيرج 80 شيكل
 2024-11-25,potato,65,kg,1000,north,,https://t.me/asarsook/15,كيلو بطاطا 65 شيكل
 2024-11-25,onion,55,kg,1000,north,,https://t.me/asarsook/15,كيلو بصل 55 شيكل
 2024-11-25,lemon,50,kg,1000,north,,https://t.me/asarsook/15,كيلو ليمون 50 شيكل
@@ -57,7 +57,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2024-11-25,pepper,150,g,250,north,,https://t.me/asarsook/15,وقية فلفل أخضر 150 شيكل
 2024-11-25,garlic,13,head,1,north,,https://t.me/asarsook/15,راس ثومة 13 شيكل
 2024-11-25,sugar,110,kg,1000,north,,https://t.me/asarsook/15,كيلو سكر 110 شيكل
-2024-11-25,veg_oil,75,l,1000,north,,https://t.me/asarsook/15,لتر سيرج 75 شيكل
+2024-11-25,veg_oil,75,l,1000,north,colloquial_name_unverified,https://t.me/asarsook/15,لتر سيرج 75 شيكل
 2024-11-25,olive_oil,110,l,1000,north,,https://t.me/asarsook/15,لتر زيت زيتون 110 شيكل
 2024-11-26,onion,55,kg,1000,north,,https://t.me/asarsook/16,كيلو بصل 55 شيكل
 2024-11-26,aubergine,100,kg,1000,north,,https://t.me/asarsook/16,كيلو باذنجان 100 شيكل
@@ -68,7 +68,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2024-11-26,red_lentils_split,8,kg,1000,north,,https://t.me/asarsook/16,كيلو عدس مجروش 8 شيكل
 2024-11-26,brown_lentils_whole,25,kg,1000,north,,https://t.me/asarsook/16,كيلو عدس حب 25 شيكل
 2024-11-26,sugar,110,kg,1000,north,,https://t.me/asarsook/16,كيلو سكر 110 شيكل
-2024-11-26,veg_oil,75,l,1000,north,,https://t.me/asarsook/16,لتر سيرج 75 شيكل
+2024-11-26,veg_oil,75,l,1000,north,colloquial_name_unverified,https://t.me/asarsook/16,لتر سيرج 75 شيكل
 2024-11-26,eggs,420,tray,30,north,,https://t.me/asarsook/16,طبق البيض 420 شيكل
 2024-11-26,yeast,60,pack,1,north,,https://t.me/asarsook/16,"باكو خميرة ""500 جرام"" 60 شيكل"
 2024-11-27,tomato,40,kg,1000,south,unit_assumed_kg,https://t.me/asarsook/22,بندورة 40 شيكل 🍅
@@ -97,7 +97,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2024-11-28,candy,70,unknown,,north,unit_unknown,https://t.me/asarsook/31,فلفل حلو 70 شيكل 🫑
 2024-11-28,sweet_potato,55,kg,1000,north,unit_assumed_kg,https://t.me/asarsook/31,بطاطا حلوة 55 شيكل 🍠
 2024-11-28,cucumber,70,kg,1000,north,unit_assumed_kg,https://t.me/asarsook/31,خيار 70 شيكل 🥒
-2024-11-28,veg_oil,75,l,1000,north,,https://t.me/asarsook/31,لتر السيرج 75 شيكل
+2024-11-28,veg_oil,75,l,1000,north,colloquial_name_unverified,https://t.me/asarsook/31,لتر السيرج 75 شيكل
 2024-11-30,tomato,40,kg,1000,south,unit_assumed_kg,https://t.me/asarsook/35,بندورة 40 شيكل 🍅
 2024-11-30,lemon,40,kg,1000,south,unit_assumed_kg,https://t.me/asarsook/35,ليمون  40 شيكل 🍋
 2024-11-30,cucumber,28,kg,1000,south,unit_assumed_kg,https://t.me/asarsook/35,خيار 28 شيكل 🥒
@@ -115,11 +115,11 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2024-11-30,garlic,10,head,1,north,,https://t.me/asarsook/36,راس الثوم 10 شيكل🧄
 2024-11-30,pepper,200,kg,1000,north,unit_assumed_kg,https://t.me/asarsook/36,فلفل اخضر 200  شيكل
 2024-11-30,aubergine,70,kg,1000,north,unit_assumed_kg,https://t.me/asarsook/36,باذنجان 70 شيكل🍆
-2024-11-30,veg_oil,75,unknown,,north,unit_unknown,https://t.me/asarsook/36,سيرج  75 شيكل
+2024-11-30,veg_oil,75,unknown,,north,unit_unknown|colloquial_name_unverified,https://t.me/asarsook/36,سيرج  75 شيكل
 2024-11-30,candy,80,unknown,,north,unit_unknown,https://t.me/asarsook/36,فلفل حلو 80 شيكل🫑
 2024-11-30,avocado,110,kg,1000,north,unit_assumed_kg,https://t.me/asarsook/36,أفوكادو 110 شيكل🥑
 2024-11-30,sugar,80,unknown,,north,unit_unknown,https://t.me/asarsook/36,سكر 80 شيكل🧂
-2024-11-30,veg_oil,75,l,1000,north,,https://t.me/asarsook/36,لتر السيرج 75 شيكل
+2024-11-30,veg_oil,75,l,1000,north,colloquial_name_unverified,https://t.me/asarsook/36,لتر السيرج 75 شيكل
 2024-12-01,potato,60,kg,1000,north,unit_assumed_kg,https://t.me/asarsook/39,بطاطا 60 شيكل 🥔
 2024-12-01,cucumber,70,kg,1000,north,unit_assumed_kg,https://t.me/asarsook/39,خيار 70  شيكل🥒
 2024-12-01,sugar,80,unknown,,north,unit_unknown,https://t.me/asarsook/39,سكر 80 شيكل 🧂
@@ -132,7 +132,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2024-12-01,sweet_potato,40,kg,1000,north,unit_assumed_kg,https://t.me/asarsook/39,بطاطا حلوة 40 شيكل🍠
 2024-12-01,lemon,60,kg,1000,north,unit_assumed_kg,https://t.me/asarsook/39,ليمون 60 شيكل 🍋
 2024-12-01,pepper,120,kg,1000,north,unit_assumed_kg,https://t.me/asarsook/39,فلفل اخضر 120 شيكل
-2024-12-01,veg_oil,70,unknown,,north,unit_unknown,https://t.me/asarsook/39,سيرج 70 شيكل
+2024-12-01,veg_oil,70,unknown,,north,unit_unknown|colloquial_name_unverified,https://t.me/asarsook/39,سيرج 70 شيكل
 2024-12-01,chicken_breast,120,kg,1000,,unit_assumed_kg,https://t.me/asarsook/41,صدر الدجاج (120 شيكل)
 2024-12-01,chicken_liver,80,kg,1000,,unit_assumed_kg,https://t.me/asarsook/41,كبدة الدجاج (80 شيكل)
 2024-12-01,chicken,90,kg,1000,,unit_assumed_kg,https://t.me/asarsook/41,فخد الدجاج (90 شيكل)
@@ -148,7 +148,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2024-12-02,sweet_potato,40,kg,1000,north,unit_assumed_kg,https://t.me/asarsook/42,بطاطا حلوة 40 شيكل🍠
 2024-12-02,lemon,40,kg,1000,north,unit_assumed_kg,https://t.me/asarsook/42,ليمون 40 شيكل 🍋
 2024-12-02,carrot,120,kg,1000,north,unit_assumed_kg,https://t.me/asarsook/42,جزر 120 شيكل 🥕
-2024-12-02,veg_oil,70,unknown,,north,unit_unknown,https://t.me/asarsook/42,سيرج 70 شيكل
+2024-12-02,veg_oil,70,unknown,,north,unit_unknown|colloquial_name_unverified,https://t.me/asarsook/42,سيرج 70 شيكل
 2024-12-03,potato,70,kg,1000,north,unit_assumed_kg,https://t.me/asarsook/44,بطاطا 70 شيكل 🥔
 2024-12-03,cucumber,80,kg,1000,north,unit_assumed_kg,https://t.me/asarsook/44,خيار 80  شيكل🥒
 2024-12-03,sugar,80,unknown,,north,unit_unknown,https://t.me/asarsook/44,سكر 80 شيكل 🧂
@@ -161,7 +161,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2024-12-03,sweet_potato,40,kg,1000,north,unit_assumed_kg,https://t.me/asarsook/44,بطاطا حلوة 40 شيكل🍠
 2024-12-03,lemon,40,kg,1000,north,unit_assumed_kg,https://t.me/asarsook/44,ليمون 40 شيكل 🍋
 2024-12-03,carrot,120,kg,1000,north,unit_assumed_kg,https://t.me/asarsook/44,جزر 120 شيكل 🥕
-2024-12-03,veg_oil,70,unknown,,north,unit_unknown,https://t.me/asarsook/44,سيرج 70 شيكل
+2024-12-03,veg_oil,70,unknown,,north,unit_unknown|colloquial_name_unverified,https://t.me/asarsook/44,سيرج 70 شيكل
 2024-12-04,tomato,40,kg,1000,south,unit_assumed_kg,https://t.me/asarsook/45,بندورة 40 شيكل 🍅
 2024-12-04,potato,30,kg,1000,south,unit_assumed_kg,https://t.me/asarsook/45,بطاطا 30 شيكل 🥔
 2024-12-04,onion,35,kg,1000,south,unit_assumed_kg,https://t.me/asarsook/45,بصل 35 شيكل 🧅
@@ -184,7 +184,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2024-12-13,avocado,80,kg,1000,north,unit_assumed_kg,https://t.me/asarsook/52,أفوكادو 80 شيكل 🥑
 2024-12-13,sugar,65,unknown,,north,unit_unknown,https://t.me/asarsook/52,سكر 65 شيكل 🧂
 2024-12-13,lemon,50,kg,1000,north,unit_assumed_kg,https://t.me/asarsook/52,ليمون 50 شيكل 🍋
-2024-12-13,veg_oil,75,unknown,,north,unit_unknown,https://t.me/asarsook/52,سيرج 75 شيكل
+2024-12-13,veg_oil,75,unknown,,north,unit_unknown|colloquial_name_unverified,https://t.me/asarsook/52,سيرج 75 شيكل
 2024-12-15,onion,60,kg,1000,north,unit_assumed_kg,https://t.me/asarsook/53,البصل 60 شيكل 🧅
 2024-12-15,potato,60,kg,1000,north,unit_assumed_kg,https://t.me/asarsook/53,البطاطا 60 شيكل 🥔
 2024-12-15,banana,100,kg,1000,north,unit_assumed_kg,https://t.me/asarsook/53,الموز 100شيكل🍌
@@ -197,7 +197,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2024-12-15,apple,100,kg,1000,north,unit_assumed_kg,https://t.me/asarsook/53,تفاح 100شيكل🍎
 2024-12-15,orange,60,kg,1000,north,unit_assumed_kg,https://t.me/asarsook/53,برتقال 60 شيكل🍊
 2024-12-15,rice,30,unknown,,north,unit_unknown,https://t.me/asarsook/53,الارز 30  شيكل🍚
-2024-12-15,veg_oil,75,unknown,,north,unit_unknown,https://t.me/asarsook/53,سيرج 75 شيكل
+2024-12-15,veg_oil,75,unknown,,north,unit_unknown|colloquial_name_unverified,https://t.me/asarsook/53,سيرج 75 شيكل
 2024-12-16,onion,45,kg,1000,north,unit_assumed_kg,https://t.me/asarsook/55,البصل 45 شيكل 🧅
 2024-12-16,potato,45,kg,1000,north,unit_assumed_kg,https://t.me/asarsook/55,البطاطا 45 شيكل 🥔
 2024-12-16,banana,95,kg,1000,north,unit_assumed_kg,https://t.me/asarsook/55,الموز 95 شيكل🍌
@@ -210,7 +210,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2024-12-16,apple,100,kg,1000,north,unit_assumed_kg,https://t.me/asarsook/55,تفاح 100شيكل🍎
 2024-12-16,orange,60,kg,1000,north,unit_assumed_kg,https://t.me/asarsook/55,برتقال 60 شيكل🍊
 2024-12-16,rice,30,unknown,,north,unit_unknown,https://t.me/asarsook/55,الارز 30  شيكل🍚
-2024-12-16,veg_oil,75,unknown,,north,unit_unknown,https://t.me/asarsook/55,سيرج 75 شيكل
+2024-12-16,veg_oil,75,unknown,,north,unit_unknown|colloquial_name_unverified,https://t.me/asarsook/55,سيرج 75 شيكل
 2024-12-17,onion,45,kg,1000,,unit_assumed_kg,https://t.me/asarsook/56,البصل 45 شيكل 🧅
 2024-12-17,potato,45,kg,1000,,unit_assumed_kg,https://t.me/asarsook/56,البطاطا 45 شيكل 🥔
 2024-12-17,banana,70,kg,1000,,unit_assumed_kg,https://t.me/asarsook/56,الموز 70 شيكل🍌
@@ -222,7 +222,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2024-12-17,apple,75,kg,1000,,unit_assumed_kg,https://t.me/asarsook/56,تفاح 75 شيكل🍎
 2024-12-17,orange,60,kg,1000,,unit_assumed_kg,https://t.me/asarsook/56,برتقال 60 شيكل🍊
 2024-12-17,rice,35,unknown,,,unit_unknown,https://t.me/asarsook/56,الارز 35  شيكل🍚
-2024-12-17,veg_oil,65,unknown,,,unit_unknown,https://t.me/asarsook/56,سيرج 65 شيكل
+2024-12-17,veg_oil,65,unknown,,,unit_unknown|colloquial_name_unverified,https://t.me/asarsook/56,سيرج 65 شيكل
 2024-12-19,onion,35,kg,1000,north,unit_assumed_kg,https://t.me/asarsook/57,بصل 35 شيكل  🧅
 2024-12-19,lemon,40,kg,1000,north,unit_assumed_kg,https://t.me/asarsook/57,ليمون 40 شيكل 🍋
 2024-12-19,chard,50,kg,1000,north,unit_assumed_kg,https://t.me/asarsook/57,سلق 50شيكل
@@ -233,9 +233,9 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2024-12-19,apple,45,kg,1000,north,unit_assumed_kg,https://t.me/asarsook/57,تفاح 45 شيكل🍎
 2024-12-19,orange,45,kg,1000,north,unit_assumed_kg,https://t.me/asarsook/57,برتقال 45 شيكل🍊
 2024-12-19,sugar,40,unknown,,north,unit_unknown,https://t.me/asarsook/57,سكر 40 شيكل 🧂
-2024-12-19,veg_oil,60,l,1000,north,,https://t.me/asarsook/57,لتر السيرج 60شيكل
+2024-12-19,veg_oil,60,l,1000,north,colloquial_name_unverified,https://t.me/asarsook/57,لتر السيرج 60شيكل
 2025-01-07,dates,35,kg,1000,north,unit_assumed_kg,https://t.me/asarsook/87,التمر 35 شيكل
-2025-01-07,veg_oil,25,unknown,,north,unit_unknown,https://t.me/asarsook/87,السيرج 25 شيكل
+2025-01-07,veg_oil,25,unknown,,north,unit_unknown|colloquial_name_unverified,https://t.me/asarsook/87,السيرج 25 شيكل
 2025-01-07,sugar,25,unknown,,north,unit_unknown,https://t.me/asarsook/87,السكر 25 شيكل
 2025-02-02,duck,40,kg,1000,,unit_assumed_kg,https://t.me/asarsook/131,🎣 بط 30 - 40 شيكل
 2025-02-02,grouper,70,kg,1000,,unit_assumed_kg,https://t.me/asarsook/131,🐟 لوكس 70 شيكل
@@ -324,9 +324,9 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2025-02-27,chicken_breast,32,kg,1000,gaza_city,unit_assumed_kg,https://t.me/asarsook/153,صدر دجاج  مقطع 32 شيكل
 2025-02-27,chicken_breast,35,kg,1000,gaza_city,unit_assumed_kg,https://t.me/asarsook/153,صدر  دجاج كامل 35 شيكل
 2025-02-27,turkey_breast,32,kg,1000,gaza_city,unit_assumed_kg,https://t.me/asarsook/153,صدر حبش كامل 32 شيكل
-2025-03-04,veg_oil,9,unknown,,middle,unit_unknown,https://t.me/asarsook/166,🔴 ضبط 700 لتر سيرج لدي سوبر ماركت النمنم التاجر/ محمد يوسف النمنم وتم البيع بسعر 9 شيكل.
+2025-03-04,veg_oil,9,unknown,,middle,unit_unknown|colloquial_name_unverified,https://t.me/asarsook/166,🔴 ضبط 700 لتر سيرج لدي سوبر ماركت النمنم التاجر/ محمد يوسف النمنم وتم البيع بسعر 9 شيكل.
 2025-03-04,sugar,6,unknown,,middle,unit_unknown,https://t.me/asarsook/166,🔴 ضبط وتحذير 1170 كجم سكر بحوزة التاجر / أحمد يوسف الدوش حيث تم بيعه بسعر 6 شيكل للباكو.
-2025-03-04,veg_oil,9,unknown,,middle,unit_unknown,https://t.me/asarsook/166,🔴 ضبط 900 لتر سيرج لدي سوبر ماركت أبو دلال - النصيرات والبيع بسعر 9 شيكل.
+2025-03-04,veg_oil,9,unknown,,middle,unit_unknown|colloquial_name_unverified,https://t.me/asarsook/166,🔴 ضبط 900 لتر سيرج لدي سوبر ماركت أبو دلال - النصيرات والبيع بسعر 9 شيكل.
 2025-03-04,sugar,6,unknown,,middle,unit_unknown,https://t.me/asarsook/166,🔴 ضبط 0.5 طن سكر طرف البسطات العشوائية بسوق دير البلح وتم بيعه للمواطنين بسعر 6 شيكل.
 2025-03-06,qatayef,15,kg,1000,,,https://t.me/asarsook/174,🔹️ كيلو القطايف 15 شيكل (اكثر من 5 دولار )
 2025-03-08,eggs,40,carton,1,,,https://t.me/asarsook/185,🔴 كرتونة البيض تساوي الآن في السوق سعر 40 شيكل وهناك من يزيد.
@@ -346,7 +346,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2025-04-11,radish,1,head,1,gaza_city,,https://t.me/asarsook/288,•       رأس فجل حجم صغير 1 شيكل
 2025-04-11,radish,2,head,1,gaza_city,,https://t.me/asarsook/288,•      رأس فجل حجم كبير 2 شيكل
 2025-04-11,sugar,20,unknown,,gaza_city,unit_unknown,https://t.me/asarsook/288,• سكر 🤍 20 شيكل
-2025-04-11,veg_oil,35,unknown,,gaza_city,unit_unknown,https://t.me/asarsook/288,• سيرج 🍟 30/35 شيكل
+2025-04-11,veg_oil,35,unknown,,gaza_city,unit_unknown|colloquial_name_unverified,https://t.me/asarsook/288,• سيرج 🍟 30/35 شيكل
 2025-04-12,tomato,18,kg,1000,gaza_city,unit_assumed_kg,https://t.me/asarsook/293,• 🍅 بندورة 18 شيكل
 2025-04-12,cucumber,18,kg,1000,gaza_city,unit_assumed_kg,https://t.me/asarsook/293,• 🥒 خيار  18 شيكل
 2025-04-12,aubergine,25,kg,1000,gaza_city,unit_assumed_kg,https://t.me/asarsook/293,• 🍆 باذنجان 25 شيكل
@@ -362,7 +362,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2025-04-12,radish,1,head,1,gaza_city,,https://t.me/asarsook/293,•       رأس فجل حجم صغير 1 شيكل
 2025-04-12,radish,2,head,1,gaza_city,,https://t.me/asarsook/293,•      رأس فجل حجم كبير 2 شيكل
 2025-04-12,sugar,20,unknown,,gaza_city,unit_unknown,https://t.me/asarsook/293,• سكر 🤍 20 شيكل
-2025-04-12,veg_oil,35,unknown,,gaza_city,unit_unknown,https://t.me/asarsook/293,• سيرج 🍟 30/35 شيكل
+2025-04-12,veg_oil,35,unknown,,gaza_city,unit_unknown|colloquial_name_unverified,https://t.me/asarsook/293,• سيرج 🍟 30/35 شيكل
 2025-04-14,tomato,20,kg,1000,gaza_city,unit_assumed_kg,https://t.me/asarsook/296,• 🍅 بندورة 19/20 شيكل
 2025-04-14,cucumber,20,kg,1000,gaza_city,unit_assumed_kg,https://t.me/asarsook/296,• 🥒 خيار 20  شيكل
 2025-04-14,red_mullet,24,kg,1000,gaza_city,unit_assumed_kg,https://t.me/asarsook/296,• 🌶 فلفل سلطان 24 شيكل
@@ -494,7 +494,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2025-06-26,crab,100,kg,1000,middle,unit_assumed_kg,https://t.me/asarsook/517,🦀 سلطعون: 100₪
 2025-06-26,squid,250,kg,1000,middle,unit_assumed_kg,https://t.me/asarsook/517,🦑 الحبار: 250₪
 2025-06-26,jelly_powder,15,l,1000,,,https://t.me/asarsook/518,🧽 لتر سائل جلي (صنع محلي): 15₪
-2025-06-28,veg_oil,40,unknown,,,unit_unknown,https://t.me/asarsook/523,🍳 السيرج: 35 – 40₪
+2025-06-28,veg_oil,40,unknown,,,unit_unknown|colloquial_name_unverified,https://t.me/asarsook/523,🍳 السيرج: 35 – 40₪
 2025-06-28,rice,30,unknown,,,unit_unknown,https://t.me/asarsook/523,🍚 الأرز: 20 – 30₪
 2025-06-28,canned_chickpeas,30,unknown,,,unit_unknown,https://t.me/asarsook/523,🫘 الحمص الحب: 25 – 30₪
 2025-06-28,canned_fava,30,unknown,,,unit_unknown,https://t.me/asarsook/523,🫘 الفول الحب: 30₪
@@ -508,7 +508,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2025-06-29,vermicelli,9,unknown,,middle,unit_unknown,https://t.me/asarsook/525,🍝 شعرية (400 جم): 9 شيكل
 2025-06-29,salt,7,unknown,,middle,unit_unknown,https://t.me/asarsook/525,🧂 الملح: 7 شيكل
 2025-06-29,yeast,70,unknown,,middle,unit_unknown,https://t.me/asarsook/525,🧁 خميرة (450 جم): 60 - 70 شيكل
-2025-06-29,veg_oil,40,unknown,,gaza_city,unit_unknown,https://t.me/asarsook/526,🛢️ السيرج (زيت نباتي): 35 – 40 شيكل
+2025-06-29,veg_oil,40,unknown,,gaza_city,unit_unknown|colloquial_name_unverified,https://t.me/asarsook/526,🛢️ السيرج (زيت نباتي): 35 – 40 شيكل
 2025-06-29,rice,30,unknown,,gaza_city,unit_unknown,https://t.me/asarsook/526,🍚 الأرز: 20 – 30 شيكل
 2025-06-29,canned_chickpeas,30,unknown,,gaza_city,unit_unknown,https://t.me/asarsook/526,🌰 الحمص الحب: 25 – 30 شيكل
 2025-06-29,canned_fava,30,unknown,,gaza_city,unit_unknown,https://t.me/asarsook/526,🌱 الفول الحب: 30 شيكل
@@ -542,7 +542,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2025-07-06,grapes,150,kg,1000,,,https://t.me/asarsook/556,- 🍇 كيلو عنب: 150₪
 2025-07-06,fig,40,g,250,,,https://t.me/asarsook/556,- 🍑 وقيّة تين: 35–40₪
 2025-07-06,pomegranate,40,kg,1000,,,https://t.me/asarsook/556,- 🍎 كيلو رمان: 40₪
-2025-07-08,veg_oil,40,l,1000,gaza_city,,https://t.me/asarsook/561,- 🛢️ لتر السيرج: 40₪
+2025-07-08,veg_oil,40,l,1000,gaza_city,colloquial_name_unverified,https://t.me/asarsook/561,- 🛢️ لتر السيرج: 40₪
 2025-07-08,flour,35,kg,1000,gaza_city,,https://t.me/asarsook/561,- 🍚 كيلو الطحين: 35₪
 2025-07-08,sugar,350,kg,1000,gaza_city,,https://t.me/asarsook/561,- 🍬 كيلو السكر: 350₪ ⚠️ مفقود
 2025-07-08,salt,7,kg,1000,gaza_city,,https://t.me/asarsook/561,- 🧂 كيلو الملح: 7₪
@@ -565,7 +565,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2025-07-10,flour,80,unknown,,south,unit_unknown,https://t.me/asarsook/570,مجرد تقدم الدبابات الإسرائيلية جنوب خان يونس اختفى الطحين من السوق، ولا تجد كيلو الطحين بسعر 80 شيكل
 2025-07-15,flour,50,unknown,,,unit_unknown,https://t.me/asarsook/590,يُطرح كيلو الطحين بـ 50 شيكل، ثم يرتفع إلى 60، وبعدها إلى 70.
 2025-07-15,cumin,10,unknown,,,unit_unknown,https://t.me/asarsook/592,اليوم 7 جرامات كمون بــ10 شيكل!!
-2025-07-16,veg_oil,60,l,1000,middle,,https://t.me/asarsook/593,• لتر السيرج: 60₪
+2025-07-16,veg_oil,60,l,1000,middle,colloquial_name_unverified,https://t.me/asarsook/593,• لتر السيرج: 60₪
 2025-07-16,flour,70,kg,1000,middle,,https://t.me/asarsook/593,• كيلو الطحين: 70₪
 2025-07-16,sugar,220,kg,1000,middle,,https://t.me/asarsook/593,• كيلو السكر: 220₪
 2025-07-16,salt,8,kg,1000,middle,,https://t.me/asarsook/593,• كيلو الملح: 8₪
@@ -590,7 +590,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2025-07-16,falafel_sandwich,12,unknown,,middle,unit_unknown,https://t.me/asarsook/593,• فرشوحة فلافل: 12₪
 2025-07-16,falafel_patty,2,unknown,,middle,unit_unknown,https://t.me/asarsook/593,• 3 أقراص فلافل: 2₪
 2025-07-17,flour,100,unknown,,,unit_unknown,https://t.me/asarsook/597,أن كيلو الطحين وصل إلى *100 شيكل فقط لا غير— رقم موجع يعكس حجم الألم والجوع الذي نعيشه.
-2025-07-17,veg_oil,60,l,1000,gaza_city,,https://t.me/asarsook/598,- لتر السيرج: 60₪
+2025-07-17,veg_oil,60,l,1000,gaza_city,colloquial_name_unverified,https://t.me/asarsook/598,- لتر السيرج: 60₪
 2025-07-17,sugar,220,kg,1000,gaza_city,,https://t.me/asarsook/598,- كيلو السكر: 220₪
 2025-07-17,flour,75,kg,1000,gaza_city,,https://t.me/asarsook/598,- كيلو الطحين: 75₪
 2025-07-17,long_grain_rice,80,kg,1000,gaza_city,,https://t.me/asarsook/598,- كيلو الرز الطويل: 80₪
@@ -637,7 +637,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2025-07-24,tomato_paste,60,unknown,,middle,unit_unknown,https://t.me/asarsook/609,🍅 صلصة: 60₪
 2025-07-24,pasta,20,unknown,,middle,unit_unknown,https://t.me/asarsook/609,🍝 معكرونة / اسبكتي 400g: 20₪
 2025-07-24,pasta,55,kg,1000,middle,,https://t.me/asarsook/609,🍝 معكرونة عادية (كيلو): 55₪
-2025-07-24,veg_oil,60,unknown,,middle,unit_unknown,https://t.me/asarsook/609,🫒 سيرج: 60₪
+2025-07-24,veg_oil,60,unknown,,middle,unit_unknown|colloquial_name_unverified,https://t.me/asarsook/609,🫒 سيرج: 60₪
 2025-07-24,vegetable_ghee,70,g,250,middle,,https://t.me/asarsook/609,🥄 سمنة (وقية): 70₪
 2025-07-24,rutf_paste,20,unknown,,middle,unit_unknown,https://t.me/asarsook/609,🟥 مكمل أحمر: 20₪
 2025-07-24,lns_small,4,unknown,,middle,unit_unknown,https://t.me/asarsook/609,🟩 مكمل أخضر: 4₪
@@ -647,7 +647,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2025-07-25,chickpeas,40,unknown,,middle,unit_unknown,https://t.me/asarsook/610,🔸 حمص : 40₪
 2025-07-25,lentils,50,unknown,,middle,unit_unknown,https://t.me/asarsook/610,🔸 عدس : 50₪
 2025-07-25,pasta,30,g,500,middle,,https://t.me/asarsook/610,🔸 نص كيلو معكرونة : 30₪
-2025-07-25,veg_oil,65,unknown,,middle,unit_unknown,https://t.me/asarsook/610,🔸 سيرج : 65₪
+2025-07-25,veg_oil,65,unknown,,middle,unit_unknown|colloquial_name_unverified,https://t.me/asarsook/610,🔸 سيرج : 65₪
 2025-07-25,frozen_peas,40,kg,1000,middle,unit_assumed_kg,https://t.me/asarsook/610,🔸 بازيلا : 40₪
 2025-07-25,yeast,90,unknown,,middle,unit_unknown,https://t.me/asarsook/610,🔸 خميرة : 90₪
 2025-07-25,salt,5,unknown,,middle,unit_unknown,https://t.me/asarsook/610,🔸 ملح : 5₪
@@ -683,7 +683,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2025-07-25,walnuts,800,unknown,,middle,unit_unknown,https://t.me/asarsook/610,🐓 جوز الفراخ : 800₪
 2025-07-25,pigeon,350,kg,1000,middle,unit_assumed_kg,https://t.me/asarsook/610,🕊️ جوز الزغاليل : 350₪
 2025-07-25,rabbit,850,kg,1000,middle,unit_assumed_kg,https://t.me/asarsook/610,🐇 الأرانب : 850₪
-2025-07-28,veg_oil,70,l,1000,middle,,https://t.me/asarsook/631,• 🥄 لتر السيرج: 70₪
+2025-07-28,veg_oil,70,l,1000,middle,colloquial_name_unverified,https://t.me/asarsook/631,• 🥄 لتر السيرج: 70₪
 2025-07-28,sugar,400,kg,1000,middle,,https://t.me/asarsook/631,• 🧂 كيلو السكر: 400₪
 2025-07-28,salt,10,kg,1000,middle,,https://t.me/asarsook/631,• 🌿 كيلو الملح: 10₪
 2025-07-28,flour,40,kg,1000,middle,,https://t.me/asarsook/631,• 🌾 كيلو الطحين: 40₪
@@ -709,7 +709,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2025-07-28,falafel_sandwich,12,unknown,,middle,unit_unknown,https://t.me/asarsook/631,• 🧆 فرشوحة فلافل: 12₪
 2025-07-28,falafel_patty,1,unknown,,middle,unit_unknown,https://t.me/asarsook/631,• 🧆 قرص فلافل: 1₪
 2025-07-29,mango,250,kg,1000,,question_not_quote|two_prices_in_line,https://t.me/asarsook/638,"قبل قليل، جربت أفوت على بسطة عليها فاكهة المانجا والانجاص والذي لم نذق طعمهما منذ سنتين، سألت البائع ""بكم الكيلو؟"" أجابني السعر للصنفين ""250 شيكل للكيلو الواحد"" يعني ما يقارب 76 دولار، فأسخففت عقلي أكثر وقمت بوضع حبة من كل صنف على الميزان، وسألت البائع بكم بطلعوا؟ أجابني 120 شيكل!!!! يعني سعر حبتين فاكهة 36 دولار، هذه الصدمة كانت كفيلة بإعادة عقلي لوضعه الطبيعي 😅"
-2025-07-30,veg_oil,70,l,1000,gaza_city,,https://t.me/asarsook/642,- لتر السيرج: 70₪
+2025-07-30,veg_oil,70,l,1000,gaza_city,colloquial_name_unverified,https://t.me/asarsook/642,- لتر السيرج: 70₪
 2025-07-30,flour,45,kg,1000,gaza_city,,https://t.me/asarsook/642,- كيلو الطحين: 40–45₪
 2025-07-30,sugar,300,kg,1000,gaza_city,,https://t.me/asarsook/642,- كيلو السكر: 300₪
 2025-07-30,salt,10,kg,1000,gaza_city,,https://t.me/asarsook/642,- كيلو الملح: 10₪
@@ -768,7 +768,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2025-08-01,chickpeas,35,unknown,,middle,unit_unknown,https://t.me/asarsook/648,🥫 حمص: 35₪
 2025-08-01,long_grain_rice,65,unknown,,middle,unit_unknown,https://t.me/asarsook/648,🍚 رز بسمتي: 60–65₪
 2025-08-01,semolina,65,unknown,,middle,unit_unknown,https://t.me/asarsook/648,🌽 سميد: 65₪
-2025-08-01,veg_oil,50,unknown,,middle,unit_unknown,https://t.me/asarsook/648,🥄 سيرج: 45–50₪
+2025-08-01,veg_oil,50,unknown,,middle,unit_unknown|colloquial_name_unverified,https://t.me/asarsook/648,🥄 سيرج: 45–50₪
 2025-08-01,mixed_pickles,20,unknown,,middle,unit_unknown,https://t.me/asarsook/648,🥒 مخلل مشكل: 20₪
 2025-08-01,sugar,65,g,250,middle,,https://t.me/asarsook/648,🍬 سكر (وقية): 60–65₪
 2025-08-01,tomato_paste,50,g,250,middle,,https://t.me/asarsook/648,🍅 صلصة (وقية): 50₪
@@ -785,7 +785,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2025-08-01,rutf_paste,18,unknown,,middle,unit_unknown,https://t.me/asarsook/648,🧃 مكمل أحمر: 18₪
 2025-08-01,walnuts,800,unknown,,middle,unit_unknown,https://t.me/asarsook/648,🐓 جوز العتاقي: 800₪
 2025-08-01,pigeon,350,kg,1000,middle,unit_assumed_kg,https://t.me/asarsook/648,🐥 جوز الزغاليل: 350₪
-2025-08-02,veg_oil,55,l,1000,gaza_city,,https://t.me/asarsook/651,• لتر السيرج 🥄 55₪
+2025-08-02,veg_oil,55,l,1000,gaza_city,colloquial_name_unverified,https://t.me/asarsook/651,• لتر السيرج 🥄 55₪
 2025-08-02,sugar,240,kg,1000,gaza_city,,https://t.me/asarsook/651,• كيلو السكر 🍬 240₪
 2025-08-02,flour,35,kg,1000,gaza_city,,https://t.me/asarsook/651,• كيلو الطحين 🌾 30–35₪
 2025-08-02,salt,7,kg,1000,gaza_city,,https://t.me/asarsook/651,• كيلو الملح 🧂 7₪
@@ -807,7 +807,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2025-08-02,canned_corned_beef,80,tin,1,gaza_city,,https://t.me/asarsook/651,• علبة لحمة اكسترا 🥩 80₪
 2025-08-02,grapes,120,kg,1000,gaza_city,unit_assumed_kg,https://t.me/asarsook/651,• العنب 🍇 120₪
 2025-08-02,fig,120,kg,1000,gaza_city,unit_assumed_kg,https://t.me/asarsook/651,• التين 🍈 120₪
-2025-08-03,veg_oil,55,l,1000,middle,,https://t.me/asarsook/656,• 🥄 لتر السيرج: 55₪
+2025-08-03,veg_oil,55,l,1000,middle,colloquial_name_unverified,https://t.me/asarsook/656,• 🥄 لتر السيرج: 55₪
 2025-08-03,olive_oil,200,l,1000,middle,,https://t.me/asarsook/656,• 🫒 لتر زيت الزيتون: 200₪
 2025-08-03,sugar,220,kg,1000,middle,,https://t.me/asarsook/656,• 🍚 كيلو السكر: 220₪
 2025-08-03,molokhia_fresh,50,kg,1000,middle,,https://t.me/asarsook/656,• 🌿 كيلو ملوخية: 50₪
@@ -847,7 +847,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2025-08-04,chard,30,bunch,1,south,,https://t.me/asarsook/659,• 🌿 ربطة السلق: 30₪
 2025-08-04,molokhia_fresh,30,kg,1000,south,unit_assumed_kg,https://t.me/asarsook/659,• 🌱 ملوخية: 30₪
 2025-08-04,jelly_powder,35,unknown,,south,unit_unknown,https://t.me/asarsook/659,• 🧼 سائل جلي محلي (1 لتر): 35₪
-2025-08-04,veg_oil,50,l,1000,south,,https://t.me/asarsook/659,• 🥄 لتر السيرج: 50₪
+2025-08-04,veg_oil,50,l,1000,south,colloquial_name_unverified,https://t.me/asarsook/659,• 🥄 لتر السيرج: 50₪
 2025-08-06,sugar,100,unknown,,south,unit_unknown,https://t.me/asarsook/669,الآن السكر عند بير 19 بخانيونس 100 شيكل
 2025-08-06,flour,20,kg,1000,,,https://t.me/asarsook/671,🍞 الطحين: 18 – 20 شيكل / كيلو
 2025-08-06,sugar,120,kg,1000,,,https://t.me/asarsook/671,🍚 السكر: 120 شيكل / كيلو
@@ -855,22 +855,22 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2025-08-06,date_paste,60,kg,1000,,,https://t.me/asarsook/671,🧱 التمر المضغوط: 60 شيكل / كيلو
 2025-08-06,lentils,25,kg,1000,,,https://t.me/asarsook/671,🫘 العدس: 25 شيكل / كيلو
 2025-08-06,canned_chickpeas,20,kg,1000,,,https://t.me/asarsook/671,🫘 الحمص الحب 20 شيكل / كيلو
-2025-08-06,veg_oil,35,unknown,,,unit_unknown,https://t.me/asarsook/671,🫘 السيرج لتر 35 شيكل
+2025-08-06,veg_oil,35,unknown,,,unit_unknown|colloquial_name_unverified,https://t.me/asarsook/671,🫘 السيرج لتر 35 شيكل
 2025-08-07,sugar,50,kg,1000,gaza_city,,https://t.me/asarsook/679,• كيلو السكر: 40 – 50 شيكل
 2025-08-07,flour,18,unknown,,gaza_city,unit_unknown,https://t.me/asarsook/679,• الطحين: 15 – 18 شيكل
-2025-08-07,veg_oil,30,unknown,,gaza_city,unit_unknown,https://t.me/asarsook/679,• السيرج: 28 – 30 شيكل للتر
+2025-08-07,veg_oil,30,unknown,,gaza_city,unit_unknown|colloquial_name_unverified,https://t.me/asarsook/679,• السيرج: 28 – 30 شيكل للتر
 2025-08-07,chickpeas,5,tin,1,gaza_city,,https://t.me/asarsook/679,• علبة الفول / الحمص: 5 شيكل
 2025-08-07,tahini,35,kg,1000,gaza_city,,https://t.me/asarsook/679,• الطحينة: 35 شيكل للكيلو
 2025-08-07,jam,30,unknown,,gaza_city,unit_unknown,https://t.me/asarsook/679,• مربى التين: 30 شيكل
 2025-08-07,date_paste,25,unknown,,gaza_city,unit_unknown,https://t.me/asarsook/679,• التمر المضغوط: 25 شيكل
 2025-08-07,flour,10,unknown,,north,unit_unknown,https://t.me/asarsook/680,"✅ مبادرة شبابية يقوم بها أهلي شمال القطاع ""جباليا النزلة"" ببيع رطل الطحين ""3ك""  ب 10 شيكل فقط.."
-2025-08-07,veg_oil,35,unknown,,,unit_unknown,https://t.me/asarsook/676,• 🍶 السيرج: 35 شيكل في كافة الأسواق
+2025-08-07,veg_oil,35,unknown,,,unit_unknown|colloquial_name_unverified,https://t.me/asarsook/676,• 🍶 السيرج: 35 شيكل في كافة الأسواق
 2025-08-07,feta_cheese,20,unknown,,,unit_unknown,https://t.me/asarsook/676,• 🧀 جبنة “فيتا” (عبور ومراعي): 20 شيكل في كافة الأسواق
 2025-08-07,lentils,30,kg,1000,,,https://t.me/asarsook/676,• 🫘 الحمص، الفاصوليا، العدس: 30 شيكل للكيلو
 2025-08-07,date_paste,20,unknown,,,unit_unknown,https://t.me/asarsook/676,• 🌴 التمر المضغوط: من 20 شيكل الى 40 شيكل (انتا وشطارتك 😉 )
 2025-08-08,sugar,50,kg,1000,gaza_city,,https://t.me/asarsook/688,• 🍚 كيلو السكر: 40 – 50 شيكل
 2025-08-08,flour,15,unknown,,gaza_city,unit_unknown,https://t.me/asarsook/688,• 🌾 الطحين: 10 – 15 شيكل
-2025-08-08,veg_oil,30,unknown,,gaza_city,unit_unknown,https://t.me/asarsook/688,• 🥄 السيرج: 25 – 30 شيكل / لتر
+2025-08-08,veg_oil,30,unknown,,gaza_city,unit_unknown|colloquial_name_unverified,https://t.me/asarsook/688,• 🥄 السيرج: 25 – 30 شيكل / لتر
 2025-08-08,chickpeas,5,tin,1,gaza_city,,https://t.me/asarsook/688,• 🥫 علبة الفول / الحمص: 5 شيكل
 2025-08-08,tahini,35,kg,1000,gaza_city,,https://t.me/asarsook/688,• 🧈 الطحينة: 35 شيكل / كيلو
 2025-08-08,jam,30,unknown,,gaza_city,unit_unknown,https://t.me/asarsook/688,• 🍯 مربى التين: 30 شيكل
@@ -903,12 +903,12 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2025-08-08,mango,45,kg,1000,,unit_assumed_kg,https://t.me/asarsook/689,🥭 مانجا: 45 شيكل / وقية
 2025-08-11,yeast,40,unknown,,gaza_city,unit_unknown,https://t.me/asarsook/712,🍞 الخميرة (تطبيق): 40 شيكل
 2025-08-11,long_grain_rice,40,unknown,,gaza_city,unit_unknown,https://t.me/asarsook/712,🍚 رز بسمتي (تطبيق): 40 شيكل
-2025-08-11,veg_oil,30,unknown,,gaza_city,unit_unknown,https://t.me/asarsook/712,🥄 السيرج (تطبيق): 30 شيكل
+2025-08-11,veg_oil,30,unknown,,gaza_city,unit_unknown|colloquial_name_unverified,https://t.me/asarsook/712,🥄 السيرج (تطبيق): 30 شيكل
 2025-08-11,canned_corned_beef,100,unknown,,gaza_city,unit_unknown,https://t.me/asarsook/712,🥫 لحمة إكسترا (تطبيق): 4 بـ 100 شيكل
 2025-08-11,pasta,30,unknown,,gaza_city,unit_unknown,https://t.me/asarsook/712,🍝 معكرونة (تطبيق - كيلو): 30 شيكل
 2025-08-11,potato_chips,5,unknown,,gaza_city,unit_unknown,https://t.me/asarsook/712,🍟 شيبس بيك: 5 شيكل
 2025-08-11,tomato_paste,35,unknown,,gaza_city,unit_unknown,https://t.me/asarsook/712,🍅 صلصة (830 جرام - تطبيق): 35 شيكل
-2025-08-12,veg_oil,35,l,1000,middle,,https://t.me/asarsook/720,• 🥄 لتر السيرج: 35 شيكل (تطبيق)
+2025-08-12,veg_oil,35,l,1000,middle,colloquial_name_unverified,https://t.me/asarsook/720,• 🥄 لتر السيرج: 35 شيكل (تطبيق)
 2025-08-12,sugar,45,kg,1000,middle,,https://t.me/asarsook/720,• 🍬 كيلو السكر:45 شيكل (تطبيق)
 2025-08-12,flour,12,kg,1000,middle,,https://t.me/asarsook/720,• 🫓 كيلو الطحين: 10 ~ 12 شيكل
 2025-08-12,salt,3,kg,1000,middle,,https://t.me/asarsook/720,• 🧂 كيلو الملح: 3 شيكل
@@ -941,7 +941,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2025-08-13,flour,75,unknown,,,unit_unknown,https://t.me/asarsook/727,سيتم شحن 213 شاحنة طحين لصالح التجار خلال هذا الاسبوع وسيتوفر في الأسواق بسعر يتراوح ثمن الكيس 25 كيلو  بين 60 ل75 شيكل .
 2025-08-14,sugar,27,unknown,,gaza_city,unit_unknown,https://t.me/asarsook/735,• *السكر*: 25/27 ₪
 2025-08-14,flour,50,unknown,,gaza_city,unit_unknown,https://t.me/asarsook/735,• *الطحين*: 3 كيلو بـ 50 ₪
-2025-08-14,veg_oil,25,unknown,,gaza_city,unit_unknown,https://t.me/asarsook/735,• *السيرج*: 25 ₪ للتر
+2025-08-14,veg_oil,25,unknown,,gaza_city,unit_unknown|colloquial_name_unverified,https://t.me/asarsook/735,• *السيرج*: 25 ₪ للتر
 2025-08-14,salt,8,unknown,,gaza_city,unit_unknown,https://t.me/asarsook/735,• *الملح*: 8 ₪
 2025-08-14,semolina,32,unknown,,gaza_city,unit_unknown,https://t.me/asarsook/735,• *السميد*: 32 ₪
 2025-08-14,yeast,40,unknown,,gaza_city,unit_unknown,https://t.me/asarsook/735,• *الخميرة (400غ)*: 40 ₪
@@ -993,7 +993,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2025-08-16,sugar,8,unknown,,,unit_unknown,https://t.me/asarsook/760,في تاجر شهم وابن حلال اسمه (مداح أبو وردة) هذا التاجر جاب كمية من السكر وباعها للناس الكيلو ب 8 شيكل .. مع إن باقي التجار بيبيعوه بثلاثين شيكل ..
 2025-08-19,flour,100,unknown,,gaza_city,unit_unknown,https://t.me/asarsook/767,1️⃣ الطحين (7 كيلو) — 100 شيكل
 2025-08-19,sugar,18,unknown,,gaza_city,unit_unknown,https://t.me/asarsook/767,2️⃣ السكر — 18 شيكل
-2025-08-19,veg_oil,25,unknown,,gaza_city,unit_unknown,https://t.me/asarsook/767,3️⃣ السيرج — 25 شيكل
+2025-08-19,veg_oil,25,unknown,,gaza_city,unit_unknown|colloquial_name_unverified,https://t.me/asarsook/767,3️⃣ السيرج — 25 شيكل
 2025-08-19,olive_oil,70,unknown,,gaza_city,unit_unknown,https://t.me/asarsook/767,4️⃣ زيت الزيتون — 70 شيكل
 2025-08-19,tahini,40,unknown,,gaza_city,unit_unknown,https://t.me/asarsook/767,5️⃣ الطحينة — 40 شيكل
 2025-08-19,dates,25,kg,1000,gaza_city,unit_assumed_kg,https://t.me/asarsook/767,6️⃣ التمر — 25 شيكل
@@ -1003,7 +1003,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2025-08-19,canned_corned_beef,29,unknown,,gaza_city,unit_unknown,https://t.me/asarsook/767,1️⃣2️⃣ لحمة إكسترا — 29 شيكل
 2025-08-19,canned_tuna,9,kg,1000,gaza_city,unit_assumed_kg,https://t.me/asarsook/767,1️⃣3️⃣ التونة — 9 شيكل
 2025-08-19,coffee,50,unknown,,gaza_city,unit_unknown,https://t.me/asarsook/767,1️⃣4️⃣ قهوة زحيمان — 50 شيكل
-2025-08-23,veg_oil,25,l,1000,,,https://t.me/asarsook/785,• لتر السيرج: 25 شيكل
+2025-08-23,veg_oil,25,l,1000,,colloquial_name_unverified,https://t.me/asarsook/785,• لتر السيرج: 25 شيكل
 2025-08-23,semolina,40,l,1000,,,https://t.me/asarsook/785,• لتر السميد: 40 شيكل 🟦 تطبيق
 2025-08-23,flour,12,kg,1000,,,https://t.me/asarsook/785,• كيلو الطحين: 12 شيكل
 2025-08-23,sugar,17,kg,1000,,,https://t.me/asarsook/785,• كيلو السكر: 17 شيكل 🟦 تطبيق
@@ -1037,7 +1037,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2025-08-23,falafel_patty,1,unknown,,,unit_unknown,https://t.me/asarsook/785,• 3 أقراص فلافل: 1 شيكل
 2025-08-26,onion,270,kg,1000,,unit_assumed_kg|two_prices_in_line,https://t.me/asarsook/792,اليوم صبح شوال البصل ب270  شيكل بعد ما كان ب١٠٠ شيكل
 2025-08-26,sugar,15,kg,1000,,,https://t.me/asarsook/793,🍬 كيلو السكر بـ 15₪ (18₪ تطبيق)
-2025-08-26,veg_oil,27,l,1000,,,https://t.me/asarsook/793,🔅 لتر السيرج بـ 27₪ (33₪ تطبيق)
+2025-08-26,veg_oil,27,l,1000,,colloquial_name_unverified,https://t.me/asarsook/793,🔅 لتر السيرج بـ 27₪ (33₪ تطبيق)
 2025-08-26,semolina,35,kg,1000,,,https://t.me/asarsook/793,🍭 كيلو سميد بـ 35₪ (40₪ تطبيق)
 2025-08-26,flour,10,kg,1000,,,https://t.me/asarsook/793,🍞 كيلو طحين بـ 10₪ (18₪ تطبيق)
 2025-08-26,peas_fresh,8,tin,1,,,https://t.me/asarsook/793,🫛علبة بازيلاء وجزر 380 غرام بـ 8₪ تطبيق
@@ -1058,7 +1058,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2025-08-26,green_olives,20,unknown,,,unit_unknown,https://t.me/asarsook/793,🫒 زيتون معلّب بـ 20₪ تطبيق
 2025-08-26,pickled_cucumber,18,unknown,,,unit_unknown,https://t.me/asarsook/793,🥒 مخلل خيار معلّب بـ 18₪ تطبيق
 2025-08-26,corn_cob,16,tin,1,,,https://t.me/asarsook/793,🌽 علبة ذرة بـ 16₪ تطبيق
-2025-08-26,beef,50,tin,1,,,https://t.me/asarsook/793,🥩 علبة لحمة شقف بـ 50₪ تطبيق
+2025-08-26,beef,50,tin,1,,colloquial_name_unverified,https://t.me/asarsook/793,🥩 علبة لحمة شقف بـ 50₪ تطبيق
 2025-08-26,tomato_paste,10,tin,1,,,https://t.me/asarsook/793,🍅 علبة صلصة 400 جرام بـ 10₪ تطبيق
 2025-08-26,tomato_paste,6,tin,1,,,https://t.me/asarsook/793,🍅 علبة صلصة 200 جرام بـ 6₪ تطبيق
 2025-08-26,coffee_mix_3in1,5,unknown,,,unit_unknown,https://t.me/asarsook/793,🥤 كابتشينو تورا بيكا بـ 5₪ (7₪ تطبيق)
@@ -1074,7 +1074,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2025-08-26,soft_drink,40,tin,1,,,https://t.me/asarsook/793,🍹 علبة كولا كينزا صغيرة بـ 40₪ تطبيق
 2025-08-26,flour,140,unknown,,south,unit_unknown,https://t.me/asarsook/795,🔴 وصل سعر كيس الطحين 25 كيلو عند العطار بخانيونس عصر اليوم ب140 شيكل.
 2025-08-28,sugar,10,unknown,,gaza_city,unit_unknown,https://t.me/asarsook/803,- السكر يُباع بالجملة نقدًا بـ10 شيكل، ويُعرض بالتطبيق بـ15 شيكل.
-2025-08-29,veg_oil,25,l,1000,middle,,https://t.me/asarsook/804,• 🛢️ لتر السيرج: 25 شيكل (تطبيق)
+2025-08-29,veg_oil,25,l,1000,middle,colloquial_name_unverified,https://t.me/asarsook/804,• 🛢️ لتر السيرج: 25 شيكل (تطبيق)
 2025-08-29,sugar,15,kg,1000,middle,,https://t.me/asarsook/804,• 🍚 كيلو السكر: 15 شيكل (تطبيق)
 2025-08-29,molokhia_fresh,20,kg,1000,middle,,https://t.me/asarsook/804,• 🌿 كيلو ملوخية: 20 شيكل
 2025-08-29,flour,250,bag,1,middle,,https://t.me/asarsook/804,• 🥖 كيس الطحين 25 كغم: 250 شيكل (تطبيق)
@@ -1146,7 +1146,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2025-09-02,sugar,15,unknown,,south,unit_unknown,https://t.me/asarsook/816,• سكر: 15₪
 2025-09-02,vegetable_ghee,35,unknown,,south,unit_unknown,https://t.me/asarsook/816,• سمنة أميرة 700غ: 35₪
 2025-09-02,vegetable_ghee,35,unknown,,south,unit_unknown,https://t.me/asarsook/816,• سمنة ريف زمان : 35₪
-2025-09-02,veg_oil,17,unknown,,south,unit_unknown,https://t.me/asarsook/816,• سيرج : 17₪
+2025-09-02,veg_oil,17,unknown,,south,unit_unknown|colloquial_name_unverified,https://t.me/asarsook/816,• سيرج : 17₪
 2025-09-02,yeast,20,unknown,,south,unit_unknown,https://t.me/asarsook/816,• خميرة : 20₪
 2025-09-02,pasta,5,unknown,,south,unit_unknown,https://t.me/asarsook/816,• معكرونة: 5₪
 2025-09-02,bouillon_cube,1,unknown,,south,unit_unknown,https://t.me/asarsook/816,• ماجي مكعب: 1₪
@@ -1224,7 +1224,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2025-09-03,sugar,13,unknown,,south,unit_unknown,https://t.me/asarsook/818,• سكر: 13₪
 2025-09-03,vegetable_ghee,35,unknown,,south,unit_unknown,https://t.me/asarsook/818,• سمنة أميرة 700غ: 35₪
 2025-09-03,vegetable_ghee,35,unknown,,south,unit_unknown,https://t.me/asarsook/818,• سمنة ريف زمان : 35₪
-2025-09-03,veg_oil,17,unknown,,south,unit_unknown,https://t.me/asarsook/818,•؛ سيرج : 17₪
+2025-09-03,veg_oil,17,unknown,,south,unit_unknown|colloquial_name_unverified,https://t.me/asarsook/818,•؛ سيرج : 17₪
 2025-09-03,yeast,20,unknown,,south,unit_unknown,https://t.me/asarsook/818,•؛ خميرة : 20₪
 2025-09-03,pasta,5,unknown,,south,unit_unknown,https://t.me/asarsook/818,• معكرونة: 5₪
 2025-09-03,bouillon_cube,1,unknown,,south,unit_unknown,https://t.me/asarsook/818,• ماجي مكعب: 1₪
@@ -1308,7 +1308,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2025-09-09,vegetable_ghee,35,unknown,,south,unit_unknown,https://t.me/asarsook/832,سمنة أميرة 700غ: 35₪
 2025-09-09,vegetable_ghee,30,unknown,,south,unit_unknown,https://t.me/asarsook/832,سمنة ريف زمان : 30₪
 2025-09-09,vegetable_ghee,30,unknown,,south,unit_unknown,https://t.me/asarsook/832,سمنة كرنفال : 30₪
-2025-09-09,veg_oil,17,unknown,,south,unit_unknown,https://t.me/asarsook/832,سيرج : 17₪
+2025-09-09,veg_oil,17,unknown,,south,unit_unknown|colloquial_name_unverified,https://t.me/asarsook/832,سيرج : 17₪
 2025-09-09,yeast,15,unknown,,south,unit_unknown,https://t.me/asarsook/832,خميرة : 15₪
 2025-09-09,pasta,5,unknown,,south,unit_unknown,https://t.me/asarsook/832,معكرونة: 5₪
 2025-09-09,bouillon_cube,1,unknown,,south,unit_unknown,https://t.me/asarsook/832,ماجي مكعب: 1₪
@@ -1370,15 +1370,15 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2025-09-11,red_lentils_split,8,unknown,,,unit_unknown,https://t.me/asarsook/837,عدس أحمر: 8₪
 2025-09-11,semolina,28,unknown,,,unit_unknown,https://t.me/asarsook/837,سميد: 28₪
 2025-09-11,canned_luncheon_beef,42,unknown,,,unit_unknown,https://t.me/asarsook/837,لحمة لانشون كبير: 42₪
-2025-09-11,beef,14,kg,1000,,unit_assumed_kg,https://t.me/asarsook/837,لحمة وزة صغيرة: 14₪
+2025-09-11,beef,14,kg,1000,,unit_assumed_kg|colloquial_name_unverified,https://t.me/asarsook/837,لحمة وزة صغيرة: 14₪
 2025-09-11,tomato,20,kg,1000,,unit_assumed_kg,https://t.me/asarsook/837,بندورة قطع معلّبة: 20₪
 2025-09-11,frozen_okra,25,kg,1000,,unit_assumed_kg,https://t.me/asarsook/837,بامية معلّبة: 25₪
 2025-09-11,corn_cob,15,kg,1000,,unit_assumed_kg,https://t.me/asarsook/837,ذرة معلبة: 15₪
 2025-09-11,canned_fava,11,unknown,,,unit_unknown,https://t.me/asarsook/837,فول معلب: 11₪
 2025-09-11,canned_mushrooms,18,kg,1000,,unit_assumed_kg,https://t.me/asarsook/837,فطر معلب: 18₪
 2025-09-11,sugar,16,unknown,,,unit_unknown,https://t.me/asarsook/837,سكر: 16₪
-2025-09-11,veg_oil,26,l,1000,,,https://t.me/asarsook/837,لتر سيرج: 26₪
-2025-09-11,veg_oil,22,unknown,,,unit_unknown,https://t.me/asarsook/837,سيرج أوكراني 900مللي: 22₪
+2025-09-11,veg_oil,26,l,1000,,colloquial_name_unverified,https://t.me/asarsook/837,لتر سيرج: 26₪
+2025-09-11,veg_oil,22,unknown,,,unit_unknown|colloquial_name_unverified,https://t.me/asarsook/837,سيرج أوكراني 900مللي: 22₪
 2025-09-11,vegetable_ghee,33,unknown,,,unit_unknown,https://t.me/asarsook/837,سمنة كرنفال: 33₪
 2025-09-11,vegetable_ghee,45,unknown,,,unit_unknown,https://t.me/asarsook/837,سمنة الربيع: 45₪
 2025-09-11,yeast,19,unknown,,,unit_unknown,https://t.me/asarsook/837,خميرة: 19₪
@@ -1507,7 +1507,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2025-09-15,vegetable_ghee,35,unknown,,south,unit_unknown,https://t.me/asarsook/841,سمنة أميرة 700غ: 35₪
 2025-09-15,vegetable_ghee,30,unknown,,south,unit_unknown,https://t.me/asarsook/841,سمنة ريف زمان : 30₪
 2025-09-15,vegetable_ghee,30,unknown,,south,unit_unknown,https://t.me/asarsook/841,سمنة كرنفال : 30₪
-2025-09-15,veg_oil,15,unknown,,south,unit_unknown,https://t.me/asarsook/841,سيرج : 15₪
+2025-09-15,veg_oil,15,unknown,,south,unit_unknown|colloquial_name_unverified,https://t.me/asarsook/841,سيرج : 15₪
 2025-09-15,yeast,15,unknown,,south,unit_unknown,https://t.me/asarsook/841,خميرة : 15₪
 2025-09-15,pasta,5,unknown,,south,unit_unknown,https://t.me/asarsook/841,معكرونة: 5₪
 2025-09-15,bouillon_cube,1,unknown,,south,unit_unknown,https://t.me/asarsook/841,ماجي مكعب: 1₪
@@ -1563,7 +1563,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2025-09-15,jelly_powder,45,unknown,,south,unit_unknown,https://t.me/asarsook/841,سائل جلي برآيت: 45₪
 2025-09-15,chocolate_bar,15,unknown,,south,unit_unknown,https://t.me/asarsook/841,"🍫 شوكلاتة بانواعها : 15₪ , 18₪ تطبيق"
 2025-09-15,soft_drink,25,unknown,,south,unit_unknown,https://t.me/asarsook/841,🥤 مشروبات غازية : 25 ₪
-2025-09-16,veg_oil,25,l,1000,middle,,https://t.me/asarsook/843,• لتر السيرج: 25 شيكل (📲 تطبيق)
+2025-09-16,veg_oil,25,l,1000,middle,colloquial_name_unverified,https://t.me/asarsook/843,• لتر السيرج: 25 شيكل (📲 تطبيق)
 2025-09-16,sugar,17,kg,1000,middle,,https://t.me/asarsook/843,• كيلو السكر: 17 شيكل (📲 تطبيق) / 12 شيكل (💵 كاش)
 2025-09-16,long_grain_rice,15,kg,1000,middle,,https://t.me/asarsook/843,• كيلو الرز الطويل: 15 شيكل (📲 تطبيق)
 2025-09-16,rice,7,kg,1000,middle,,https://t.me/asarsook/843,• كيلو الرز المصري: 7 شيكل
@@ -1638,7 +1638,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2025-09-18,vegetable_ghee,35,unknown,,south,unit_unknown,https://t.me/asarsook/846,سمنة أميرة 700غ: 35₪
 2025-09-18,vegetable_ghee,30,unknown,,south,unit_unknown,https://t.me/asarsook/846,سمنة ريف زمان : 30₪
 2025-09-18,vegetable_ghee,30,unknown,,south,unit_unknown,https://t.me/asarsook/846,سمنة كرنفال : 30₪
-2025-09-18,veg_oil,15,unknown,,south,unit_unknown,https://t.me/asarsook/846,سيرج : 15₪
+2025-09-18,veg_oil,15,unknown,,south,unit_unknown|colloquial_name_unverified,https://t.me/asarsook/846,سيرج : 15₪
 2025-09-18,yeast,15,unknown,,south,unit_unknown,https://t.me/asarsook/846,خميرة : 15₪
 2025-09-18,pasta,5,unknown,,south,unit_unknown,https://t.me/asarsook/846,معكرونة: 5₪
 2025-09-18,bouillon_cube,1,unknown,,south,unit_unknown,https://t.me/asarsook/846,ماجي مكعب: 1₪
@@ -1736,7 +1736,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2025-09-18,vegetable_ghee,35,unknown,,middle,unit_unknown,https://t.me/asarsook/847,• سمنة جنه: 35 ₪
 2025-09-18,vegetable_ghee,30,unknown,,middle,unit_unknown,https://t.me/asarsook/847,• سمنة ريف زمان: 30 ₪
 2025-09-18,yeast,15,unknown,,middle,unit_unknown,https://t.me/asarsook/847,• خميرة: 15 ₪
-2025-09-18,veg_oil,20,unknown,,middle,unit_unknown,https://t.me/asarsook/847,• سيرج: 18-20 ₪
+2025-09-18,veg_oil,20,unknown,,middle,unit_unknown|colloquial_name_unverified,https://t.me/asarsook/847,• سيرج: 18-20 ₪
 2025-09-18,pasta,5,unknown,,middle,unit_unknown,https://t.me/asarsook/847,• معكرونة: 5 ₪
 2025-09-18,stock_powder,35,unknown,,middle,unit_unknown,https://t.me/asarsook/847,• ماجي بودرة: 35 ₪
 2025-09-18,bouillon_cube,22,tin,1,middle,,https://t.me/asarsook/847,• علبة ماجي مكعبات: 22 ₪
@@ -1777,13 +1777,13 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2025-10-22,plain_biscuits,5,unknown,,,unit_unknown,https://t.me/asarsook/884,• بسكوت شاي: 5 ₪
 2025-10-22,walnuts,35,g,250,,,https://t.me/asarsook/884,• وقية جوز الهند: 35 ₪
 2025-10-22,coffee_mix_3in1,5,unknown,,,unit_unknown,https://t.me/asarsook/884,• كابتشينو قود: 5 ₪
-2025-10-31,veg_oil,70,unknown,,,unit_unknown,https://t.me/asarsook/907,- السيرج بـ 70 شيكل
+2025-10-31,veg_oil,70,unknown,,,unit_unknown|colloquial_name_unverified,https://t.me/asarsook/907,- السيرج بـ 70 شيكل
 2025-10-31,chickpeas,35,unknown,,,unit_unknown,https://t.me/asarsook/907,- الحمص بـ 35 شيكل
 2025-10-31,falafel_patty,1,unknown,,,unit_unknown|two_prices_in_line,https://t.me/asarsook/907,كان سعر 3 أقراص فلافل = 1 شيكل!
 2025-10-31,chickpeas,1,unknown,,,unit_unknown,https://t.me/asarsook/907,- الحمص بـ 1 شيكل
-2025-10-31,veg_oil,6,unknown,,,unit_unknown,https://t.me/asarsook/907,- السيرج بـ 6 شيكل
+2025-10-31,veg_oil,6,unknown,,,unit_unknown|colloquial_name_unverified,https://t.me/asarsook/907,- السيرج بـ 6 شيكل
 2025-11-07,eggs,50,unknown,,,unit_unknown,https://t.me/asarsook/922,نقاط بيع البيض بسعر 50 شيكل للطبق 🥚💰👇
-2025-11-12,beef,50,kg,1000,,,https://t.me/asarsook/949,🥩كيلو اللحمة بـ  50 شيكل
+2025-11-12,beef,50,kg,1000,,colloquial_name_unverified,https://t.me/asarsook/949,🥩كيلو اللحمة بـ  50 شيكل
 2025-11-12,fish,35,kg,1000,,,https://t.me/asarsook/949,🐟كيلو السمك بـ 35 شيكل
 2025-11-20,shawarma_sandwich,20,unknown,,gaza_city,unit_unknown,https://t.me/asarsook/968,بعض المطاعم في غزة أصبحت تبيع فرشوحة الشاورما ب20 شيكل
 2025-11-20,bread,3,unknown,,middle,unit_unknown,https://t.me/asarsook/970,أوضحت أن المخابز تعمل بشكل جيد ويتم توزيع الخبز على عدد كبير من نقاط البيع بسعر 3 شيكل للربطة، موضحة أن أغلب المخابز البلدية مفتوحة وتعمل بشكل طبيعي.
@@ -1926,7 +1926,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2025-12-22,chicken_liver,17,kg,1000,gaza_city,unit_assumed_kg,https://t.me/asarsook/1171,🧆 كبدة دجاج — 17 شيكل
 2025-12-22,beef_liver,17,kg,1000,gaza_city,unit_assumed_kg,https://t.me/asarsook/1171,🧆 كبدة حبش — 17 شيكل
 2025-12-22,fish,25,kg,1000,gaza_city,unit_assumed_kg,https://t.me/asarsook/1171,🐟 سمك بكلا — 25 شيكل
-2025-12-23,beef,35,kg,1000,,,https://t.me/asarsook/1186,📌 كيلو اللحمة بـ 35 شيكل
+2025-12-23,beef,35,kg,1000,,colloquial_name_unverified,https://t.me/asarsook/1186,📌 كيلو اللحمة بـ 35 شيكل
 2025-12-23,kofta_kebab,100,kg,1000,,,https://t.me/asarsook/1186,📌 كيلو الكباب في المطاعم بـ 100 شيكل
 2025-12-23,chicken,25,kg,1000,gaza_city,unit_assumed_kg,https://t.me/asarsook/1176,• دجاج كامل — 25 شيكل
 2025-12-23,chicken,27,kg,1000,gaza_city,unit_assumed_kg,https://t.me/asarsook/1176,• دجاج مصري — 27 شيكل
@@ -1959,7 +1959,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2025-12-23,fish,24,kg,1000,middle,,https://t.me/asarsook/1177,• سمك بكلا ➝ 24 شيكل / الكيلو
 2025-12-23,chicken_wings,10,kg,1000,,unit_assumed_kg,https://t.me/asarsook/1181,متابعة// كيلو جناح الدجاج بسعر 10 شيكل - دوار المدفع - ديرالبلح 🔥
 2025-12-23,chickpeas,5,kg,1000,,,https://t.me/asarsook/1183,• كيلو الحمص: 5 شيكل
-2025-12-23,veg_oil,6,l,1000,,,https://t.me/asarsook/1183,• لتر السيرج: 6 شيكل
+2025-12-23,veg_oil,6,l,1000,,colloquial_name_unverified,https://t.me/asarsook/1183,• لتر السيرج: 6 شيكل
 2025-12-24,chicken,25,kg,1000,north,unit_assumed_kg,https://t.me/asarsook/1188,🐔 دجاج كامل — 25 شيكل
 2025-12-24,chicken_liver,15,kg,1000,north,unit_assumed_kg,https://t.me/asarsook/1188,🫀 كبدة دجاج — 15 شيكل
 2025-12-24,beef_liver,15,kg,1000,north,unit_assumed_kg,https://t.me/asarsook/1188,🫀 كبدة حبش — 15 شيكل
@@ -1972,7 +1972,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2025-12-24,turkey_wing,15,kg,1000,north,unit_assumed_kg,https://t.me/asarsook/1188,🦃 جناح حبش — 15 شيكل
 2025-12-24,turkey_breast,25,kg,1000,north,unit_assumed_kg,https://t.me/asarsook/1188,🦃 دبوس حبش — 25 شيكل
 2025-12-24,fish,25,kg,1000,north,unit_assumed_kg,https://t.me/asarsook/1188,🐟 سمك بكلا — 25 شيكل
-2025-12-24,beef,40,kg,1000,north,unit_assumed_kg,https://t.me/asarsook/1188,🥩 لحمة ريش — 40 شيكل
+2025-12-24,beef,40,kg,1000,north,unit_assumed_kg|colloquial_name_unverified,https://t.me/asarsook/1188,🥩 لحمة ريش — 40 شيكل
 2025-12-24,banana,40,kg,1000,north,unit_assumed_kg,https://t.me/asarsook/1188,🥩 لحمة موزة — 40 شيكل
 2025-12-24,chicken_liver,14,kg,1000,middle,,https://t.me/asarsook/1189,• كبدة دجاج نخب أول ➝14 شيكل / الكيلو
 2025-12-24,chicken,23,kg,1000,middle,,https://t.me/asarsook/1189,• دجاج كامل شركة دبّاح ➝23 شيكل / الكيلو
@@ -1998,7 +1998,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2025-12-25,turkey_wing,15,kg,1000,north,unit_assumed_kg,https://t.me/asarsook/1196,🦃 جناح حبش — 15 شيكل
 2025-12-25,turkey_breast,25,kg,1000,north,unit_assumed_kg,https://t.me/asarsook/1196,🦃 دبوس حبش — 25 شيكل
 2025-12-25,fish,25,kg,1000,north,unit_assumed_kg,https://t.me/asarsook/1196,🐟 سمك بكلا — 25 شيكل
-2025-12-25,beef,40,kg,1000,north,unit_assumed_kg,https://t.me/asarsook/1196,🥩 لحمة ريش — 40 شيكل
+2025-12-25,beef,40,kg,1000,north,unit_assumed_kg|colloquial_name_unverified,https://t.me/asarsook/1196,🥩 لحمة ريش — 40 شيكل
 2025-12-25,banana,40,kg,1000,north,unit_assumed_kg,https://t.me/asarsook/1196,🥩 لحمة موزة — 40 شيكل
 2025-12-25,kofta_kebab,45,kg,1000,north,unit_assumed_kg,https://t.me/asarsook/1196,🥩 كفتة — 45 شيكل
 2025-12-25,shrimp,80,kg,1000,north,unit_assumed_kg,https://t.me/asarsook/1196,🍤 جمبري (صافي 1.200) — 80 شيكل
@@ -2229,7 +2229,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2026-01-09,fish,23,kg,1000,,,https://t.me/asarsook/1315,- كيلو سمك بكلا: 23 شيكل
 2026-01-09,frozen_fish_fillet,25,kg,1000,,,https://t.me/asarsook/1315,- كيلو سمك فيليه: 25 شيكل
 2026-01-09,minced_meat,38,kg,1000,,,https://t.me/asarsook/1315,- كيلو لحمة مفرومة (موزة): 38 شيكل
-2026-01-09,beef,38,kg,1000,,,https://t.me/asarsook/1315,- كيلو لحمة شقف (موزة): 38 شيكل
+2026-01-09,beef,38,kg,1000,,colloquial_name_unverified,https://t.me/asarsook/1315,- كيلو لحمة شقف (موزة): 38 شيكل
 2026-01-10,potato,14,sack,1,,,https://t.me/asarsook/1321,- شوال بطاطا (4 كجم): 14 شيكل
 2026-01-10,onion,10,kg,1000,,unit_assumed_kg,https://t.me/asarsook/1321,- 3 كيلو بصل: 10 شيكل
 2026-01-10,potato,4,kg,1000,,,https://t.me/asarsook/1321,- كيلو بطاطا بلدية: 4 شيكل
@@ -2252,7 +2252,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2026-01-10,fish,23,kg,1000,,,https://t.me/asarsook/1322,- كيلو سمك بكلا: 23 شيكل
 2026-01-10,frozen_fish_fillet,25,kg,1000,,,https://t.me/asarsook/1322,- كيلو سمك فيليه: 25 شيكل
 2026-01-10,minced_meat,38,kg,1000,,,https://t.me/asarsook/1322,- كيلو لحمة مفرومة (موزة): 38 شيكل
-2026-01-10,beef,38,kg,1000,,,https://t.me/asarsook/1322,- كيلو لحمة شقف (موزة): 38 شيكل
+2026-01-10,beef,38,kg,1000,,colloquial_name_unverified,https://t.me/asarsook/1322,- كيلو لحمة شقف (موزة): 38 شيكل
 2026-01-11,potato,14,sack,1,,,https://t.me/asarsook/1327,- شوال بطاطا (4 كجم): 14 شيكل
 2026-01-11,onion,10,kg,1000,,unit_assumed_kg,https://t.me/asarsook/1327,- 3 كيلو بصل: 10 شيكل
 2026-01-11,potato,4,kg,1000,,,https://t.me/asarsook/1327,- كيلو بطاطا بلدية: 4 شيكل
@@ -2275,7 +2275,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2026-01-11,fish,23,kg,1000,,unit_assumed_kg,https://t.me/asarsook/1327,- سمك بكلا: 23 شيكل
 2026-01-11,frozen_fish_fillet,25,kg,1000,,unit_assumed_kg,https://t.me/asarsook/1327,- سمك فيليه: 25 شيكل
 2026-01-11,minced_meat,38,kg,1000,,unit_assumed_kg,https://t.me/asarsook/1327,- لحمة مفرومة (موزة): 38 شيكل
-2026-01-11,beef,38,kg,1000,,unit_assumed_kg,https://t.me/asarsook/1327,- لحمة شقف (موزة): 38 شيكل
+2026-01-11,beef,38,kg,1000,,unit_assumed_kg|colloquial_name_unverified,https://t.me/asarsook/1327,- لحمة شقف (موزة): 38 شيكل
 2026-01-12,soft_drink,10,unknown,,,unit_unknown,https://t.me/asarsook/1342,3علب كولا 250ملي بس ب10 شيكل 💥💥🔜
 2026-01-12,soft_drink,10,unknown,,,unit_unknown,https://t.me/asarsook/1342,5علب كولا 150ملي ب10شيكل 🚂🔜
 2026-01-15,potato,14,sack,1,,,https://t.me/asarsook/1362,- شوال بطاطا (4 كجم): 14 شيكل
@@ -2300,7 +2300,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2026-01-15,fish,23,kg,1000,,unit_assumed_kg,https://t.me/asarsook/1362,- سمك بكلا: 23 شيكل
 2026-01-15,frozen_fish_fillet,25,kg,1000,,unit_assumed_kg,https://t.me/asarsook/1362,- سمك فيليه: 25 شيكل
 2026-01-15,minced_meat,38,kg,1000,,unit_assumed_kg,https://t.me/asarsook/1362,- لحمة مفرومة (موزة): 38 شيكل
-2026-01-15,beef,38,kg,1000,,unit_assumed_kg,https://t.me/asarsook/1362,- لحمة شقف (موزة): 38 شيكل
+2026-01-15,beef,38,kg,1000,,unit_assumed_kg|colloquial_name_unverified,https://t.me/asarsook/1362,- لحمة شقف (موزة): 38 شيكل
 2026-01-17,potato,13,sack,1,,,https://t.me/asarsook/1378,- شوال بطاطا (4 كجم):13 شيكل
 2026-01-17,onion,10,kg,1000,,unit_assumed_kg,https://t.me/asarsook/1378,- 3 كيلو بصل: 10 شيكل
 2026-01-17,potato,4,kg,1000,,,https://t.me/asarsook/1378,- كيلو بطاطا بلدية: 4 شيكل
@@ -2323,7 +2323,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2026-01-17,fish,23,kg,1000,,unit_assumed_kg,https://t.me/asarsook/1378,- سمك بكلا: 23 شيكل
 2026-01-17,frozen_fish_fillet,25,kg,1000,,unit_assumed_kg,https://t.me/asarsook/1378,- سمك فيليه: 25 شيكل
 2026-01-17,minced_meat,38,kg,1000,,unit_assumed_kg,https://t.me/asarsook/1378,- لحمة مفرومة (موزة): 38 شيكل
-2026-01-17,beef,38,kg,1000,,unit_assumed_kg,https://t.me/asarsook/1378,- لحمة شقف (موزة): 38 شيكل
+2026-01-17,beef,38,kg,1000,,unit_assumed_kg|colloquial_name_unverified,https://t.me/asarsook/1378,- لحمة شقف (موزة): 38 شيكل
 2026-01-18,potato,13,sack,1,,,https://t.me/asarsook/1386,- شوال بطاطا (4 كجم):13 شيكل
 2026-01-18,onion,10,kg,1000,,unit_assumed_kg,https://t.me/asarsook/1386,- 3 كيلو بصل: 10 شيكل
 2026-01-18,potato,4,kg,1000,,,https://t.me/asarsook/1386,- كيلو بطاطا بلدية: 4 شيكل
@@ -2346,7 +2346,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2026-01-18,fish,23,kg,1000,,unit_assumed_kg,https://t.me/asarsook/1386,- سمك بكلا: 23 شيكل
 2026-01-18,frozen_fish_fillet,25,kg,1000,,unit_assumed_kg,https://t.me/asarsook/1386,- سمك فيليه: 25 شيكل
 2026-01-18,minced_meat,38,kg,1000,,unit_assumed_kg,https://t.me/asarsook/1386,- لحمة مفرومة (موزة): 38 شيكل
-2026-01-18,beef,38,kg,1000,,unit_assumed_kg,https://t.me/asarsook/1386,- لحمة شقف (موزة): 38 شيكل
+2026-01-18,beef,38,kg,1000,,unit_assumed_kg|colloquial_name_unverified,https://t.me/asarsook/1386,- لحمة شقف (موزة): 38 شيكل
 2026-01-19,candy,32,unknown,,,unit_unknown,https://t.me/asarsook/1396,السولار عند محطة لبيب الحلو وصل إلى 32 شيكل
 2026-01-19,potato,13,sack,1,,,https://t.me/asarsook/1397,- شوال بطاطا (4 كجم):13 شيكل
 2026-01-19,onion,10,kg,1000,,unit_assumed_kg,https://t.me/asarsook/1397,- 3 كيلو بصل: 10 شيكل
@@ -2370,7 +2370,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2026-01-19,fish,23,kg,1000,,unit_assumed_kg,https://t.me/asarsook/1397,- سمك بكلا: 23 شيكل
 2026-01-19,frozen_fish_fillet,25,kg,1000,,unit_assumed_kg,https://t.me/asarsook/1397,- سمك فيليه: 25 شيكل
 2026-01-19,minced_meat,38,kg,1000,,unit_assumed_kg,https://t.me/asarsook/1397,- لحمة مفرومة (موزة): 38 شيكل
-2026-01-19,beef,38,kg,1000,,unit_assumed_kg,https://t.me/asarsook/1397,- لحمة شقف (موزة): 38 شيكل
+2026-01-19,beef,38,kg,1000,,unit_assumed_kg|colloquial_name_unverified,https://t.me/asarsook/1397,- لحمة شقف (موزة): 38 شيكل
 2026-01-20,potato,14,sack,1,gaza_city,,https://t.me/asarsook/1401,شوال بطاطا (4 كجم): 14 شيكل
 2026-01-20,potato,4,kg,1000,gaza_city,,https://t.me/asarsook/1401,كيلو بطاطا بلدية: 4 شيكل
 2026-01-20,onion,9,kg,1000,gaza_city,unit_assumed_kg,https://t.me/asarsook/1401,3 كيلو بصل: 9 شيكل
@@ -2393,7 +2393,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2026-01-20,fish,23,kg,1000,gaza_city,unit_assumed_kg,https://t.me/asarsook/1401,سمك بكلا: 23 شيكل
 2026-01-20,frozen_fish_fillet,25,kg,1000,gaza_city,unit_assumed_kg,https://t.me/asarsook/1401,سمك فيليه: 25 شيكل
 2026-01-20,minced_meat,38,kg,1000,gaza_city,unit_assumed_kg,https://t.me/asarsook/1401,لحمة مفرومة (موزة): 38 شيكل
-2026-01-20,beef,38,kg,1000,gaza_city,unit_assumed_kg,https://t.me/asarsook/1401,لحمة شقف (موزة): 38 شيكل
+2026-01-20,beef,38,kg,1000,gaza_city,unit_assumed_kg|colloquial_name_unverified,https://t.me/asarsook/1401,لحمة شقف (موزة): 38 شيكل
 2026-01-22,potato,13,sack,1,,,https://t.me/asarsook/1422,🥔 شوال بطاطا ➝ 13 شيكل
 2026-01-22,onion,10,kg,1000,,unit_assumed_kg,https://t.me/asarsook/1422,🧅 4 كيلو بصل ➝ 10 شيكل
 2026-01-22,potato,10,kg,1000,,unit_assumed_kg,https://t.me/asarsook/1422,🥔 3 كيلو بطاطا بلدي ➝ 10 شيكل
@@ -2801,7 +2801,7 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2026-02-27,grouper,33,kg,1000,,,https://t.me/asarsook/1666,🐟 كيلو سمك لوكس بـ 33 شيكل
 2026-02-27,turkey_neck,15,kg,1000,,,https://t.me/asarsook/1666,🦃 كيلو رقاب حبش منظف وجاهز بـ 15 شيكل
 2026-02-27,minced_meat,40,kg,1000,,,https://t.me/asarsook/1666,🥩 كيلو لحمة مفرومة بـ 40 شيكل
-2026-02-27,beef,40,kg,1000,,,https://t.me/asarsook/1666,🥩 كيلو لحمة شقف بـ 40 شيكل
+2026-02-27,beef,40,kg,1000,,colloquial_name_unverified,https://t.me/asarsook/1666,🥩 كيلو لحمة شقف بـ 40 شيكل
 2026-03-01,bread,6,unknown,,middle,unit_unknown,https://t.me/asarsook/1687,كل يوم أشتري خبز من عندهم، ولسّا أمس وقت المغرب اشتريت الكيلو بـ 6 شيكل 🥖
 2026-03-05,tomato,10,kg,1000,,unit_assumed_kg,https://t.me/asarsook/1724,▪️البندورة 10 شيكل
 2026-03-05,cucumber,10,kg,1000,,unit_assumed_kg,https://t.me/asarsook/1724,▪️الخيار 10 شيكل
@@ -3132,4 +3132,4 @@ observed_on,slug,price_ils,unit,unit_grams,region,flags,post,line
 2026-09-01,fish,20,kg,1000,,unit_assumed_kg,https://t.me/asarsook/2682,🔹 سمك بكلا — 20 شيكل
 2026-09-15,apple,10,kg,1000,middle,unit_assumed_kg,https://t.me/asarsook/2735,3 كيلو تفاح ب10 شيكل عند مركز البحيصي معسكر دير البلح
 2026-09-16,eggs,30,carton,1,middle,,https://t.me/asarsook/2741,كرتونة البيض بــ 30 شيكل في سوق النصيرات.
-2026-09-25,beef,140,kg,1000,,,https://t.me/asarsook/2762,التجار دخلو لحمة خروف ب 140 شيكل الكيلو
+2026-09-25,beef,140,kg,1000,,colloquial_name_unverified,https://t.me/asarsook/2762,التجار دخلو لحمة خروف ب 140 شيكل الكيلو

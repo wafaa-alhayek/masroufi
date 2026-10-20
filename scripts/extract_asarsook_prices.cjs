@@ -31,9 +31,12 @@ for (const f of fs.readdirSync(`${M}/data/raw`).filter((f) => f.endsWith('_items
   }
 }
 // Gaza colloquial names seen in the channel, mapped to existing slugs only.
+// UNSURE ones are kept but flag their rows: سيرج can mean sesame oil rather
+// than generic cooking oil, and plain لحمة is "meat", not specifically beef.
+const UNSURE = new Set(['سيرج', 'لحمه'].map(norm))
 for (const [n, s] of [['سيرج', 'veg_oil'], ['بتنجان', 'aubergine'], ['باذنجان', 'aubergine'],
   ['تومه', 'garlic'], ['ثومه', 'garlic'], ['فليفله', 'pepper'], ['لحمه عجل', 'beef'], ['لحمه', 'beef'],
-  ['بندوره', 'tomato'], ['صلصه', 'tomato_paste'], ['جراده', 'carrot'], ['بقدونس', 'parsley'], ['رز مصري', 'rice']])
+  ['بندوره', 'tomato'], ['صلصه', 'tomato_paste'], ['بقدونس', 'parsley'], ['رز مصري', 'rice']])
   names.push([norm(n), s])
 names.sort((a, b) => b[0].length - a[0].length) // longest name wins
 
@@ -70,7 +73,7 @@ for (const p of fs.readFileSync('posts.jsonl', 'utf8').trim().split('\n').map(JS
     if (!unit && /كيلو/.test(tail)) { unit = 'kg'; grams = 1000 }
     if (!unit) { if (LOOSE.test(ROLE[hit[1]] || '')) { unit = 'kg'; grams = 1000; assumed = true } else unit = 'unknown' }
     const flags = [unit === 'unknown' ? 'unit_unknown' : '', assumed ? 'unit_assumed_kg' : '',
-      /[؟?]/.test(line) ? 'question_not_quote' : '', /(متوفر ب|بدل|كان)/.test(line) ? 'two_prices_in_line' : '']
+      /[؟?]/.test(line) ? 'question_not_quote' : '', UNSURE.has(hit[0]) ? 'colloquial_name_unverified' : '', /(متوفر ب|بدل|كان)/.test(line) ? 'two_prices_in_line' : '']
       .filter(Boolean).join('|')
     rows.push({ observed_on: p.date.slice(0, 10), slug: hit[1], price_ils: +m[2].replace(',', '.'), unit,
       unit_grams: grams ?? '', region: reg, flags, post: `https://t.me/asarsook/${p.id}`, line: line.trim() })

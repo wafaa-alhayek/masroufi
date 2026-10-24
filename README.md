@@ -191,7 +191,11 @@ pytest
 | `POST /api/vendors/{id}/confirm` | Confirm a vendor once; settles its whole history and all future transactions, with no model call. |
 | `GET /api/patterns` | Detected repeat patterns with a monthly cost estimate and a question to put to the user. |
 | `POST /api/patterns/confirm` | Name a pattern once; applies to every transaction in it. Eight ₪3 fares are one question, not eight. |
-| `GET /api/summary` | Spend by category, plus what fraction is categorised. |
+| `PATCH /api/transactions/{id}` | Fix the amount, date or note; say who it was for (`for_whom`) and what for (`details`); name an «other» (`category_label`); or exclude it (`excluded`). |
+| `DELETE /api/transactions/{id}` | Hand entries only — the undo. An imported row gets 409: see below. |
+| `GET /api/transactions?month=2031-03` | Also `date_from`/`date_to` and `for_whom`. |
+| `GET /api/summary?month=2031-03` | Spend by category, by named «other», and by person, plus what fraction is categorised. Excluded rows are left out. |
+| `GET`/`POST /api/people`, `PATCH /api/people/{id}` | The household's names for `for_whom`. First use adds one; a rename follows into every transaction. |
 | `GET /api/categories` | The taxonomy, for building a picker. |
 
 ### Kitchen
@@ -246,6 +250,27 @@ pytest
 
 Every write that happens in a shop — purchase, unavailable, from-stock, parcel,
 stock — takes a client-generated `key` so a replayed queue cannot record it twice.
+
+### Fixing a transaction
+
+Everything the bank cannot know stays editable on every row, imported ones
+included: who it was for (`for_whom`, from the household's list of people),
+what for (`details`), and a name for «غيره» (`category_label`, refused on any
+other category). Naming an «other» through the category endpoint teaches the
+shop, so the next visit arrives with the same name.
+
+A wrong amount, date or note is fixed with `PATCH`. A changed note is matched to
+a shop again, and every shop it touched has its totals recounted. A changed
+amount breaks a transfer pair, since the two sides no longer match.
+
+**Imported rows are excluded, never deleted.** Duplicate detection counts the
+rows already held (two ₪3 fares on one day are two fares), so a deleted
+imported row would come straight back with the next import of the same
+statement. `excluded: true` («ما تحسبوها») keeps it out of every total while it
+still counts as held. Hand entries can be deleted, which is the undo.
+
+Older databases get the new columns at start-up (`add_missing_columns` in
+`app/db.py`), each with its model default.
 
 ## Importer
 

@@ -73,7 +73,7 @@ def record_sighting(vendor: Vendor, transaction: Transaction) -> None:
         vendor.last_seen = transaction.booked_on
 
 
-def learn_category(session: Session, vendor: Vendor, category: str) -> int:
+def learn_category(session: Session, vendor: Vendor, category: str, label: str = "") -> int:
     """Teach the vendor a category from a user correction, and backfill.
 
     Applied to the vendor's transactions that are still awaiting review — never
@@ -81,6 +81,7 @@ def learn_category(session: Session, vendor: Vendor, category: str) -> int:
     transactions this settled.
     """
     vendor.category = category
+    vendor.category_label = label if category == "other" else ""
     vendor.category_confirmed = True
     session.add(vendor)
 
@@ -95,9 +96,24 @@ def learn_category(session: Session, vendor: Vendor, category: str) -> int:
 
     for transaction in pending:
         transaction.category = category
+        transaction.category_label = vendor.category_label
         transaction.category_source = CategorySource.RULE
         transaction.confidence = 1.0
         transaction.needs_review = False
         session.add(transaction)
 
     return len(pending)
+
+
+def refresh_stats(session: Session, vendor: Vendor) -> None:
+    """Recount a vendor's sightings from its transactions.
+
+    `record_sighting` keeps the counts as rows arrive; an edit or a delete has
+    to recount, because a running total cannot be un-added reliably.
+    """
+    rows = list(session.exec(select(Transaction).where(Transaction.vendor_id == vendor.id)))
+    vendor.times_seen = len(rows)
+    vendor.total_spent = sum(-t.amount for t in rows if t.amount < 0 and not t.excluded)
+    vendor.first_seen = min((t.booked_on for t in rows), default=None)
+    vendor.last_seen = max((t.booked_on for t in rows), default=None)
+    session.add(vendor)

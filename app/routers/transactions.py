@@ -1,8 +1,9 @@
 import asyncio
+import re
 import uuid
-from datetime import date
+from datetime import date, timedelta
 
-from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, Query, Response, UploadFile
 from pydantic import BaseModel, Field
 from sqlmodel import Session, select
 
@@ -11,7 +12,7 @@ from app.config import settings
 from app.db import get_session
 from app.deps import get_classifier, get_cleaner
 from app.importers.csv_import import ImportError_, parse_csv
-from app.models import CategorySource, Currency, Source, Transaction, Vendor
+from app.models import CategorySource, Currency, Person, Source, Transaction, Vendor
 from app.idempotency import remember, replay
 from app.notes import NoteCleaner
 from app.redact import normalise
@@ -25,6 +26,42 @@ from app.taxonomy import CATEGORIES, REDUCIBILITY_SCALE, is_valid_category
 router = APIRouter()
 
 MAX_UPLOAD_BYTES = 5 * 1024 * 1024
+
+LABEL_MAX = 40
+DETAILS_MAX = 200
+
+
+def _label(category: str | None, label: str | None) -> str:
+    """The household's own name for «other». Only «other» carries one."""
+    label = (label or "").strip()
+    if label and category != "other":
+        raise HTTPException(422, "category_label names an «other» transaction; this one is not «other».")
+    return label[:LABEL_MAX]
+
+
+def _person(session: Session, name: str | None) -> str:
+    """Use a name for `for_whom`, adding it to the household list the first time."""
+    name = (name or "").strip()[:LABEL_MAX]
+    if name and session.exec(select(Person).where(Person.name == name)).first() is None:
+        session.add(Person(name=name))
+    return name
+
+
+_MONTH = re.compile(r"^(\d{4})-(0[1-9]|1[0-2])$")
+
+
+def _period(month: str | None, date_from: date | None, date_to: date | None) -> tuple[date | None, date | None]:
+    """A month (YYYY-MM) or an explicit range; a month wins when both are given."""
+    if month:
+        m = _MONTH.match(month)
+        if not m:
+            raise HTTPException(422, "month must look like 2026-09.")
+        start = date(int(m.group(1)), int(m.group(2)), 1)
+        end = (start.replace(day=28) + timedelta(days=4)).replace(day=1) - timedelta(days=1)
+        return start, end
+    if date_from and date_to and date_from > date_to:
+        raise HTTPException(422, "date_from is after date_to.")
+    return date_from, date_to
 
 
 class ImportSummary(BaseModel):
@@ -61,6 +98,7 @@ class TransactionOut(BaseModel):
     )
     note_translated: bool = False
     category: str | None
+    category_label: str = ""
     category_source: CategorySource
     confidence: float | None
     reducibility: int | None
@@ -68,10 +106,14 @@ class TransactionOut(BaseModel):
     is_internal_transfer: bool
     source_id: int | None
     vendor_id: int | None
+    for_whom: str = ""
+    details: str = ""
+    excluded: bool = False
 
 
 class CategoryUpdate(BaseModel):
     category: str
+    category_label: str = Field(default="", max_length=LABEL_MAX, description="Own name for «other».")
     apply_to_vendor: bool = Field(
         default=True,
         description=(
@@ -93,6 +135,7 @@ class VendorOut(BaseModel):
     id: int
     name: str
     category: str | None
+    category_label: str = ""
     category_confirmed: bool
     times_seen: int
     total_spent: float
@@ -121,6 +164,7 @@ class VendorConfirm(BaseModel):
     category: str | None = Field(
         default=None, description="Omit to confirm the provisional category as-is."
     )
+    category_label: str = Field(default="", max_length=LABEL_MAX)
 
 
 class VendorConfirmResult(BaseModel):
@@ -135,6 +179,7 @@ class PatternConfirm(BaseModel):
     currency: str = Currency.ILS.value
     note_key: str = ""
     category: str
+    category_label: str = Field(default="", max_length=LABEL_MAX)
 
 
 class PatternOut(BaseModel):
@@ -302,10 +347,21 @@ def list_transactions(
     needs_review: bool | None = None,
     category: str | None = None,
     batch: str | None = None,
+    month: str | None = Query(None, description="YYYY-MM. Wins over date_from/date_to."),
+    date_from: date | None = None,
+    date_to: date | None = None,
+    for_whom: str | None = None,
     limit: int = Query(200, le=1000),
     session: Session = Depends(get_session),
 ) -> list[Transaction]:
+    start, end = _period(month, date_from, date_to)
     statement = select(Transaction)
+    if start is not None:
+        statement = statement.where(Transaction.booked_on >= start)
+    if end is not None:
+        statement = statement.where(Transaction.booked_on <= end)
+    if for_whom is not None:
+        statement = statement.where(Transaction.for_whom == for_whom)
     if needs_review is not None:
         statement = statement.where(Transaction.needs_review == needs_review)
     if category is not None:
@@ -330,12 +386,14 @@ def set_category(
     """
     if not is_valid_category(update.category):
         raise HTTPException(422, f"Unknown category: {update.category!r}")
+    label = _label(update.category, update.category_label)
 
     transaction = session.get(Transaction, transaction_id)
     if transaction is None:
         raise HTTPException(404, "No such transaction.")
 
     transaction.category = update.category
+    transaction.category_label = label
     transaction.category_source = CategorySource.USER
     transaction.confidence = 1.0
     transaction.needs_review = False
@@ -346,7 +404,7 @@ def set_category(
     if update.apply_to_vendor and transaction.vendor_id is not None:
         vendor = session.get(Vendor, transaction.vendor_id)
         if vendor is not None:
-            also_settled = vendor_service.learn_category(session, vendor, update.category)
+            also_settled = vendor_service.learn_category(session, vendor, update.category, label)
             learned_for = vendor.name
 
     session.commit()
@@ -381,8 +439,9 @@ def confirm_vendor(
         )
     if not is_valid_category(category):
         raise HTTPException(422, f"Unknown category: {category!r}")
+    label = _label(category, update.category_label or (vendor.category_label if not update.category else ""))
 
-    settled = vendor_service.learn_category(session, vendor, category)
+    settled = vendor_service.learn_category(session, vendor, category, label)
     session.commit()
     session.refresh(vendor)
     return VendorConfirmResult(
@@ -437,6 +496,7 @@ def confirm_pattern(
     """
     if not is_valid_category(confirm.category):
         raise HTTPException(422, f"Unknown category: {confirm.category!r}")
+    label = _label(confirm.category, confirm.category_label)
 
     transactions = list(session.exec(select(Transaction)))
     match = next(
@@ -456,30 +516,56 @@ def confirm_pattern(
     for tid in match.transaction_ids:
         transaction = by_id[tid]
         transaction.category = confirm.category
+        transaction.category_label = label
         transaction.category_source = CategorySource.USER
         transaction.confidence = 1.0
         transaction.needs_review = False
         session.add(transaction)
     session.commit()
 
-    return {"category": confirm.category, "transactions_updated": len(match.transaction_ids)}
+    return {
+        "category": confirm.category,
+        "category_label": label,
+        "transactions_updated": len(match.transaction_ids),
+        # Same name as the correction endpoint's count, so a client reads one field.
+        "also_settled": len(match.transaction_ids),
+    }
 
 
 @router.get("/summary")
-def summary(session: Session = Depends(get_session)) -> dict:
+def summary(
+    month: str | None = Query(None, description="YYYY-MM. Wins over date_from/date_to."),
+    date_from: date | None = None,
+    date_to: date | None = None,
+    session: Session = Depends(get_session),
+) -> dict:
     """Spend by category, plus what is still unreviewed.
 
     Internal transfers are excluded: a wallet top-up from the bank is the same
     money seen twice, and counting it would inflate spending by however much the
-    household moved between its own accounts.
+    household moved between its own accounts. Rows the household excluded
+    («ما تحسبوها») are left out too; only their count is reported.
     """
-    all_rows = list(session.exec(select(Transaction)))
+    start, end = _period(month, date_from, date_to)
+    statement = select(Transaction)
+    if start is not None:
+        statement = statement.where(Transaction.booked_on >= start)
+    if end is not None:
+        statement = statement.where(Transaction.booked_on <= end)
+    rows = list(session.exec(statement))
+    all_rows = [t for t in rows if not t.excluded]
     spending = [t for t in all_rows if not t.is_internal_transfer]
 
     by_category: dict[str, float] = {}
+    other_labels: dict[str, float] = {}
+    by_person: dict[str, float] = {}
     for t in spending:
         if t.amount < 0 and t.category:
             by_category[t.category] = by_category.get(t.category, 0.0) + abs(t.amount)
+            if t.category == "other" and t.category_label:
+                other_labels[t.category_label] = other_labels.get(t.category_label, 0.0) + abs(t.amount)
+        if t.amount < 0 and t.for_whom:
+            by_person[t.for_whom] = by_person.get(t.for_whom, 0.0) + abs(t.amount)
 
     return {
         "total_out": round(sum(abs(t.amount) for t in spending if t.amount < 0), 2),
@@ -487,7 +573,14 @@ def summary(session: Session = Depends(get_session)) -> dict:
         "internal_transfers_excluded": round(
             sum(abs(t.amount) for t in all_rows if t.is_internal_transfer and t.amount < 0), 2
         ),
+        "excluded": sum(1 for t in rows if t.excluded),
+        "from": start.isoformat() if start else None,
+        "to": end.isoformat() if end else None,
         "by_category": {k: round(v, 2) for k, v in sorted(by_category.items(), key=lambda kv: -kv[1])},
+        # The named parts of «other», so «phone repair» can be its own line.
+        "other_labels": {k: round(v, 2) for k, v in sorted(other_labels.items(), key=lambda kv: -kv[1])},
+        # Money out with a person named; the rest was for the whole household.
+        "by_person": {k: round(v, 2) for k, v in sorted(by_person.items(), key=lambda kv: -kv[1])},
         "needs_review": sum(1 for t in spending if t.needs_review),
         "coverage": round(sum(1 for t in spending if not t.needs_review) / len(spending), 3)
         if spending
@@ -586,6 +679,9 @@ class ManualEntry(BaseModel):
         description="Client-generated at the moment of tapping, so a replayed offline "
         "queue cannot record the same entry twice.",
     )
+    category_label: str = Field(default="", max_length=LABEL_MAX, description="Own name for «other».")
+    for_whom: str = Field(default="", max_length=LABEL_MAX, description="A person, or empty for the household.")
+    details: str = Field(default="", max_length=DETAILS_MAX)
 
 
 class ManualEntryOut(BaseModel):
@@ -628,6 +724,7 @@ async def add_transaction(
         raise HTTPException(422, "A transaction needs an amount.")
     if entry.category is not None and not is_valid_category(entry.category):
         raise HTTPException(422, f"Unknown category: {entry.category!r}")
+    label = _label(entry.category, entry.category_label)
 
     provider = source_service.by_slug(session, entry.source)
     if provider is None:
@@ -645,6 +742,8 @@ async def add_transaction(
         note_translated=note.translated,
         source_id=provider.id,
         import_batch="manual",
+        for_whom=_person(session, entry.for_whom),
+        details=entry.details.strip(),
     )
 
     vendor = vendor_service.resolve(session, note)
@@ -658,11 +757,13 @@ async def add_transaction(
     if entry.category is not None:
         # The household said so. Cheapest possible path: no model, no question.
         transaction.category = entry.category
+        transaction.category_label = label
         transaction.category_source = CategorySource.USER
         transaction.confidence = 1.0
         transaction.needs_review = False
     elif vendor is not None and vendor.category_confirmed:
         transaction.category = vendor.category
+        transaction.category_label = vendor.category_label
         transaction.category_source = CategorySource.RULE
         transaction.confidence = 1.0
         transaction.needs_review = False
@@ -709,3 +810,172 @@ async def add_transaction(
     remember(session, entry.key, "manual-entry", out)
     session.commit()
     return out
+
+
+class TransactionUpdate(BaseModel):
+    """Fix what was typed or imported. Only the fields sent are changed.
+
+    The category has its own endpoint, because changing it teaches the vendor.
+    """
+
+    booked_on: date | None = None
+    amount: float | None = Field(default=None, description="Same sign rule as entry; zero is refused.")
+    note: str | None = Field(default=None, min_length=1)
+    for_whom: str | None = Field(default=None, max_length=LABEL_MAX)
+    details: str | None = Field(default=None, max_length=DETAILS_MAX)
+    category_label: str | None = Field(default=None, max_length=LABEL_MAX)
+    excluded: bool | None = Field(
+        default=None, description="True keeps the row out of every total. The way to drop an imported row."
+    )
+
+
+def _unlink_transfer(session: Session, transaction: Transaction) -> None:
+    """A transfer pair no longer matches once one side changes or goes."""
+    if not transaction.is_internal_transfer:
+        return
+    peer = session.get(Transaction, transaction.transfer_peer_id) if transaction.transfer_peer_id else None
+    for t in (transaction, peer):
+        if t is not None:
+            t.is_internal_transfer = False
+            t.transfer_peer_id = None
+            session.add(t)
+
+
+@router.patch("/transactions/{transaction_id}", response_model=TransactionOut)
+async def update_transaction(
+    transaction_id: int,
+    update: TransactionUpdate,
+    session: Session = Depends(get_session),
+    cleaner: NoteCleaner = Depends(get_cleaner),
+) -> Transaction:
+    """Correct a wrong amount, date or note, or say who it was for.
+
+    Safe to replay: sending the same fields twice leaves the same result. A
+    changed note is cleaned and matched to a vendor again; the category is left
+    alone unless it only ever came from the old vendor, in which case the new
+    vendor's confirmed category replaces it.
+    """
+    transaction = session.get(Transaction, transaction_id)
+    if transaction is None:
+        raise HTTPException(404, "No such transaction.")
+    if update.amount is not None and update.amount == 0:
+        raise HTTPException(422, "A transaction needs an amount.")
+
+    touched_vendors: set[int] = set()
+    if transaction.vendor_id is not None:
+        touched_vendors.add(transaction.vendor_id)
+
+    if update.amount is not None and update.amount != transaction.amount:
+        _unlink_transfer(session, transaction)
+        transaction.amount = update.amount
+    if update.booked_on is not None:
+        transaction.booked_on = update.booked_on
+    if update.note is not None and update.note != transaction.note:
+        cleaned = await cleaner.clean(update.note)
+        transaction.note = update.note
+        transaction.note_key = cleaned.match_key or normalise(update.note)
+        transaction.note_clean = cleaned.for_classifier
+        transaction.note_translated = cleaned.translated
+        vendor = vendor_service.resolve(session, cleaned)
+        session.flush()
+        transaction.vendor_id = vendor.id if vendor is not None else None
+        if vendor is not None:
+            touched_vendors.add(vendor.id)
+            if transaction.category_source is CategorySource.RULE or transaction.needs_review:
+                if vendor.category_confirmed:
+                    transaction.category = vendor.category
+                    transaction.category_label = vendor.category_label
+                    transaction.category_source = CategorySource.RULE
+                    transaction.confidence = 1.0
+                    transaction.needs_review = False
+    if update.for_whom is not None:
+        transaction.for_whom = _person(session, update.for_whom)
+    if update.details is not None:
+        transaction.details = update.details.strip()
+    if update.category_label is not None:
+        transaction.category_label = _label(transaction.category, update.category_label)
+    if update.excluded is not None:
+        transaction.excluded = update.excluded
+
+    session.add(transaction)
+    session.flush()
+    for vid in touched_vendors:
+        vendor = session.get(Vendor, vid)
+        if vendor is not None:
+            vendor_service.refresh_stats(session, vendor)
+    session.commit()
+    session.refresh(transaction)
+    return transaction
+
+
+@router.delete("/transactions/{transaction_id}", status_code=204)
+def delete_transaction(transaction_id: int, session: Session = Depends(get_session)) -> Response:
+    """Remove a hand entry: the «تراجع», or a row typed twice.
+
+    404 when it is already gone, which an offline client replaying its queue
+    should treat as done. Imported rows get 409: duplicate detection counts the
+    rows already held, so a deleted one would return with the next import of the
+    same statement. Exclude it instead (PATCH with `excluded: true`). A transfer
+    partner is unlinked, and the vendor's counts are recomputed.
+    """
+    transaction = session.get(Transaction, transaction_id)
+    if transaction is None:
+        raise HTTPException(404, "No such transaction.")
+    if transaction.import_batch != "manual":
+        raise HTTPException(
+            409, "An imported row would come back on re-import. Exclude it instead (PATCH excluded: true)."
+        )
+    _unlink_transfer(session, transaction)
+    vendor_id = transaction.vendor_id
+    session.delete(transaction)
+    session.flush()
+    if vendor_id is not None:
+        vendor = session.get(Vendor, vendor_id)
+        if vendor is not None:
+            vendor_service.refresh_stats(session, vendor)
+    session.commit()
+    return Response(status_code=204)
+
+
+class PersonIn(BaseModel):
+    name: str = Field(min_length=1, max_length=LABEL_MAX)
+
+
+@router.get("/people", response_model=list[Person])
+def list_people(session: Session = Depends(get_session)) -> list[Person]:
+    """The household's people, for the «لمين؟» picker."""
+    return list(session.exec(select(Person).order_by(Person.name)))
+
+
+@router.post("/people", response_model=Person)
+def add_person(person: PersonIn, session: Session = Depends(get_session)) -> Person:
+    """Add someone. Adding a name that exists returns it, so a replay is harmless."""
+    name = person.name.strip()
+    existing = session.exec(select(Person).where(Person.name == name)).first()
+    if existing is not None:
+        return existing
+    row = Person(name=name)
+    session.add(row)
+    session.commit()
+    session.refresh(row)
+    return row
+
+
+@router.patch("/people/{person_id}", response_model=Person)
+def rename_person(person_id: int, person: PersonIn, session: Session = Depends(get_session)) -> Person:
+    """Correct a name everywhere it was used."""
+    row = session.get(Person, person_id)
+    if row is None:
+        raise HTTPException(404, "No such person.")
+    name = person.name.strip()
+    clash = session.exec(select(Person).where(Person.name == name, Person.id != person_id)).first()
+    if clash is not None:
+        raise HTTPException(409, f"{name!r} is already in the list.")
+    for t in session.exec(select(Transaction).where(Transaction.for_whom == row.name)):
+        t.for_whom = name
+        session.add(t)
+    row.name = name
+    session.add(row)
+    session.commit()
+    session.refresh(row)
+    return row

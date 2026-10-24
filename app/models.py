@@ -469,6 +469,9 @@ class Vendor(SQLModel, table=True):
         default=False, description="True once a human said so. Never overwritten by a model."
     )
 
+    category_label: str = Field(
+        default="", description="Own name for an «other» vendor; see Transaction."
+    )
     times_seen: int = Field(default=0)
     total_spent: float = Field(default=0.0)
     first_seen: date | None = None
@@ -535,12 +538,31 @@ class Transaction(SQLModel, table=True):
     )
 
     category: str | None = Field(default=None, index=True)
+    category_label: str = Field(
+        default="",
+        description="The household's own name for an «other» transaction, e.g. "
+        "'phone repair'. Shown instead of «other»; empty for every other category.",
+    )
     category_source: CategorySource = CategorySource.UNSET
     confidence: float | None = None
     reducibility: int | None = Field(
         default=None, description="Index into taxonomy.REDUCIBILITY_SCALE."
     )
     needs_review: bool = Field(default=True, index=True)
+
+    # What the bank cannot know. Both are the household's own words and stay
+    # editable for every transaction, imported ones included.
+    for_whom: str = Field(
+        default="",
+        index=True,
+        description="A person from the household list, or empty for the whole household.",
+    )
+    details: str = Field(default="", description="Free text, e.g. 'for university'.")
+
+    # «ما تحسبوها»: left out of every total but kept, because duplicate
+    # detection counts rows and a deleted imported row would come back on the
+    # next import of the same statement.
+    excluded: bool = Field(default=False, index=True)
 
     import_batch: str = Field(index=True)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
@@ -568,4 +590,16 @@ class RecurringCandidate(SQLModel, table=True):
     confirmed: bool | None = Field(
         default=None, description="None = not yet answered, True/False = user's answer."
     )
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class Person(SQLModel, table=True):
+    """Someone in the household that money is spent for: «مواصلات · لإسراء».
+
+    A name only. The app does not need ages, relationships or anything else
+    about a family to answer "who did this money go to".
+    """
+
+    id: int | None = Field(default=None, primary_key=True)
+    name: str = Field(index=True, unique=True, max_length=40)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))

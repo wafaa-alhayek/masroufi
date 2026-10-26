@@ -18,6 +18,11 @@ Everything else is still written out with a `status` saying why it was not used,
 so the rules can be loosened by someone who checks what they would let in.
 
     python -m app.importers.telegram_prices messages.html data/prices/asarsook.csv
+    python -m app.importers.telegram_prices --web data/prices/asarsook.csv
+
+The second form tops the CSV up from the channel's public web preview
+(t.me/s/asarsook), adding only messages newer than the last one already in it.
+Message numbers are the same in both sources, so the two never double-count.
 
 The raw export is never committed. The output keeps each line's text and message
 number, so any figure can be traced back to t.me/asarsook/<message_id>.
@@ -30,7 +35,7 @@ import html
 import re
 import sys
 from dataclasses import asdict, dataclass, fields
-from datetime import date
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 CHANNEL = "asarsook"
@@ -86,6 +91,8 @@ CHANNEL_ALIASES: dict[str, str] = {
     "فلفل حار": "hot_green_chilli",
     "بتنجان": "aubergine",
     "طحينيه": "tahini",
+    "ابو كادو": "avocado",
+    "ابو صره": "orange",  # navel orange
     "بيضه": "eggs",
     "بيض": "eggs",
     "ثومه": "garlic",
@@ -97,6 +104,19 @@ CHANNEL_ALIASES: dict[str, str] = {
     "حمص حب": "chickpeas",
     "فول ناشف": "fava_beans",
     "ملوخيه ناشفه": "molokhia_dry",
+    # In Gaza plain لحمة is beef unless the line names another animal; the
+    # longer names below (lamb, chicken, tins) win because they match more words.
+    "لحم": "beef",
+    "لحمه": "beef",
+    "لحم موزه": "beef",  # shank, a cut of beef, not bananas
+    "لحمه موزه": "beef",
+    "لحم عجل": "beef",
+    "لحمه عجل": "beef",
+    "لحم ضان": "lamb",
+    "لحم خروف": "lamb",
+    "لحمه خروف": "lamb",
+    # كفتة is how the channel sells raw ground meat, not the frozen kebab item.
+    "كفته": "minced_meat",
     "لحمه اكسترا": "canned_meat",
     "علبه لحمه": "canned_meat",
 }
@@ -105,10 +125,10 @@ CHANNEL_ALIASES: dict[str, str] = {
 _CANNED = re.compile(r"علب|معلب")
 
 # Phrases that contain an item's name but are not that item: citric acid is
-# not lemons, a cut of beef called "banana" is not bananas, cooked okra is a
+# not lemons, cooked okra is a
 # dish, and Deir al-Balah is a town, not dates.
 _NOT_THE_ITEM = re.compile(
-    r"حمض|ملح ليمون|لحمه موزه|موزه لحمه|شبره|مطبوخ|نقل|توصيل|اجره|مواصلات"
+    r"حمض|ملح ليمون|شبره|مطبوخ|نقل|توصيل|اجره|مواصلات"
 )
 _PLACES = re.compile(
     r"دير البلح|خانيونس|خان يونس|النصيرات|الزوايده|المواصي|رفح|جباليا|بيت لاهيا|الشجاعيه|الرمال"
@@ -168,7 +188,8 @@ def match_item(text: str, items: dict[str, dict], index=None) -> tuple[str | Non
         return None, "ambiguous_item"
     slug = winners[0]
     if _CANNED.search(normalise(text)) and not slug.startswith("canned_"):
-        canned = f"canned_{slug}"
+        # Tinned beef is catalogued as canned_meat; there is no canned_beef.
+        canned = "canned_meat" if slug == "beef" else f"canned_{slug}"
         if canned in items:
             return canned, ""
         return None, "canned_form_unknown"
@@ -198,6 +219,9 @@ _UNITS: list[tuple[re.Pattern, str, float]] = [
 ]
 _TIN = re.compile(r"علب")
 _SACK = re.compile(r"كيس|شوال")
+# A رطل is not a kilo: in Palestine it is usually around 3 kg, and its weight is
+# not fixed, so a price per رطل is left out rather than read as per kilo.
+_RATL = re.compile(r"رطل|ارطال")
 
 # What a unitless price is customarily quoted by. Produce, grains, pulses and
 # sugar are sold loose by the kilo, and so is fresh meat and fish; cooking oil by
@@ -264,6 +288,8 @@ def _quantity(
         return 0, "", "tin", False, "tin_without_weight"
     if _SACK.search(t):
         return 0, "", "sack", False, "sack_without_weight"
+    if _RATL.search(t):
+        return 0, "", "ratl", False, "ratl_without_weight"
     if unit == "g" and (
         role in _LOOSE_BY_KILO or (role in _FRESH_BY_KILO and shelf_life == "perishable")
     ):
@@ -380,10 +406,72 @@ def posts(export_html: str):
         yield mid, date(int(d.group(3)), int(d.group(2)), int(d.group(1))).isoformat(), text
 
 
+_WEB_POST = re.compile(r'data-post="[^"/]+/(\d+)"')
+_WEB_TEXT = re.compile(r'tgme_widget_message_text[^>]*>(.*?)</div>', re.S)
+_WEB_TIME = re.compile(r'<time[^>]*datetime="([^"]+)"')
+
+
+def _gaza_date(stamp: str) -> str:
+    """The calendar day in Gaza for a UTC timestamp, as the export would show it."""
+    moment = datetime.fromisoformat(stamp)
+    try:
+        from zoneinfo import ZoneInfo
+
+        return moment.astimezone(ZoneInfo("Asia/Gaza")).date().isoformat()
+    except Exception:  # no tz database (Windows without tzdata): winter offset
+        return moment.astimezone(timezone(timedelta(hours=2))).date().isoformat()
+
+
+def web_posts(page_html: str):
+    """(message_id, posted_on, text) from one page of t.me/s/<channel>."""
+    for block in page_html.split('class="tgme_widget_message_wrap')[1:]:
+        mid, t, when = _WEB_POST.search(block), _WEB_TEXT.search(block), _WEB_TIME.search(block)
+        if not (mid and t and when):
+            continue
+        body = re.sub(r"<br\s*/?>", "\n", t.group(1))
+        text = html.unescape(re.sub(r"<[^>]+>", "", body))
+        yield int(mid.group(1)), _gaza_date(when.group(1)), text
+
+
+def fetch_web_posts(after_id: int, pause: float = 1.5) -> list[tuple[int, str, str]]:
+    """Every post newer than `after_id`, oldest first, reading pages backwards."""
+    import time
+
+    import httpx
+
+    out: dict[int, tuple[int, str, str]] = {}
+    before = None
+    with httpx.Client(headers={"User-Agent": "Mozilla/5.0"}, timeout=30) as client:
+        while True:
+            url = f"https://t.me/s/{CHANNEL}" + (f"?before={before}" if before else "")
+            for attempt in range(4):  # a dropped connection should not end a long run
+                try:
+                    page = client.get(url).text
+                    break
+                except httpx.TransportError:
+                    if attempt == 3:
+                        raise
+                    time.sleep(10 * (attempt + 1))
+            ids = [int(m) for m in _WEB_POST.findall(page)]
+            for post in web_posts(page):
+                if post[0] > after_id:
+                    out[post[0]] = post
+            if not ids or min(ids) <= after_id + 1 or min(ids) == before:
+                break
+            before = min(ids)
+            time.sleep(pause)
+    return [out[k] for k in sorted(out)]
+
+
 def parse_export(export_html: str, items: dict[str, dict]) -> list[PriceLine]:
+    return parse_posts(posts(export_html), items)
+
+
+def parse_posts(messages, items: dict[str, dict]) -> list[PriceLine]:
+    """Price rows from (message_id, posted_on, text) triples, from either source."""
     index = _alias_index(items)
     rows: list[PriceLine] = []
-    for mid, posted_on, text in posts(export_html):
+    for mid, posted_on, text in messages:
         lines = [l for l in text.split("\n") if l.strip()]
         region = region_of(" ".join(lines[:3]))
         for line in lines:
@@ -464,10 +552,18 @@ def read_csv(path: Path) -> list[PriceLine]:
 
 def main(argv: list[str]) -> int:
     if len(argv) != 3:
-        print(__doc__.strip().split("\n\n")[-2])
+        print(__doc__.strip().split("\n\n")[-3])
         return 2
-    rows = parse_export(Path(argv[1]).read_text(encoding="utf-8"), catalogue_items())
-    write_csv(rows, Path(argv[2]))
+    if argv[1] == "--web":
+        path = Path(argv[2])
+        kept = read_csv(path) if path.exists() else []
+        newest = max((r.message_id for r in kept), default=0)
+        rows = parse_posts(fetch_web_posts(newest), catalogue_items())
+        write_csv(kept + rows, path)
+        print(f"{len(rows)} new rows after message {newest}")
+    else:
+        rows = parse_export(Path(argv[1]).read_text(encoding="utf-8"), catalogue_items())
+        write_csv(rows, Path(argv[2]))
     from collections import Counter
 
     for status, n in Counter(r.status for r in rows).most_common():

@@ -412,8 +412,8 @@ and `GET /api/prices/observations/{id}` shows the history behind any figure.
 [أسعار السوق - غزة](https://t.me/asarsook) has posted what things cost in
 Gaza's markets most days since November 2024, area by area. Its posts are the
 closest thing to a local, dated price record there is, so the app ships them:
-`data/prices/asarsook.csv` holds every price line from 275 posts (Nov 2024 – Dec
-2025), and **1,763 of them load as observations** for 117 items on startup
+`data/prices/asarsook.csv` holds every price line from 544 posts (Nov 2024 – Oct
+2026), and **2,949 of them load as observations** for 135 items on startup
 (`CHANNEL_PRICES=false` turns that off).
 
 The lines are written for people, so the parser
@@ -428,7 +428,8 @@ every other line in the CSV with a `status` saying why it was left out:
 - **A quantity must be stated** — a kilo, a وقية, a litre, 700 g — or be the kilo
   that loose produce, grains, pulses, sugar and fresh meat are customarily quoted
   by (marked `unit_inferred`). A tin, a packet or a sack with no weight is left
-  out: read as a per-kilo price it would be wrong by an order of magnitude.
+  out: read as a per-kilo price it would be wrong by an order of magnitude. So is
+  a price per رطل, which is not a kilo (usually about 3 kg, and not fixed).
 - **A وقية is taken as 250 g.** The channel never defines it; the raw unit is on
   every row, so the prices can be recomputed if that is wrong.
 - **Prices paid by app transfer are not loaded.** Posts often quote two prices,
@@ -437,14 +438,22 @@ every other line in the CSV with a `status` saying why it was left out:
   a kilo in July 2025; nothing here smooths that away.
 
 Each observation's note links to its post (`t.me/asarsook/<message>`), so any
-figure can be checked. To refresh, export the channel from Telegram Desktop
-(*Export chat history*, HTML) and run:
+figure can be checked. To add the posts since the last one in the CSV, from the
+channel's public web preview (about 1.5 s per page of 20 posts):
+
+```bash
+python -m app.importers.telegram_prices --web data/prices/asarsook.csv
+```
+
+To rebuild from scratch, export the channel from Telegram Desktop (*Export chat
+history*, HTML) and run:
 
 ```bash
 python -m app.importers.telegram_prices path/to/messages.html data/prices/asarsook.csv
 ```
 
-The raw export is never committed.
+Message numbers are the same in both, so they never double-count. The raw export
+is never committed. Photo posts (price boards as images) are not read.
 
 Costing a whole list names its own gaps rather than quietly covering half of it:
 

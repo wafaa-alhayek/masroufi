@@ -9,7 +9,9 @@ from app.importers.telegram_prices import (
     catalogue_items,
     parse_export,
     parse_line,
+    parse_posts,
     read_csv,
+    web_posts,
 )
 from app.models import Item, PriceObservation, PriceSource
 from app.services import prices
@@ -67,6 +69,25 @@ def test_cash_first_then_app(items):
 
 
 @pytest.mark.parametrize(
+    "text, slug",
+    [
+        ("لحم موزه 50شيكل", "beef"),  # shank, a cut of beef, not bananas
+        ("لحمة موزة: ٥٠ شيكل", "beef"),
+        ("لحم رقيبة 40شيكل", "beef"),  # plain لحمة is beef in Gaza
+        ("🥩 كيلو لحم ضأن: 480₪", "lamb"),
+        ("كيلو كفتة 60 شيكل", "minced_meat"),  # the channel's raw ground meat
+        ("كيلو موز 10 شيكل", "banana"),
+    ],
+)
+def test_meat_words(items, text, slug):
+    assert line(text, items).item_slug == slug
+
+
+def test_tinned_beef_is_canned_meat(items):
+    assert line("• لحمة عجل معلب: 40₪", items).item_slug == "canned_meat"
+
+
+@pytest.mark.parametrize(
     "text, status",
     [
         ("🍋 حمض الليمون – 600 شيكل / كيلو", "not_the_item"),  # citric acid
@@ -112,6 +133,39 @@ def test_an_export_becomes_dated_regional_rows(items):
     assert any(r.item_slug == "garlic" and r.status == "unit_mismatch" for r in rows)
 
 
+# The same two messages as they appear on t.me/s/asarsook, the public web preview.
+WEB_PAGE = """
+<div class="tgme_widget_message_wrap js-widget_message_wrap"><div class="tgme_widget_message" data-post="asarsook/12">
+ <div class="tgme_widget_message_text js-message_text" dir="auto">📊 <b>الأسعار في شمال غزة اليوم<br/>🗓️ 23 نوفمبر 2024<br/></b><br/>كيلو بطاطا 60 شيكل <br/><br/>راس ثومة 15 شيكل</div>
+ <a class="tgme_widget_message_date" href="https://t.me/asarsook/12"><time datetime="2024-11-23T08:06:53+00:00" class="time">10:06</time></a>
+</div></div>
+<div class="tgme_widget_message_wrap js-widget_message_wrap"><div class="tgme_widget_message" data-post="asarsook/13">
+ <div class="tgme_widget_message_text js-message_text" dir="auto">الأسعار في جنوب قطاع غزة<br/>كيلو سكر 35 شيكل</div>
+ <a class="tgme_widget_message_date" href="https://t.me/asarsook/13"><time datetime="2024-11-23T23:30:00+00:00" class="time">01:30</time></a>
+</div></div>
+"""
+
+
+def test_the_web_preview_reads_like_the_export(items):
+    """Same message numbers, same text, and dates on Gaza's calendar, not UTC's."""
+    assert list(web_posts(WEB_PAGE))[1][:2] == (13, "2024-11-24")
+    web = parse_posts(web_posts(WEB_PAGE), items)
+    export = parse_export(EXPORT, items)
+    assert [(r.message_id, r.posted_on, r.region, r.line, r.status, r.item_slug) for r in web] == [
+        (r.message_id, r.posted_on, r.region, r.line, r.status, r.item_slug) for r in export
+    ]
+
+
+def test_a_ratl_is_not_a_kilo(items):
+    row = line("🥔 بطاطا بلدية (الرطل) ➝ 11 شيكل", items)
+    assert (row.item_slug, row.status) == ("potato", "ratl_without_weight")
+
+
+def test_more_spellings(items):
+    assert line("🥑 ابو كادو  8 ₪", items).item_slug == "avocado"
+    assert line("🍊 أبو صُرّة: 2 كيلو بـ 10 شيكل", items).item_slug == "orange"
+
+
 def test_every_committed_price_names_a_seeded_item():
     from app.kitchen.catalogue import seed_items
 
@@ -150,6 +204,31 @@ def test_loading_is_idempotent_and_skips_app_prices(session):
     observations = session.exec(select(PriceObservation)).all()
     assert {o.source for o in observations} == {PriceSource.CHANNEL}
     assert all(o.note.startswith("t.me/asarsook/") for o in observations)
+
+
+def test_a_corrected_csv_replaces_what_was_loaded(session, tmp_path):
+    """A line re-filed under another item moves; household prices stay put."""
+    import shutil
+
+    from app.services.prices import record
+
+    banana = session.exec(select(Item).where(Item.slug == "banana")).one()
+    beef = session.exec(select(Item).where(Item.slug == "beef")).one()
+    old = tmp_path / "old.csv"
+    shutil.copy(CHANNEL_PRICES, old)
+    text = old.read_text(encoding="utf-8").replace(",ok,beef,50.0,50.0,1000.0", ",ok,banana,50.0,50.0,1000.0", 1)
+    old.write_text(text, encoding="utf-8")
+    load_channel_prices(session, old)
+    record(session, banana, 12, 1000, PriceSource.MANUAL)
+    session.commit()
+
+    load_channel_prices(session, CHANNEL_PRICES)
+    by_item = lambda item: session.exec(  # noqa: E731
+        select(PriceObservation).where(PriceObservation.item_id == item.id)
+    ).all()
+    assert [o.source for o in by_item(banana) if "موز" in o.note and "لحم" in o.note] == []
+    assert any(o.paid == 50.0 for o in by_item(beef))
+    assert [o.source for o in by_item(banana)].count(PriceSource.MANUAL) == 1
 
 
 def test_a_new_install_has_a_dated_estimate_not_no_price(session):

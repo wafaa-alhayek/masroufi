@@ -9,7 +9,9 @@ from app.importers.telegram_prices import (
     catalogue_items,
     parse_export,
     parse_line,
+    parse_posts,
     read_csv,
+    web_posts,
 )
 from app.models import Item, PriceObservation, PriceSource
 from app.services import prices
@@ -129,6 +131,39 @@ def test_an_export_becomes_dated_regional_rows(items):
     ]
     # A head of garlic has no weight, so it is kept as a row but not as a price.
     assert any(r.item_slug == "garlic" and r.status == "unit_mismatch" for r in rows)
+
+
+# The same two messages as they appear on t.me/s/asarsook, the public web preview.
+WEB_PAGE = """
+<div class="tgme_widget_message_wrap js-widget_message_wrap"><div class="tgme_widget_message" data-post="asarsook/12">
+ <div class="tgme_widget_message_text js-message_text" dir="auto">📊 <b>الأسعار في شمال غزة اليوم<br/>🗓️ 23 نوفمبر 2024<br/></b><br/>كيلو بطاطا 60 شيكل <br/><br/>راس ثومة 15 شيكل</div>
+ <a class="tgme_widget_message_date" href="https://t.me/asarsook/12"><time datetime="2024-11-23T08:06:53+00:00" class="time">10:06</time></a>
+</div></div>
+<div class="tgme_widget_message_wrap js-widget_message_wrap"><div class="tgme_widget_message" data-post="asarsook/13">
+ <div class="tgme_widget_message_text js-message_text" dir="auto">الأسعار في جنوب قطاع غزة<br/>كيلو سكر 35 شيكل</div>
+ <a class="tgme_widget_message_date" href="https://t.me/asarsook/13"><time datetime="2024-11-23T23:30:00+00:00" class="time">01:30</time></a>
+</div></div>
+"""
+
+
+def test_the_web_preview_reads_like_the_export(items):
+    """Same message numbers, same text, and dates on Gaza's calendar, not UTC's."""
+    assert list(web_posts(WEB_PAGE))[1][:2] == (13, "2024-11-24")
+    web = parse_posts(web_posts(WEB_PAGE), items)
+    export = parse_export(EXPORT, items)
+    assert [(r.message_id, r.posted_on, r.region, r.line, r.status, r.item_slug) for r in web] == [
+        (r.message_id, r.posted_on, r.region, r.line, r.status, r.item_slug) for r in export
+    ]
+
+
+def test_a_ratl_is_not_a_kilo(items):
+    row = line("🥔 بطاطا بلدية (الرطل) ➝ 11 شيكل", items)
+    assert (row.item_slug, row.status) == ("potato", "ratl_without_weight")
+
+
+def test_more_spellings(items):
+    assert line("🥑 ابو كادو  8 ₪", items).item_slug == "avocado"
+    assert line("🍊 أبو صُرّة: 2 كيلو بـ 10 شيكل", items).item_slug == "orange"
 
 
 def test_every_committed_price_names_a_seeded_item():

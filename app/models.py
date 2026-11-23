@@ -603,3 +603,28 @@ class Person(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     name: str = Field(index=True, unique=True, max_length=40)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class BudgetPeriod(str, Enum):
+    WEEK = "week"
+    FORTNIGHT = "fortnight"
+    MONTH = "month"
+    DAYS = "days"  # any other length, set in `days`
+
+
+class Budget(SQLModel, table=True):
+    """A limit the household set for one category, over a period they chose.
+
+    The period repeats from `starts_on`: a fortnight from the day the salary
+    arrives, a month from the 5th, ten days from the aid payment. The window is
+    worked out on read, so nothing has to roll over at midnight.
+    """
+
+    id: int | None = Field(default=None, primary_key=True)
+    category: str = Field(index=True, unique=True)
+    amount: float = Field(gt=0)
+    currency: Currency = Currency.ILS
+    period: BudgetPeriod = BudgetPeriod.MONTH
+    days: int | None = Field(default=None, ge=1, le=366, description="Only for period `days`.")
+    starts_on: date
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))

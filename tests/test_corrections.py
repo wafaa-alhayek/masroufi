@@ -175,17 +175,20 @@ def test_an_older_database_gets_the_new_columns():
     with engine.begin() as conn:
         conn.execute(text('INSERT INTO "transaction" (booked_on, amount, currency, note, note_key, note_clean, '
                           'note_translated, is_internal_transfer, category_source, needs_review, import_batch, created_at, '
-                          'for_whom, details, category_label, excluded) VALUES '
-                          "('2031-01-01', -5, 'ILS', 'x', 'x', '', 0, 0, 'UNSET', 1, 'old', '2031-01-01', '', '', '', 0)"))
+                          'for_whom, details, category_label, excluded, personal) VALUES '
+                          "('2031-01-01', -5, 'ILS', 'x', 'x', '', 0, 0, 'UNSET', 1, 'old', '2031-01-01', '', '', '', 0, 0)"))
         conn.execute(text("DROP INDEX ix_transaction_for_whom"))
         conn.execute(text('ALTER TABLE "transaction" DROP COLUMN for_whom'))
         conn.execute(text('ALTER TABLE "transaction" DROP COLUMN details'))
         conn.execute(text("DROP INDEX ix_transaction_excluded"))
         conn.execute(text('ALTER TABLE "transaction" DROP COLUMN excluded'))
+        conn.execute(text("DROP INDEX ix_transaction_personal"))
+        conn.execute(text('ALTER TABLE "transaction" DROP COLUMN personal'))
     added = add_missing_columns(engine)
-    assert {"transaction.for_whom", "transaction.details", "transaction.excluded"} <= set(added)
+    assert {"transaction.for_whom", "transaction.details", "transaction.excluded", "transaction.personal"} <= set(added)
     with engine.connect() as conn:
-        assert conn.execute(text('SELECT for_whom, details, excluded FROM "transaction"')).one() == ("", "", 0)
+        row = conn.execute(text('SELECT for_whom, details, excluded, personal FROM "transaction"')).one()
+        assert row == ("", "", 0, 0)
         indexes = {r[1] for r in conn.execute(text("PRAGMA index_list('transaction')"))}
         assert "ix_transaction_for_whom" in indexes
     assert add_missing_columns(engine) == [], "running it again adds nothing"

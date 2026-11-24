@@ -16,6 +16,7 @@ from app.models import (
     DishPortion,
     GasBudget,
     Household,
+    HouseholdMode,
     Item,
     ItemRole,
     LineState,
@@ -47,12 +48,18 @@ GROCERY_CATEGORY = "groceries"
 
 
 class HouseholdUpdate(BaseModel):
+    mode: HouseholdMode | None = Field(
+        default=None,
+        description="The answer to «بتصرف على بيت ولا على حالك؟». `alone` also sets one "
+        "adult and no children unless those are sent too.",
+    )
     adults: int | None = Field(default=None, ge=0)
     children: int | None = Field(default=None, ge=0)
     child_portion_ratio: float | None = Field(default=None, gt=0, le=1)
 
 
 class HouseholdOut(BaseModel):
+    mode: HouseholdMode | None = Field(description="None until the first-launch question is answered.")
     adults: int
     children: int
     child_portion_ratio: float
@@ -229,7 +236,12 @@ def update_household(
     update: HouseholdUpdate, session: Session = Depends(get_session)
 ) -> HouseholdOut:
     household = get_household(session)
-    for field_name, value in update.model_dump(exclude_none=True).items():
+    changes = update.model_dump(exclude_none=True)
+    if changes.get("mode") is HouseholdMode.ALONE:
+        # Someone spending only on themselves cooks for one.
+        changes.setdefault("adults", 1)
+        changes.setdefault("children", 0)
+    for field_name, value in changes.items():
         setattr(household, field_name, value)
     session.add(household)
     session.commit()
@@ -239,6 +251,7 @@ def update_household(
 
 def _household_out(household: Household) -> HouseholdOut:
     return HouseholdOut(
+        mode=household.mode,
         adults=household.adults,
         children=household.children,
         child_portion_ratio=household.child_portion_ratio,

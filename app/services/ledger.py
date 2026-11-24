@@ -2,8 +2,8 @@
 
 Balances are worked out from the entries on read, per currency, never stored:
 a stored balance drifts the first time an entry is edited. The sign is the
-household's: positive means the party owes the household («إلكم»), negative
-means the household owes the party («عليكم»).
+household's: positive means the party owes the household («إلك»), negative
+means the household owes the party («عليك»).
 """
 
 from dataclasses import dataclass, field

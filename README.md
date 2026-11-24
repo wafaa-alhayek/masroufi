@@ -202,7 +202,7 @@ pytest
 
 | | |
 |---|---|
-| `GET`/`PATCH /api/kitchen/household` | Adults, children, and the child portion ratio. |
+| `GET`/`PATCH /api/kitchen/household` | Adults, children, the child portion ratio, and `mode` (household or alone). |
 | `GET /api/kitchen/dishes` · `/items` | The seeded dish library and grocery catalogue. |
 | `GET`/`PUT /api/kitchen/dishes/{id}/ingredients` | Read and correct a recipe's per-adult quantities. |
 | `PATCH /api/kitchen/items/{id}` | Correct an item's unit, shelf life or purchase step. |
@@ -256,7 +256,7 @@ stock — takes a client-generated `key` so a replayed queue cannot record it tw
 | | |
 |---|---|
 | `GET /api/budgets?on=…` | Each budget's current window, spent, left, days left, the straight-line mark for today, and `status`. |
-| `POST /api/budgets` | One per category: `amount`, `period` (`week`, `fortnight`, `month`, or `days` with a length), `starts_on`. Takes a `key`. |
+| `POST /api/budgets` | One per category and `scope` (`all`, `household`, `personal`): `amount`, `period` (`week`, `fortnight`, `month`, or `days` with a length), `starts_on`. Takes a `key`. |
 | `PATCH`/`DELETE /api/budgets/{id}` | Change the amount or period, or remove it. |
 
 A budget is a category, an amount and a period that repeats from the day the
@@ -300,11 +300,31 @@ entry with it. A bank row categorised `debt_repayment` is left out of
 same groceries twice.
 
 Balances are worked out from the entries on read, per currency, never stored.
-Negative means you owe them («عليكم»); positive, they owe you («إلكم»). A party
+Negative means you owe them («عليك»); positive, they owe you («إلك»). A party
 is `overdue` once the date promised on its latest borrow or lend has passed
 with money still outstanding.
 
 The ledger also travels in `/api/bootstrap`.
+
+### One user, the household and their own money
+
+| | |
+|---|---|
+| `PATCH /api/kitchen/household` with `mode` | The answer to «بتصرف على بيت ولا على حالك؟»: `household` or `alone`. `null` until asked. |
+| `personal` on a transaction | «إلي»: the user's own spending. Refused together with a `for_whom`. |
+| `scope=all\|household\|personal` | On `/summary`, `/transactions` and budgets. `/summary` also returns `by_scope`, both sides of the switch. |
+
+The app is always used by one person, even one who pays for a whole household.
+So it asks once whether they spend for a household or only for themselves.
+Someone on their own never sees anything about a household; `alone` also sets
+the kitchen to one adult.
+
+For a household, each expense is the household's (the default), the user's own
+(`personal`), or for someone in the family (`for_whom`, which is still household
+money). These stay in **one list**, not two, because both come out of the same
+wallet: two lists would never add up to what is in it. The month screen switches
+between «الكل», «البيت» and «إلي», and a budget can be set for any of the three,
+so groceries for the house and the user's own can each have a limit.
 
 ### Fixing a transaction
 
@@ -321,11 +341,13 @@ amount breaks a transfer pair, since the two sides no longer match.
 **Imported rows are excluded, never deleted.** Duplicate detection counts the
 rows already held (two ₪3 fares on one day are two fares), so a deleted
 imported row would come straight back with the next import of the same
-statement. `excluded: true` («ما تحسبوها») keeps it out of every total while it
+statement. `excluded: true` («ما بتنحسب») keeps it out of every total while it
 still counts as held. Hand entries can be deleted, which is the undo.
 
 Older databases get the new columns at start-up (`add_missing_columns` in
-`app/db.py`), each with its model default.
+`app/db.py`), each with its model default. An index that has stopped being
+unique, like the budget's category, is rebuilt without the constraint
+(`relax_unique_indexes`).
 
 ## Importer
 

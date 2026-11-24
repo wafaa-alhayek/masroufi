@@ -34,6 +34,7 @@ from app.deps import get_temperature_source
 from app.kitchen import get_household
 from app.kitchen.spoilage import DAILY_THRESHOLD_DAYS, REFERENCE_C, keeps_for
 from app.models import (
+    Budget,
     Dish,
     DishAlias,
     DishItem,
@@ -48,6 +49,8 @@ from app.models import (
     Source,
     StockCondition,
 )
+from app.routers.budgets import BudgetOut
+from app.routers.budgets import out as budget_out
 from app.services import prices as price_service
 from app.services import shopping
 from app.weather import CLIMATE_NORMALS_C, TemperatureSource
@@ -185,6 +188,12 @@ class Bootstrap(BaseModel):
     parcel_template: ParcelTemplateBundle = Field(
         description="What a new parcel sheet opens with, so recording one works offline."
     )
+    budgets: list[BudgetOut] = Field(
+        default_factory=list,
+        description="Each budget as it stood when the bundle was made. Offline, the "
+        "client adds what it records to `spent` and `left`; the window and the line "
+        "are already worked out.",
+    )
     dishes_offline_only: bool = Field(
         description="True when `dishes` is the curated offline set rather than the "
         "whole library. The rest are searchable when there is a connection."
@@ -321,6 +330,7 @@ async def bootstrap(
             for row in session.exec(select(PantryStock))
             if row.quantity > 0 and row.condition is not StockCondition.SPOILED
         ],
+        budgets=[budget_out(session, b, date.today()) for b in session.exec(select(Budget).order_by(Budget.id))],
         weary_item_ids=[
             p.item_id
             for p in session.exec(select(ItemPreference))

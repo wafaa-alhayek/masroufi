@@ -251,6 +251,33 @@ pytest
 Every write that happens in a shop — purchase, unavailable, from-stock, parcel,
 stock — takes a client-generated `key` so a replayed queue cannot record it twice.
 
+### Budgets
+
+| | |
+|---|---|
+| `GET /api/budgets?on=…` | Each budget's current window, spent, left, days left, the straight-line mark for today, and `status`. |
+| `POST /api/budgets` | One per category: `amount`, `period` (`week`, `fortnight`, `month`, or `days` with a length), `starts_on`. Takes a `key`. |
+| `PATCH`/`DELETE /api/budgets/{id}` | Change the amount or period, or remove it. |
+
+A budget is a category, an amount and a period that repeats from the day the
+household picks: a fortnight from when the salary lands, a month from the 5th,
+ten days from an aid payment. The window is worked out on read, so nothing rolls
+over at midnight. A month from the 31st starts on the 30th in a 30-day month.
+
+Spent follows the same rules as `/summary`: money out in that category, with
+internal transfers and excluded rows left out. Categories that move money
+rather than spend it (`transfer_in`, `transfer_out`, `cash_withdrawal`,
+`debt_repayment`) cannot have a budget.
+
+`status` is `fine`, `fast` or `over`. The pace is a straight line through the
+period, which is crude for things bought in lumps (one gas cylinder a month), so
+`fast` is only reported once spending is clearly ahead of the line (15%) and
+never on the first day. The numbers are the app's to show; what to do about
+them is the household's.
+
+Budgets travel in `/api/bootstrap` as they stood when the bundle was made.
+Offline, the client adds what it records to `spent` and `left`.
+
 ### Fixing a transaction
 
 Everything the bank cannot know stays editable on every row, imported ones

@@ -43,7 +43,9 @@ def find_candidates(session: Session, window_days: int = WINDOW_DAYS) -> list[Tr
     )
     names = {s.id: s.slug for s in session.exec(select(Source))}
 
-    outgoing = [t for t in rows if t.amount < 0 and t.source_id is not None]
+    # Goods on the tab move no money between accounts, so they never pair up.
+    on_tab = {s.id for s in session.exec(select(Source)) if s.slug == "credit"}
+    outgoing = [t for t in rows if t.amount < 0 and t.source_id is not None and t.source_id not in on_tab]
     incoming = [t for t in rows if t.amount > 0 and t.source_id is not None]
 
     used: set[int] = set()

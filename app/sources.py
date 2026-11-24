@@ -39,6 +39,12 @@ DEFAULT_SOURCES: tuple[dict, ...] = (
         "kind": SourceKind.MANUAL,
         "default_currency": Currency.ILS,
     },
+    {
+        "slug": "credit",
+        "name": "On the tab (على الدفتر)",
+        "kind": SourceKind.CREDIT,
+        "default_currency": Currency.ILS,
+    },
 )
 
 # Words that suggest a transaction is topping up or drawing on another provider

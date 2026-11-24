@@ -278,6 +278,34 @@ them is the household's.
 Budgets travel in `/api/bootstrap` as they stood when the bundle was made.
 Offline, the client adds what it records to `spent` and `left`.
 
+### Debts
+
+| | |
+|---|---|
+| `GET /api/debts` | What you owe (`we_owe`) and are owed (`owed_to_us`), per currency, and each party still open, missed dates first. |
+| `GET /api/debts/parties/{id}` | One shop or person: every entry with the balance after it. |
+| `POST /api/debts/entries` | Money `borrow`ed, `repay`ed, `lend`, `collect`ed. `party_id`, or `party_name` to find or add one. Takes a `key`. |
+| `PATCH`/`DELETE /api/debts/entries/{id}` | Fix or remove an entry. One raised by a purchase on the tab is changed through that purchase (409 here). |
+| `PATCH /api/debts/parties/{id}` | Rename, or say whether it is a shop or a person. |
+| `POST /api/transactions` with `source: "credit"` | Goods «على الدفتر»: the purchase and what is owed to the shop, in one write. |
+
+The accounting rule, which decides every total in the app: **goods taken on
+the tab are spending on the day they are taken; nothing else in the ledger is
+spending.** Lending, borrowing cash, repaying and collecting move money that was
+already counted, or was never spent. So a purchase on the tab is an ordinary
+transaction (it counts in `/summary` and against its budget) that also raises a
+`borrow` entry, and editing or deleting the purchase changes or removes that
+entry with it. A bank row categorised `debt_repayment` is left out of
+`total_out` and reported as `debt_repaid`, because counting it would count the
+same groceries twice.
+
+Balances are worked out from the entries on read, per currency, never stored.
+Negative means you owe them («عليكم»); positive, they owe you («إلكم»). A party
+is `overdue` once the date promised on its latest borrow or lend has passed
+with money still outstanding.
+
+The ledger also travels in `/api/bootstrap`.
+
 ### Fixing a transaction
 
 Everything the bank cannot know stays editable on every row, imported ones

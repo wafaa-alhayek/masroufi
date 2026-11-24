@@ -50,6 +50,8 @@ from app.models import (
     StockCondition,
 )
 from app.routers.budgets import BudgetOut
+from app.routers.debts import DebtsOut
+from app.routers.debts import summary as debts_summary
 from app.routers.budgets import out as budget_out
 from app.services import prices as price_service
 from app.services import shopping
@@ -194,6 +196,11 @@ class Bootstrap(BaseModel):
         "client adds what it records to `spent` and `left`; the window and the line "
         "are already worked out.",
     )
+    debts: DebtsOut | None = Field(
+        default=None,
+        description="The ledger as it stood when the bundle was made: totals and each "
+        "party still owed or owing.",
+    )
     dishes_offline_only: bool = Field(
         description="True when `dishes` is the curated offline set rather than the "
         "whole library. The rest are searchable when there is a connection."
@@ -330,6 +337,7 @@ async def bootstrap(
             for row in session.exec(select(PantryStock))
             if row.quantity > 0 and row.condition is not StockCondition.SPOILED
         ],
+        debts=debts_summary(session, date.today()),
         budgets=[budget_out(session, b, date.today()) for b in session.exec(select(Budget).order_by(Budget.id))],
         weary_item_ids=[
             p.item_id

@@ -16,6 +16,7 @@ class SourceKind(str, Enum):
     WALLET = "wallet"
     CASH = "cash"
     MANUAL = "manual"
+    CREDIT = "credit"  # «على الدفتر»: goods taken now, paid for later
 
 
 class Source(SQLModel, table=True):
@@ -627,4 +628,56 @@ class Budget(SQLModel, table=True):
     period: BudgetPeriod = BudgetPeriod.MONTH
     days: int | None = Field(default=None, ge=1, le=366, description="Only for period `days`.")
     starts_on: date
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class PartyKind(str, Enum):
+    SHOP = "shop"
+    PERSON = "person"
+
+
+class Party(SQLModel, table=True):
+    """Someone the household owes, or who owes the household: a shop's tab
+    («الدفتر») or a relative. A name only, like `Person`."""
+
+    id: int | None = Field(default=None, primary_key=True)
+    name: str = Field(index=True, unique=True, max_length=40)
+    kind: PartyKind = PartyKind.PERSON
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class LedgerKind(str, Enum):
+    """The four movements, from the household's side.
+
+    borrow  — goods or cash taken, owed back   (we owe more)
+    repay   — paying that back                 (we owe less)
+    lend    — money given, to come back        (they owe more)
+    collect — getting it back                  (they owe less)
+
+    None of them is spending. Goods on the tab are spending, but that is the
+    linked transaction's job, on the day the goods were taken.
+    """
+
+    BORROW = "borrow"
+    REPAY = "repay"
+    LEND = "lend"
+    COLLECT = "collect"
+
+
+class LedgerEntry(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    party_id: int = Field(foreign_key="party.id", index=True)
+    kind: LedgerKind
+    amount: float = Field(gt=0)
+    currency: Currency = Currency.ILS
+    on: date
+    due_on: date | None = Field(default=None, description="When it was promised back, if ever.")
+    note: str = Field(default="", max_length=200)
+    transaction_id: int | None = Field(
+        default=None,
+        foreign_key="transaction.id",
+        index=True,
+        description="The purchase this entry was raised by (goods on the tab). Edited and "
+        "removed with it.",
+    )
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))

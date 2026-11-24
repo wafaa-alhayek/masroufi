@@ -12,11 +12,21 @@ from app.config import settings
 from app.db import get_session
 from app.deps import get_classifier, get_cleaner
 from app.importers.csv_import import ImportError_, parse_csv
-from app.models import CategorySource, Currency, Person, Source, Transaction, Vendor
+from app.models import (
+    CategorySource,
+    Currency,
+    LedgerEntry,
+    LedgerKind,
+    PartyKind,
+    Person,
+    Source,
+    Transaction,
+    Vendor,
+)
 from app.idempotency import remember, replay
 from app.notes import NoteCleaner
 from app.redact import normalise
-from app.services import dedup, transfers
+from app.services import dedup, ledger, transfers
 from app.services import vendors as vendor_service
 from app.services.recurring import find_patterns
 from app import sources as source_service
@@ -554,7 +564,10 @@ def summary(
         statement = statement.where(Transaction.booked_on <= end)
     rows = list(session.exec(statement))
     all_rows = [t for t in rows if not t.excluded]
-    spending = [t for t in all_rows if not t.is_internal_transfer]
+    # Repaying a debt is not new spending: the goods were counted the day they
+    # were taken on the tab, or the loan was never spending at all.
+    repaid = [t for t in all_rows if not t.is_internal_transfer and t.category == "debt_repayment"]
+    spending = [t for t in all_rows if not t.is_internal_transfer and t.category != "debt_repayment"]
 
     by_category: dict[str, float] = {}
     other_labels: dict[str, float] = {}
@@ -574,6 +587,7 @@ def summary(
             sum(abs(t.amount) for t in all_rows if t.is_internal_transfer and t.amount < 0), 2
         ),
         "excluded": sum(1 for t in rows if t.excluded),
+        "debt_repaid": round(sum(abs(t.amount) for t in repaid if t.amount < 0), 2),
         "from": start.isoformat() if start else None,
         "to": end.isoformat() if end else None,
         "by_category": {k: round(v, 2) for k, v in sorted(by_category.items(), key=lambda kv: -kv[1])},
@@ -682,6 +696,12 @@ class ManualEntry(BaseModel):
     category_label: str = Field(default="", max_length=LABEL_MAX, description="Own name for «other».")
     for_whom: str = Field(default="", max_length=LABEL_MAX, description="A person, or empty for the household.")
     details: str = Field(default="", max_length=DETAILS_MAX)
+    party_id: int | None = Field(default=None, description="With `source: credit`: whose tab.")
+    party_name: str | None = Field(
+        default=None, max_length=LABEL_MAX, description="With `source: credit`: found or added by name."
+    )
+    party_kind: PartyKind = Field(default=PartyKind.SHOP, description="For a new party.")
+    due_on: date | None = Field(default=None, description="With `source: credit`: when it was promised paid.")
 
 
 class ManualEntryOut(BaseModel):
@@ -695,6 +715,9 @@ class ManualEntryOut(BaseModel):
         "the category, so nothing was asked and no model was called."
     )
     transfers_linked: int = 0
+    ledger_entry_id: int | None = Field(default=None, description="The borrow entry raised by goods on the tab.")
+    party_id: int | None = None
+    party_name: str | None = None
 
 
 @router.post("/transactions", response_model=ManualEntryOut)
@@ -715,6 +738,10 @@ async def add_transaction(
     Deduplication is deliberately **not** applied here. Two identical ₪3 fares
     entered on the same day are two fares, and a household that typed something
     twice on purpose meant it. A double tap is handled by `key` instead.
+
+    Goods on a shop's tab («على الدفتر») are `source: "credit"` with the shop as
+    `party_id` or `party_name`. They count as spending today, and the same write
+    adds what is owed to that shop, so a replay creates neither twice.
     """
     seen = replay(session, entry.key, "manual-entry")
     if seen is not None:
@@ -730,6 +757,11 @@ async def add_transaction(
     if provider is None:
         known = ", ".join(s["slug"] for s in DEFAULT_SOURCES)
         raise HTTPException(422, f"Unknown source {entry.source!r}. Known: {known}.")
+    on_tab = entry.source == "credit"
+    if on_tab and entry.amount > 0:
+        raise HTTPException(422, "Goods on the tab are money out: the amount is negative.")
+    if on_tab and entry.party_id is None and not (entry.party_name or "").strip():
+        raise HTTPException(422, "Goods on the tab need whose tab: party_id or party_name.")
 
     note = await cleaner.clean(entry.note)
     transaction = Transaction(
@@ -789,6 +821,23 @@ async def add_transaction(
                 session.add(vendor)
 
     session.add(transaction)
+    party = tab_entry = None
+    if on_tab:
+        from app.routers.debts import resolve_party
+
+        party = resolve_party(session, entry.party_id, entry.party_name, entry.party_kind)
+        session.flush()
+        tab_entry = LedgerEntry(
+            party_id=party.id,
+            kind=LedgerKind.BORROW,
+            amount=abs(entry.amount),
+            currency=entry.currency,
+            on=entry.booked_on,
+            due_on=entry.due_on,
+            note=entry.note,
+            transaction_id=transaction.id,
+        )
+        session.add(tab_entry)
     session.commit()
     session.refresh(transaction)
 
@@ -806,6 +855,9 @@ async def add_transaction(
         needs_review=transaction.needs_review,
         settled_by_vendor=settled_by_vendor,
         transfers_linked=linked,
+        ledger_entry_id=tab_entry.id if tab_entry else None,
+        party_id=party.id if party else None,
+        party_name=party.name if party else None,
     )
     remember(session, entry.key, "manual-entry", out)
     session.commit()
@@ -865,11 +917,19 @@ async def update_transaction(
     if transaction.vendor_id is not None:
         touched_vendors.add(transaction.vendor_id)
 
+    tab_entries = list(session.exec(select(LedgerEntry).where(LedgerEntry.transaction_id == transaction.id)))
+    if tab_entries and update.amount is not None and update.amount > 0:
+        raise HTTPException(422, "Goods on the tab are money out: the amount is negative.")
     if update.amount is not None and update.amount != transaction.amount:
         _unlink_transfer(session, transaction)
         transaction.amount = update.amount
     if update.booked_on is not None:
         transaction.booked_on = update.booked_on
+    for e in tab_entries:
+        # What is owed to the shop follows the purchase that raised it.
+        e.amount = abs(transaction.amount)
+        e.on = transaction.booked_on
+        session.add(e)
     if update.note is not None and update.note != transaction.note:
         cleaned = await cleaner.clean(update.note)
         transaction.note = update.note
@@ -926,6 +986,8 @@ def delete_transaction(transaction_id: int, session: Session = Depends(get_sessi
             409, "An imported row would come back on re-import. Exclude it instead (PATCH excluded: true)."
         )
     _unlink_transfer(session, transaction)
+    for e in session.exec(select(LedgerEntry).where(LedgerEntry.transaction_id == transaction.id)):
+        session.delete(e)  # the shop is owed nothing for goods that were never taken
     vendor_id = transaction.vendor_id
     session.delete(transaction)
     session.flush()

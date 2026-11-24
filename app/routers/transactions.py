@@ -19,6 +19,7 @@ from app.models import (
     LedgerKind,
     PartyKind,
     Person,
+    Scope,
     Source,
     Transaction,
     Vendor,
@@ -55,6 +56,20 @@ def _person(session: Session, name: str | None) -> str:
     if name and session.exec(select(Person).where(Person.name == name)).first() is None:
         session.add(Person(name=name))
     return name
+
+
+def _check_scope(personal: bool, for_whom: str) -> None:
+    """«إلي» is the user's own spending, so it cannot also be for someone else."""
+    if personal and for_whom:
+        raise HTTPException(422, "A personal transaction is for the user; for_whom must be empty.")
+
+
+def _scoped(statement, scope: Scope):
+    if scope is Scope.HOUSEHOLD:
+        return statement.where(Transaction.personal == False)  # noqa: E712
+    if scope is Scope.PERSONAL:
+        return statement.where(Transaction.personal == True)  # noqa: E712
+    return statement
 
 
 _MONTH = re.compile(r"^(\d{4})-(0[1-9]|1[0-2])$")
@@ -118,6 +133,7 @@ class TransactionOut(BaseModel):
     vendor_id: int | None
     for_whom: str = ""
     details: str = ""
+    personal: bool = False
     excluded: bool = False
 
 
@@ -361,11 +377,12 @@ def list_transactions(
     date_from: date | None = None,
     date_to: date | None = None,
     for_whom: str | None = None,
+    scope: Scope = Scope.ALL,
     limit: int = Query(200, le=1000),
     session: Session = Depends(get_session),
 ) -> list[Transaction]:
     start, end = _period(month, date_from, date_to)
-    statement = select(Transaction)
+    statement = _scoped(select(Transaction), scope)
     if start is not None:
         statement = statement.where(Transaction.booked_on >= start)
     if end is not None:
@@ -547,14 +564,15 @@ def summary(
     month: str | None = Query(None, description="YYYY-MM. Wins over date_from/date_to."),
     date_from: date | None = None,
     date_to: date | None = None,
+    scope: Scope = Query(Scope.ALL, description="all, household («البيت») or personal («إلي»)."),
     session: Session = Depends(get_session),
 ) -> dict:
     """Spend by category, plus what is still unreviewed.
 
     Internal transfers are excluded: a wallet top-up from the bank is the same
     money seen twice, and counting it would inflate spending by however much the
-    household moved between its own accounts. Rows the household excluded
-    («ما تحسبوها») are left out too; only their count is reported.
+    household moved between its own accounts. Rows the user excluded
+    («ما بتنحسب») are left out too; only their count is reported.
     """
     start, end = _period(month, date_from, date_to)
     statement = select(Transaction)
@@ -562,12 +580,22 @@ def summary(
         statement = statement.where(Transaction.booked_on >= start)
     if end is not None:
         statement = statement.where(Transaction.booked_on <= end)
-    rows = list(session.exec(statement))
-    all_rows = [t for t in rows if not t.excluded]
+    period_rows = list(session.exec(statement))
     # Repaying a debt is not new spending: the goods were counted the day they
     # were taken on the tab, or the loan was never spending at all.
+    every_spend = [
+        t for t in period_rows
+        if not t.excluded and not t.is_internal_transfer and t.category != "debt_repayment"
+    ]
+    in_scope = {
+        Scope.ALL: lambda t: True,
+        Scope.HOUSEHOLD: lambda t: not t.personal,
+        Scope.PERSONAL: lambda t: t.personal,
+    }[scope]
+    rows = [t for t in period_rows if in_scope(t)]
+    all_rows = [t for t in rows if not t.excluded]
     repaid = [t for t in all_rows if not t.is_internal_transfer and t.category == "debt_repayment"]
-    spending = [t for t in all_rows if not t.is_internal_transfer and t.category != "debt_repayment"]
+    spending = [t for t in every_spend if in_scope(t)]
 
     by_category: dict[str, float] = {}
     other_labels: dict[str, float] = {}
@@ -583,6 +611,13 @@ def summary(
     return {
         "total_out": round(sum(abs(t.amount) for t in spending if t.amount < 0), 2),
         "total_in": round(sum(t.amount for t in spending if t.amount > 0), 2),
+        "scope": scope.value,
+        # Both sides of the «البيت | إلي» switch, so it can show its numbers
+        # before either side is opened.
+        "by_scope": {
+            "household": round(sum(abs(t.amount) for t in every_spend if t.amount < 0 and not t.personal), 2),
+            "personal": round(sum(abs(t.amount) for t in every_spend if t.amount < 0 and t.personal), 2),
+        },
         "internal_transfers_excluded": round(
             sum(abs(t.amount) for t in all_rows if t.is_internal_transfer and t.amount < 0), 2
         ),
@@ -696,6 +731,7 @@ class ManualEntry(BaseModel):
     category_label: str = Field(default="", max_length=LABEL_MAX, description="Own name for «other».")
     for_whom: str = Field(default="", max_length=LABEL_MAX, description="A person, or empty for the household.")
     details: str = Field(default="", max_length=DETAILS_MAX)
+    personal: bool = Field(default=False, description="«إلي»: the user's own spending, not the household's.")
     party_id: int | None = Field(default=None, description="With `source: credit`: whose tab.")
     party_name: str | None = Field(
         default=None, max_length=LABEL_MAX, description="With `source: credit`: found or added by name."
@@ -752,6 +788,7 @@ async def add_transaction(
     if entry.category is not None and not is_valid_category(entry.category):
         raise HTTPException(422, f"Unknown category: {entry.category!r}")
     label = _label(entry.category, entry.category_label)
+    _check_scope(entry.personal, entry.for_whom.strip())
 
     provider = source_service.by_slug(session, entry.source)
     if provider is None:
@@ -776,6 +813,7 @@ async def add_transaction(
         import_batch="manual",
         for_whom=_person(session, entry.for_whom),
         details=entry.details.strip(),
+        personal=entry.personal,
     )
 
     vendor = vendor_service.resolve(session, note)
@@ -875,6 +913,7 @@ class TransactionUpdate(BaseModel):
     note: str | None = Field(default=None, min_length=1)
     for_whom: str | None = Field(default=None, max_length=LABEL_MAX)
     details: str | None = Field(default=None, max_length=DETAILS_MAX)
+    personal: bool | None = None
     category_label: str | None = Field(default=None, max_length=LABEL_MAX)
     excluded: bool | None = Field(
         default=None, description="True keeps the row out of every total. The way to drop an imported row."
@@ -956,6 +995,9 @@ async def update_transaction(
         transaction.category_label = _label(transaction.category, update.category_label)
     if update.excluded is not None:
         transaction.excluded = update.excluded
+    if update.personal is not None:
+        transaction.personal = update.personal
+    _check_scope(transaction.personal, transaction.for_whom)
 
     session.add(transaction)
     session.flush()

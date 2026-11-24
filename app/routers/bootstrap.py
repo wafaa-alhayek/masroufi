@@ -148,6 +148,11 @@ class LineBundle(BaseModel):
 
 
 class HouseholdBundle(BaseModel):
+    mode: str | None = Field(
+        default=None,
+        description="household | alone, or None until the first-launch question is "
+        "answered. With `alone`, the client hides «البيت | إلي».",
+    )
     adults: int
     children: int
     child_portion_ratio: float
@@ -312,6 +317,7 @@ async def bootstrap(
             confidence_threshold=settings.confidence_threshold,
         ),
         household=HouseholdBundle(
+            mode=household.mode.value if household.mode else None,
             adults=household.adults,
             children=household.children,
             child_portion_ratio=household.child_portion_ratio,

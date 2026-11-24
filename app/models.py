@@ -49,6 +49,21 @@ class CategorySource(str, Enum):
     UNSET = "unset"
 
 
+class HouseholdMode(str, Enum):
+    """Whether the one person using the app spends for a household or for themselves."""
+
+    HOUSEHOLD = "household"
+    ALONE = "alone"
+
+
+class Scope(str, Enum):
+    """Which money a total or a budget counts: «الكل», «البيت» or «إلي»."""
+
+    ALL = "all"
+    HOUSEHOLD = "household"
+    PERSONAL = "personal"
+
+
 class Household(SQLModel, table=True):
     """Who eats, so quantities can be scaled to them.
 
@@ -57,6 +72,11 @@ class Household(SQLModel, table=True):
     """
 
     id: int | None = Field(default=None, primary_key=True)
+    mode: HouseholdMode | None = Field(
+        default=None,
+        description="«بتصرف على بيت ولا على حالك؟», asked once at first launch. None "
+        "until answered.",
+    )
     adults: int = Field(default=2, ge=0)
     children: int = Field(default=0, ge=0)
     child_portion_ratio: float = Field(
@@ -559,8 +579,12 @@ class Transaction(SQLModel, table=True):
         description="A person from the household list, or empty for the whole household.",
     )
     details: str = Field(default="", description="Free text, e.g. 'for university'.")
+    # «إلي»: the user's own spending (their phone credit, their coffee) rather than
+    # the household's. One list for both, because both come out of the same
+    # wallet; two lists would never add up to what is in it.
+    personal: bool = Field(default=False, index=True)
 
-    # «ما تحسبوها»: left out of every total but kept, because duplicate
+    # «ما بتنحسب»: left out of every total but kept, because duplicate
     # detection counts rows and a deleted imported row would come back on the
     # next import of the same statement.
     excluded: bool = Field(default=False, index=True)
@@ -622,7 +646,10 @@ class Budget(SQLModel, table=True):
     """
 
     id: int | None = Field(default=None, primary_key=True)
-    category: str = Field(index=True, unique=True)
+    # One budget per category and scope: groceries for the house and groceries
+    # for oneself can each have a limit.
+    category: str = Field(index=True)
+    scope: Scope = Field(default=Scope.ALL, index=True)
     amount: float = Field(gt=0)
     currency: Currency = Currency.ILS
     period: BudgetPeriod = BudgetPeriod.MONTH

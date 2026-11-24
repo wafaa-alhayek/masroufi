@@ -1,8 +1,9 @@
-"""Budgets per category, over a period the household picks.
+"""Budgets per category, over a period the user picks.
 
-«بدنا نصرف على الأكل ٨٠٠ شيكل كل أسبوعين»: one budget per category, repeating
-from the day they choose. Reads return where each one stands today; the numbers
-come from `app.services.budgets`, never from the client or a model.
+«بدي أصرف على الأكل ٨٠٠ شيكل كل أسبوعين»: one budget per category and scope
+(all, the household, or the user's own), repeating from the day they choose.
+Reads return where each one stands today; the numbers come from
+`app.services.budgets`, never from the client or a model.
 """
 
 from datetime import date
@@ -13,7 +14,7 @@ from sqlmodel import Session, select
 
 from app.db import get_session
 from app.idempotency import remember, replay
-from app.models import Budget, BudgetPeriod, Currency
+from app.models import Budget, BudgetPeriod, Currency, Scope
 from app.services import budgets as budget_service
 from app.taxonomy import is_valid_category
 
@@ -27,6 +28,7 @@ NOT_BUDGETABLE = {"transfer_in", "transfer_out", "cash_withdrawal", "debt_repaym
 class BudgetIn(BaseModel):
     category: str
     amount: float = Field(gt=0)
+    scope: Scope = Field(default=Scope.ALL, description="all, household («البيت») or personal («إلي»).")
     period: BudgetPeriod = BudgetPeriod.MONTH
     days: int | None = Field(default=None, ge=1, le=366, description="Required for period `days`.")
     starts_on: date | None = Field(default=None, description="Defaults to today.")
@@ -54,6 +56,7 @@ class BudgetUpdate(BaseModel):
 class BudgetOut(BaseModel):
     id: int
     category: str
+    scope: Scope
     amount: float
     currency: Currency
     period: BudgetPeriod
@@ -76,6 +79,7 @@ def out(session: Session, budget: Budget, on: date) -> BudgetOut:
     return BudgetOut(
         id=budget.id,
         category=budget.category,
+        scope=budget.scope,
         amount=budget.amount,
         currency=budget.currency,
         period=budget.period,
@@ -96,8 +100,8 @@ def list_budgets(
 
 @router.post("", response_model=BudgetOut)
 def set_budget(budget: BudgetIn, session: Session = Depends(get_session)) -> BudgetOut:
-    """Set a budget for a category. 409 if that category already has one: change it
-    with PATCH instead, so two phones cannot leave two limits on one category."""
+    """Set a budget for a category and scope. 409 if that pair already has one:
+    change it with PATCH instead, so two phones cannot leave two limits on it."""
     seen = replay(session, budget.key, "budget")
     if seen is not None:
         return BudgetOut(**seen)
@@ -105,11 +109,13 @@ def set_budget(budget: BudgetIn, session: Session = Depends(get_session)) -> Bud
         raise HTTPException(422, f"Unknown category: {budget.category!r}")
     if budget.category in NOT_BUDGETABLE:
         raise HTTPException(422, f"{budget.category!r} moves money rather than spending it.")
-    if session.exec(select(Budget).where(Budget.category == budget.category)).first() is not None:
-        raise HTTPException(409, "That category already has a budget. Change it instead.")
+    taken = select(Budget).where(Budget.category == budget.category, Budget.scope == budget.scope)
+    if session.exec(taken).first() is not None:
+        raise HTTPException(409, "That category already has a budget for this scope. Change it instead.")
 
     row = Budget(
         category=budget.category,
+        scope=budget.scope,
         amount=budget.amount,
         currency=budget.currency,
         period=budget.period,

@@ -17,6 +17,7 @@ def init_db() -> None:
 
     SQLModel.metadata.create_all(engine)
     add_missing_columns(engine)
+    relax_unique_indexes(engine)
 
     # Imported here rather than at module scope: app.sources imports the models,
     # which must be registered on the metadata above before this runs.
@@ -78,3 +79,27 @@ def add_missing_columns(bind) -> list[str]:
                     if column.name in {c.name for c in index.columns}:
                         index.create(conn, checkfirst=True)
     return added
+
+
+def relax_unique_indexes(bind) -> list[str]:
+    """Drop a uniqueness the models no longer ask for, keeping the index.
+
+    A budget used to be one per category; now it is one per category and scope,
+    so an older database's unique index on the category alone would refuse the
+    second. Only a model index that has stopped being unique is touched. Returns
+    the indexes rebuilt.
+    """
+    inspector = inspect(bind)
+    rebuilt: list[str] = []
+    with bind.begin() as conn:
+        for table in SQLModel.metadata.sorted_tables:
+            if not inspector.has_table(table.name):
+                continue
+            unique_in_db = {i["name"] for i in inspector.get_indexes(table.name) if i["unique"]}
+            for index in table.indexes:
+                if index.unique or index.name not in unique_in_db:
+                    continue
+                conn.execute(text(f'DROP INDEX "{index.name}"'))
+                index.create(conn)
+                rebuilt.append(index.name)
+    return rebuilt

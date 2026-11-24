@@ -1,4 +1,4 @@
-"""The debt ledger: «عليكم» and «إلكم».
+"""The debt ledger: «عليك» and «إلك».
 
 Shops' tabs and money between people. An entry here is never spending; goods on
 the tab are entered as a purchase with `source: "credit"` on

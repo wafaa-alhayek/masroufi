@@ -1,4 +1,4 @@
-"""The debt ledger: what the household owes («عليكم») and is owed («إلكم»)."""
+"""The debt ledger: what the household owes («عليك») and is owed («إلك»)."""
 
 from datetime import date
 

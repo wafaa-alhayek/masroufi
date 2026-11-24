@@ -20,7 +20,7 @@ from datetime import date, timedelta
 
 from sqlmodel import Session, select
 
-from app.models import Budget, BudgetPeriod, Transaction
+from app.models import Budget, BudgetPeriod, Scope, Transaction
 
 FIXED_DAYS = {BudgetPeriod.WEEK: 7, BudgetPeriod.FORTNIGHT: 14}
 
@@ -63,18 +63,20 @@ def window(budget: Budget, on: date) -> tuple[date, date]:
     return begin, begin + timedelta(days=length - 1)
 
 
-def spent(session: Session, category: str, begin: date, end: date) -> float:
-    rows = session.exec(
-        select(Transaction).where(
-            Transaction.category == category,
-            Transaction.booked_on >= begin,
-            Transaction.booked_on <= end,
-            Transaction.amount < 0,
-            Transaction.is_internal_transfer == False,  # noqa: E712
-            Transaction.excluded == False,  # noqa: E712
-        )
+def spent(session: Session, category: str, begin: date, end: date, scope: Scope = Scope.ALL) -> float:
+    statement = select(Transaction).where(
+        Transaction.category == category,
+        Transaction.booked_on >= begin,
+        Transaction.booked_on <= end,
+        Transaction.amount < 0,
+        Transaction.is_internal_transfer == False,  # noqa: E712
+        Transaction.excluded == False,  # noqa: E712
     )
-    return round(sum(-t.amount for t in rows), 2)
+    if scope is Scope.HOUSEHOLD:
+        statement = statement.where(Transaction.personal == False)  # noqa: E712
+    elif scope is Scope.PERSONAL:
+        statement = statement.where(Transaction.personal == True)  # noqa: E712
+    return round(sum(-t.amount for t in session.exec(statement)), 2)
 
 
 @dataclass
@@ -96,7 +98,7 @@ def standing(session: Session, budget: Budget, on: date) -> Standing:
     total = (end - begin).days + 1
     gone = min(total, max(0, (on - begin).days + 1))
     days_left = total - gone + (1 if gone else 0)  # today still counts as left
-    used = spent(session, budget.category, begin, end)
+    used = spent(session, budget.category, begin, end, budget.scope)
     expected = budget.amount * gone / total
     left = round(budget.amount - used, 2)
 

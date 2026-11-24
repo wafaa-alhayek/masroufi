@@ -320,7 +320,7 @@ message_id,posted_on,region,line,status,item_slug,price_low,price_high,quantity,
 137,2025-02-16,gaza_city,صدر دجاج  مقطع بعضم 18شيكل,ok,chicken_breast,18.0,18.0,1000.0,g,kilo,True,,0.018
 137,2025-02-16,gaza_city,صدر دجاج كامل 33شيكل,ok,chicken_breast,33.0,33.0,1000.0,g,kilo,True,,0.033
 137,2025-02-16,gaza_city,صدر حبش كامل 33شيكلً,ok,turkey_breast,33.0,33.0,1000.0,g,kilo,True,,0.033
-137,2025-02-16,gaza_city,لحم موزه 50شيكل,ok,banana,50.0,50.0,1000.0,g,kilo,True,,0.05
+137,2025-02-16,gaza_city,لحم موزه 50شيكل,ok,beef,50.0,50.0,1000.0,g,kilo,True,,0.05
 138,2025-02-16,gaza_city,طرخونه 45 ش,unmatched_item,,45.0,45.0,0.0,,,False,,0.0
 138,2025-02-16,gaza_city,غزلان كبير85 ش,unmatched_item,,85.0,85.0,0.0,,,False,,0.0
 138,2025-02-16,gaza_city,ماليطه 60 ش,unmatched_item,,60.0,60.0,0.0,,,False,,0.0
@@ -345,7 +345,7 @@ message_id,posted_on,region,line,status,item_slug,price_low,price_high,quantity,
 141,2025-02-21,gaza_city,ضهر دجاج 9شيكل,ok,chicken,9.0,9.0,1000.0,g,kilo,True,,0.009
 141,2025-02-21,gaza_city,صدر دجاج  مقطع 28شيكل,ok,chicken_breast,28.0,28.0,1000.0,g,kilo,True,,0.028
 141,2025-02-21,gaza_city,صدر حبش كامل 30شيكل,ok,turkey_breast,30.0,30.0,1000.0,g,kilo,True,,0.03
-141,2025-02-21,gaza_city,لحم موزه 45شيكل,ok,banana,45.0,45.0,1000.0,g,kilo,True,,0.045
+141,2025-02-21,gaza_city,لحم موزه 45شيكل,ok,beef,45.0,45.0,1000.0,g,kilo,True,,0.045
 142,2025-02-23,gaza_city,🍅 بندورة 6 ش,ok,tomato,6.0,6.0,1000.0,g,kilo,True,,0.006
 142,2025-02-23,gaza_city,🥔 بطاطا 7 ش,ok,potato,7.0,7.0,1000.0,g,kilo,True,,0.007
 142,2025-02-23,gaza_city,🧅 بصل 6 ش,ok,onion,6.0,6.0,1000.0,g,kilo,True,,0.006
@@ -374,8 +374,8 @@ message_id,posted_on,region,line,status,item_slug,price_low,price_high,quantity,
 144,2025-02-24,gaza_city,ضهر دجاج 9شيكل,ok,chicken,9.0,9.0,1000.0,g,kilo,True,,0.009
 144,2025-02-24,gaza_city,صدر دجاج  مقطع 28شيكل,ok,chicken_breast,28.0,28.0,1000.0,g,kilo,True,,0.028
 144,2025-02-24,gaza_city,صدر  دجاج كامل 35شيكل,ok,chicken_breast,35.0,35.0,1000.0,g,kilo,True,,0.035
-144,2025-02-24,gaza_city,لحم موزه 45شيكل,ok,banana,45.0,45.0,1000.0,g,kilo,True,,0.045
-144,2025-02-24,gaza_city,لحم رقيبة 40شيكل,unmatched_item,,40.0,40.0,0.0,,,False,,0.0
+144,2025-02-24,gaza_city,لحم موزه 45شيكل,ok,beef,45.0,45.0,1000.0,g,kilo,True,,0.045
+144,2025-02-24,gaza_city,لحم رقيبة 40شيكل,ok,beef,40.0,40.0,1000.0,g,kilo,True,,0.04
 147,2025-02-25,gaza_city,طرخونة 45 شيكل,unmatched_item,,45.0,45.0,0.0,,,False,,0.0
 147,2025-02-25,gaza_city,مليطة 45 شيكل,unmatched_item,,45.0,45.0,0.0,,,False,,0.0
 147,2025-02-25,gaza_city,سويسي 55 شيكل,unmatched_item,,55.0,55.0,0.0,,,False,,0.0
@@ -1113,7 +1113,7 @@ message_id,posted_on,region,line,status,item_slug,price_low,price_high,quantity,
 516,2025-06-26,gaza,🍋 حامض ليمون: 250₪,ambiguous_item,,250.0,250.0,0.0,,,False,,0.0
 516,2025-06-26,gaza,🌶️ فلفل أحمر: 25₪,unmatched_item,,25.0,25.0,0.0,,,False,,0.0
 516,2025-06-26,gaza,🥒 مخللات مشكل (وقية): 20₪,unmatched_item,,20.0,20.0,0.0,,,False,,0.0
-517,2025-06-26,deir_al_balah,🥩 كيلو لحم ضأن: 480₪,unmatched_item,,480.0,480.0,0.0,,,False,,0.0
+517,2025-06-26,deir_al_balah,🥩 كيلو لحم ضأن: 480₪,ok,lamb,480.0,480.0,1000.0,g,كيلو,False,,0.48
 517,2025-06-26,deir_al_balah,🐠 سمك دنيس: 350₪,ambiguous_item,,350.0,350.0,0.0,,,False,,0.0
 517,2025-06-26,deir_al_balah,🐟 سمك طرخون: 250₪,ok,fish,250.0,250.0,1000.0,g,ك,False,,0.25
 517,2025-06-26,deir_al_balah,🦈 سمك قرّاص: 180₪,ok,fish,180.0,180.0,1000.0,g,ك,False,,0.18
@@ -1963,7 +1963,7 @@ message_id,posted_on,region,line,status,item_slug,price_low,price_high,quantity,
 816,2025-09-02,khan_younis,• لحمة لانشون حجم صغير: 10₪,no_quantity,canned_luncheon_beef,10.0,10.0,0.0,,,False,,0.0
 816,2025-09-02,khan_younis,• لحمة لانشون سنيورة : 45₪,no_quantity,canned_luncheon_beef,45.0,45.0,0.0,,,False,,0.0
 816,2025-09-02,khan_younis,• مرتديلا المدائن : 13₪,no_quantity,mortadella,13.0,13.0,0.0,,,False,,0.0
-816,2025-09-02,khan_younis,• لحمة عجل معلب: 40₪,unmatched_item,,40.0,40.0,0.0,,,False,,0.0
+816,2025-09-02,khan_younis,• لحمة عجل معلب: 40₪,tin_without_weight,canned_meat,40.0,40.0,0.0,,tin,False,,0.0
 816,2025-09-02,khan_younis,• لحمة بيفي معلب: 10₪,tin_without_weight,canned_meat,10.0,10.0,0.0,,tin,False,,0.0
 816,2025-09-02,khan_younis,• اكسترا: 25₪,unmatched_item,,25.0,25.0,0.0,,,False,,0.0
 816,2025-09-02,khan_younis,• فول: 7₪,ok,fava_beans,7.0,7.0,1000.0,g,kilo,True,,0.007
@@ -2061,7 +2061,7 @@ message_id,posted_on,region,line,status,item_slug,price_low,price_high,quantity,
 818,2025-09-03,khan_younis,• لحمة لانشون حجم صغير: 10₪,no_quantity,canned_luncheon_beef,10.0,10.0,0.0,,,False,,0.0
 818,2025-09-03,khan_younis,• لحمة لانشون سنيورة : 45₪,no_quantity,canned_luncheon_beef,45.0,45.0,0.0,,,False,,0.0
 818,2025-09-03,khan_younis,• مرتديلا المدائن : 13₪,no_quantity,mortadella,13.0,13.0,0.0,,,False,,0.0
-818,2025-09-03,khan_younis,• لحمة عجل معلب: 40₪,unmatched_item,,40.0,40.0,0.0,,,False,,0.0
+818,2025-09-03,khan_younis,• لحمة عجل معلب: 40₪,tin_without_weight,canned_meat,40.0,40.0,0.0,,tin,False,,0.0
 818,2025-09-03,khan_younis,• لحمة بيفي معلب: 10₪,tin_without_weight,canned_meat,10.0,10.0,0.0,,tin,False,,0.0
 818,2025-09-03,khan_younis,• اكسترا: 25₪,unmatched_item,,25.0,25.0,0.0,,,False,,0.0
 818,2025-09-03,khan_younis,• فول: 7₪,ok,fava_beans,7.0,7.0,1000.0,g,kilo,True,,0.007
@@ -2183,7 +2183,7 @@ message_id,posted_on,region,line,status,item_slug,price_low,price_high,quantity,
 832,2025-09-09,khan_younis,لحمة لانشون حجم صغير: 10₪,no_quantity,canned_luncheon_beef,10.0,10.0,0.0,,,False,,0.0
 832,2025-09-09,khan_younis,لحمة لانشون سنيورة : 45₪,no_quantity,canned_luncheon_beef,45.0,45.0,0.0,,,False,,0.0
 832,2025-09-09,khan_younis,مرتديلا المدائن : 13₪,no_quantity,mortadella,13.0,13.0,0.0,,,False,,0.0
-832,2025-09-09,khan_younis,لحمة عجل معلب: 40₪,unmatched_item,,40.0,40.0,0.0,,,False,,0.0
+832,2025-09-09,khan_younis,لحمة عجل معلب: 40₪,tin_without_weight,canned_meat,40.0,40.0,0.0,,tin,False,,0.0
 832,2025-09-09,khan_younis,لحمة بيفي معلب: 10₪,tin_without_weight,canned_meat,10.0,10.0,0.0,,tin,False,,0.0
 832,2025-09-09,khan_younis,اكسترا: 25₪,unmatched_item,,25.0,25.0,0.0,,,False,,0.0
 832,2025-09-09,khan_younis,فول: 7₪,ok,fava_beans,7.0,7.0,1000.0,g,kilo,True,,0.007
@@ -2279,7 +2279,7 @@ message_id,posted_on,region,line,status,item_slug,price_low,price_high,quantity,
 837,2025-09-11,gaza,اكسترا: 30₪,unmatched_item,,30.0,30.0,0.0,,,False,,0.0
 837,2025-09-11,gaza,سنيورة كبيرة: 45₪,unmatched_item,,45.0,45.0,0.0,,,False,,0.0
 837,2025-09-11,gaza,لحمة لانشون كبير: 42₪,no_quantity,canned_luncheon_beef,42.0,42.0,0.0,,,False,,0.0
-837,2025-09-11,gaza,لحمة وزة صغيرة: 14₪,unmatched_item,,14.0,14.0,0.0,,,False,,0.0
+837,2025-09-11,gaza,لحمة وزة صغيرة: 14₪,ok,beef,14.0,14.0,1000.0,g,kilo,True,,0.014
 837,2025-09-11,gaza,بندورة قطع معلّبة: 20₪,tin_without_weight,canned_tomato,20.0,20.0,0.0,,tin,False,,0.0
 837,2025-09-11,gaza,بامية معلّبة: 25₪,canned_form_unknown,,25.0,25.0,0.0,,,False,,0.0
 837,2025-09-11,gaza,ذرة معلبة: 15₪,canned_form_unknown,,15.0,15.0,0.0,,,False,,0.0
@@ -2364,7 +2364,7 @@ message_id,posted_on,region,line,status,item_slug,price_low,price_high,quantity,
 839,2025-09-14,gaza,حمص أبو عيطة: 5 ₪,ok,chickpeas,5.0,5.0,1000.0,g,kilo,True,,0.005
 839,2025-09-14,gaza,شوكولاتة أبو عيطة ممراح: 5 ₪,no_quantity,chocolate_bar,5.0,5.0,0.0,,,False,,0.0
 839,2025-09-14,gaza,بسكويت ديما (فانيلا وقهوة): 3 ₪,unmatched_item,,3.0,3.0,0.0,,,False,,0.0
-839,2025-09-14,gaza,لحم قطع بالمرق (معلبات): 50 ₪,unmatched_item,,50.0,50.0,0.0,,,False,,0.0
+839,2025-09-14,gaza,لحم قطع بالمرق (معلبات): 50 ₪,tin_without_weight,canned_meat,50.0,50.0,0.0,,tin,False,,0.0
 839,2025-09-14,gaza,مايونيز يونكا: 35 ₪,no_quantity,mayonnaise,35.0,35.0,0.0,,,False,,0.0
 839,2025-09-14,gaza,كاتشب يونكا: 33 ₪,no_quantity,ketchup,33.0,33.0,0.0,,,False,,0.0
 839,2025-09-14,gaza,قلاية بندورة: 16 ₪,ok,tomato,16.0,16.0,1000.0,g,kilo,True,,0.016
@@ -2441,7 +2441,7 @@ message_id,posted_on,region,line,status,item_slug,price_low,price_high,quantity,
 841,2025-09-15,khan_younis,لحمة لانشون حجم صغير: 10₪,no_quantity,canned_luncheon_beef,10.0,10.0,0.0,,,False,,0.0
 841,2025-09-15,khan_younis,لحمة لانشون سنيورة : 45₪,no_quantity,canned_luncheon_beef,45.0,45.0,0.0,,,False,,0.0
 841,2025-09-15,khan_younis,مرتديلا المدائن : 13₪,no_quantity,mortadella,13.0,13.0,0.0,,,False,,0.0
-841,2025-09-15,khan_younis,لحمة عجل معلب: 40₪,unmatched_item,,40.0,40.0,0.0,,,False,,0.0
+841,2025-09-15,khan_younis,لحمة عجل معلب: 40₪,tin_without_weight,canned_meat,40.0,40.0,0.0,,tin,False,,0.0
 841,2025-09-15,khan_younis,لحمة بيفي معلب: 10₪,tin_without_weight,canned_meat,10.0,10.0,0.0,,tin,False,,0.0
 841,2025-09-15,khan_younis,اكسترا: 25₪,unmatched_item,,25.0,25.0,0.0,,,False,,0.0
 841,2025-09-15,khan_younis,فول: 7₪,ok,fava_beans,7.0,7.0,1000.0,g,kilo,True,,0.007
@@ -2614,7 +2614,7 @@ message_id,posted_on,region,line,status,item_slug,price_low,price_high,quantity,
 846,2025-09-18,khan_younis,لحمة لانشون حجم صغير: 10₪,no_quantity,canned_luncheon_beef,10.0,10.0,0.0,,,False,,0.0
 846,2025-09-18,khan_younis,لحمة لانشون سنيورة : 45₪,no_quantity,canned_luncheon_beef,45.0,45.0,0.0,,,False,,0.0
 846,2025-09-18,khan_younis,مرتديلا المدائن : 13₪,no_quantity,mortadella,13.0,13.0,0.0,,,False,,0.0
-846,2025-09-18,khan_younis,لحمة عجل معلب: 40₪,unmatched_item,,40.0,40.0,0.0,,,False,,0.0
+846,2025-09-18,khan_younis,لحمة عجل معلب: 40₪,tin_without_weight,canned_meat,40.0,40.0,0.0,,tin,False,,0.0
 846,2025-09-18,khan_younis,لحمة بيفي معلب: 10₪,tin_without_weight,canned_meat,10.0,10.0,0.0,,tin,False,,0.0
 846,2025-09-18,khan_younis,اكسترا: 25₪,unmatched_item,,25.0,25.0,0.0,,,False,,0.0
 846,2025-09-18,khan_younis,فول: 8₪,ok,fava_beans,8.0,8.0,1000.0,g,kilo,True,,0.008
@@ -2731,7 +2731,7 @@ message_id,posted_on,region,line,status,item_slug,price_low,price_high,quantity,
 847,2025-09-18,deir_al_balah,• لانشون: 10 ₪,ambiguous_item,,10.0,10.0,0.0,,,False,,0.0
 847,2025-09-18,deir_al_balah,• سنيورة: 45 ₪,unmatched_item,,45.0,45.0,0.0,,,False,,0.0
 847,2025-09-18,deir_al_balah,• لانشون المدائن: 15 ₪,ambiguous_item,,15.0,15.0,0.0,,,False,,0.0
-847,2025-09-18,deir_al_balah,• لحمة العجل: 45 ₪,unmatched_item,,45.0,45.0,0.0,,,False,,0.0
+847,2025-09-18,deir_al_balah,• لحمة العجل: 45 ₪,ok,beef,45.0,45.0,1000.0,g,kilo,True,,0.045
 847,2025-09-18,deir_al_balah,• بيف: 12 ₪,unmatched_item,,12.0,12.0,0.0,,,False,,0.0
 847,2025-09-18,deir_al_balah,• اكسترا: 25 ₪,unmatched_item,,25.0,25.0,0.0,,,False,,0.0
 847,2025-09-18,deir_al_balah,• علبة السردين والتونة: 12 ₪,tin_without_weight,canned_sardines,12.0,12.0,0.0,,tin,False,,0.0
@@ -2826,7 +2826,7 @@ message_id,posted_on,region,line,status,item_slug,price_low,price_high,quantity,
 884,2025-10-22,gaza,• لانشون: 10 ₪,ambiguous_item,,10.0,10.0,0.0,,,False,,0.0
 884,2025-10-22,gaza,• سنيورة: ٢٥₪,unmatched_item,,25.0,25.0,0.0,,,False,,0.0
 884,2025-10-22,gaza,• لانشون المدائن: ١٠ ₪,ambiguous_item,,10.0,10.0,0.0,,,False,,0.0
-884,2025-10-22,gaza,• لحمة العجل: ٩٠ ₪,unmatched_item,,90.0,90.0,0.0,,,False,,0.0
+884,2025-10-22,gaza,• لحمة العجل: ٩٠ ₪,ok,beef,90.0,90.0,1000.0,g,kilo,True,,0.09
 884,2025-10-22,gaza,• اكسترا: ١٢ ₪,unmatched_item,,12.0,12.0,0.0,,,False,,0.0
 884,2025-10-22,gaza,• علبة السردين والتونة: ٢_٤₪,tin_without_weight,canned_sardines,2.0,4.0,0.0,,tin,False,,0.0
 884,2025-10-22,gaza,• فول: ٢₪,ok,fava_beans,2.0,2.0,1000.0,g,kilo,True,,0.002
@@ -2878,7 +2878,7 @@ message_id,posted_on,region,line,status,item_slug,price_low,price_high,quantity,
 922,2025-11-07,gaza,نقاط بيع البيض بسعر 50 شيكل للطبق 🥚💰👇,no_quantity,eggs,50.0,50.0,0.0,,,False,,0.0
 930,2025-11-09,gaza,خلال أيام سيصل سعر واط ألواح الطاقة إلى 2 شيكل.,prose,,2.0,2.0,0.0,,,False,,0.0
 949,2025-11-12,gaza,🐔كيلو الطريف  بـ 38 شيكل,unmatched_item,,38.0,38.0,0.0,,,False,,0.0
-949,2025-11-12,gaza,🥩كيلو اللحمة بـ  50 شيكل,unmatched_item,,50.0,50.0,0.0,,,False,,0.0
+949,2025-11-12,gaza,🥩كيلو اللحمة بـ  50 شيكل,ok,beef,50.0,50.0,1000.0,g,كيلو,False,,0.05
 949,2025-11-12,gaza,🐟كيلو السمك بـ 35 شيكل,ok,fish,35.0,35.0,1000.0,g,كيلو,False,,0.035
 949,2025-11-12,gaza,🥓كيلو الصدور بـ 60 شيكل,unmatched_item,,60.0,60.0,0.0,,,False,,0.0
 968,2025-11-20,gaza,بعض المطاعم في غزة أصبحت تبيع فرشوحة الشاورما ب20 شيكل,prose,,20.0,20.0,0.0,,,False,,0.0
@@ -2996,7 +2996,7 @@ message_id,posted_on,region,line,status,item_slug,price_low,price_high,quantity,
 1037,2025-12-05,gaza,▪️الجنيه المصري: 0.068 شيكل.,unmatched_item,,0.068,0.068,0.0,,,False,,0.0
 1039,2025-12-05,gaza,كبدة عجل: ٣٠ شيكل,ok,beef_liver,30.0,30.0,1000.0,g,kilo,True,,0.03
 1039,2025-12-05,gaza,صدر  دجاج: ٥٠ شيكل,ok,chicken_breast,50.0,50.0,1000.0,g,kilo,True,,0.05
-1039,2025-12-05,gaza,لحمة موزة: ٥٠ شيكل,not_the_item,,50.0,50.0,0.0,,,False,,0.0
+1039,2025-12-05,gaza,لحمة موزة: ٥٠ شيكل,ok,beef,50.0,50.0,1000.0,g,kilo,True,,0.05
 1039,2025-12-05,gaza,شيش فخذ مجروم:  ٥٠ شيكل,ok,chicken_shish_tawook,50.0,50.0,1000.0,g,kilo,True,,0.05
 1041,2025-12-05,khan_younis,💥المتابعين الكرام نحيطكم علماً انه متوفر غداً وبشكل يومي #خبز طازج بـ 3 شيقل مدعوم من برنامج الأغذية العالمي,prose,,3.0,3.0,0.0,,,False,,0.0
 1042,2025-12-05,deir_al_balah,💥 متوفر غداً وبشكل يومي #خبز طازج بـ 3 شيقل مدعوم من برنامج الأغذية العالمي,no_quantity,bread,3.0,3.0,0.0,,,False,,0.0

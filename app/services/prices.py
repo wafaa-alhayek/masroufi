@@ -241,19 +241,30 @@ def load_channel_prices(session: Session, path: Path = CHANNEL_PRICES) -> int:
     if not path.exists():
         return 0
     items = {i.slug: i for i in session.exec(select(Item))}
-    seen = {
-        (o.item_id, o.observed_on, o.note)
-        for o in session.exec(
-            select(PriceObservation).where(PriceObservation.source == PriceSource.CHANNEL)
-        )
-    }
-    added = 0
+    wanted = []
     for row in read_csv(path):
         item = items.get(row.item_slug)
         if not row.usable or row.payment == "app" or item is None:
             continue
-        observed_on = date.fromisoformat(row.posted_on)
         note = f"t.me/{CHANNEL}/{row.message_id} · {row.region} · {row.line}"
+        wanted.append((row, item, date.fromisoformat(row.posted_on), note))
+
+    # A corrected CSV can re-file a line under another item (beef shank was once
+    # read as bananas). Channel rows the CSV no longer vouches for are dropped;
+    # nothing a household recorded is touched.
+    keep = {(item.id, observed_on, note) for _, item, observed_on, note in wanted}
+    seen = set()
+    for o in session.exec(
+        select(PriceObservation).where(PriceObservation.source == PriceSource.CHANNEL)
+    ):
+        key = (o.item_id, o.observed_on, o.note)
+        if key in keep:
+            seen.add(key)
+        else:
+            session.delete(o)
+
+    added = 0
+    for row, item, observed_on, note in wanted:
         if (item.id, observed_on, note) in seen:
             continue
         paid = (row.price_low + row.price_high) / 2

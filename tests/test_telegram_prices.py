@@ -67,6 +67,25 @@ def test_cash_first_then_app(items):
 
 
 @pytest.mark.parametrize(
+    "text, slug",
+    [
+        ("لحم موزه 50شيكل", "beef"),  # shank, a cut of beef, not bananas
+        ("لحمة موزة: ٥٠ شيكل", "beef"),
+        ("لحم رقيبة 40شيكل", "beef"),  # plain لحمة is beef in Gaza
+        ("🥩 كيلو لحم ضأن: 480₪", "lamb"),
+        ("كيلو كفتة 60 شيكل", "minced_meat"),  # the channel's raw ground meat
+        ("كيلو موز 10 شيكل", "banana"),
+    ],
+)
+def test_meat_words(items, text, slug):
+    assert line(text, items).item_slug == slug
+
+
+def test_tinned_beef_is_canned_meat(items):
+    assert line("• لحمة عجل معلب: 40₪", items).item_slug == "canned_meat"
+
+
+@pytest.mark.parametrize(
     "text, status",
     [
         ("🍋 حمض الليمون – 600 شيكل / كيلو", "not_the_item"),  # citric acid
@@ -150,6 +169,31 @@ def test_loading_is_idempotent_and_skips_app_prices(session):
     observations = session.exec(select(PriceObservation)).all()
     assert {o.source for o in observations} == {PriceSource.CHANNEL}
     assert all(o.note.startswith("t.me/asarsook/") for o in observations)
+
+
+def test_a_corrected_csv_replaces_what_was_loaded(session, tmp_path):
+    """A line re-filed under another item moves; household prices stay put."""
+    import shutil
+
+    from app.services.prices import record
+
+    banana = session.exec(select(Item).where(Item.slug == "banana")).one()
+    beef = session.exec(select(Item).where(Item.slug == "beef")).one()
+    old = tmp_path / "old.csv"
+    shutil.copy(CHANNEL_PRICES, old)
+    text = old.read_text(encoding="utf-8").replace(",ok,beef,50.0,50.0,1000.0", ",ok,banana,50.0,50.0,1000.0", 1)
+    old.write_text(text, encoding="utf-8")
+    load_channel_prices(session, old)
+    record(session, banana, 12, 1000, PriceSource.MANUAL)
+    session.commit()
+
+    load_channel_prices(session, CHANNEL_PRICES)
+    by_item = lambda item: session.exec(  # noqa: E731
+        select(PriceObservation).where(PriceObservation.item_id == item.id)
+    ).all()
+    assert [o.source for o in by_item(banana) if "موز" in o.note and "لحم" in o.note] == []
+    assert any(o.paid == 50.0 for o in by_item(beef))
+    assert [o.source for o in by_item(banana)].count(PriceSource.MANUAL) == 1
 
 
 def test_a_new_install_has_a_dated_estimate_not_no_price(session):

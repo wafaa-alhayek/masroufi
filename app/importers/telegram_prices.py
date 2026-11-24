@@ -97,6 +97,19 @@ CHANNEL_ALIASES: dict[str, str] = {
     "حمص حب": "chickpeas",
     "فول ناشف": "fava_beans",
     "ملوخيه ناشفه": "molokhia_dry",
+    # In Gaza plain لحمة is beef unless the line names another animal; the
+    # longer names below (lamb, chicken, tins) win because they match more words.
+    "لحم": "beef",
+    "لحمه": "beef",
+    "لحم موزه": "beef",  # shank, a cut of beef, not bananas
+    "لحمه موزه": "beef",
+    "لحم عجل": "beef",
+    "لحمه عجل": "beef",
+    "لحم ضان": "lamb",
+    "لحم خروف": "lamb",
+    "لحمه خروف": "lamb",
+    # كفتة is how the channel sells raw ground meat, not the frozen kebab item.
+    "كفته": "minced_meat",
     "لحمه اكسترا": "canned_meat",
     "علبه لحمه": "canned_meat",
 }
@@ -105,10 +118,10 @@ CHANNEL_ALIASES: dict[str, str] = {
 _CANNED = re.compile(r"علب|معلب")
 
 # Phrases that contain an item's name but are not that item: citric acid is
-# not lemons, a cut of beef called "banana" is not bananas, cooked okra is a
+# not lemons, cooked okra is a
 # dish, and Deir al-Balah is a town, not dates.
 _NOT_THE_ITEM = re.compile(
-    r"حمض|ملح ليمون|لحمه موزه|موزه لحمه|شبره|مطبوخ|نقل|توصيل|اجره|مواصلات"
+    r"حمض|ملح ليمون|شبره|مطبوخ|نقل|توصيل|اجره|مواصلات"
 )
 _PLACES = re.compile(
     r"دير البلح|خانيونس|خان يونس|النصيرات|الزوايده|المواصي|رفح|جباليا|بيت لاهيا|الشجاعيه|الرمال"
@@ -168,7 +181,8 @@ def match_item(text: str, items: dict[str, dict], index=None) -> tuple[str | Non
         return None, "ambiguous_item"
     slug = winners[0]
     if _CANNED.search(normalise(text)) and not slug.startswith("canned_"):
-        canned = f"canned_{slug}"
+        # Tinned beef is catalogued as canned_meat; there is no canned_beef.
+        canned = "canned_meat" if slug == "beef" else f"canned_{slug}"
         if canned in items:
             return canned, ""
         return None, "canned_form_unknown"

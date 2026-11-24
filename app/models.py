@@ -677,7 +677,14 @@ class LedgerEntry(SQLModel, table=True):
         default=None,
         foreign_key="transaction.id",
         index=True,
-        description="The purchase this entry was raised by (goods on the tab). Edited and "
-        "removed with it.",
+        description="The transaction this entry was raised by: goods on the tab, or a "
+        "payment that paid a debt. Edited and removed with it.",
     )
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class Dismissal(SQLModel, table=True):
+    """A question the household answered «لا» to, so it is not asked again."""
+
+    key: str = Field(primary_key=True, max_length=160)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))

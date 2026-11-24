@@ -306,6 +306,30 @@ with money still outstanding.
 
 The ledger also travels in `/api/bootstrap`.
 
+### Questions
+
+| | |
+|---|---|
+| `GET /api/questions` | Every open question in one list, biggest answer first: `kind`, a stable `key`, how many transactions it `settles`, and `params` for the client's template. |
+| `POST /api/questions/debt-payment` | «إيه»: this payment paid that debt. The payment becomes `debt_repayment` and a `repay` entry tied to it lowers what is owed. |
+| `POST /api/questions/dismiss` | «لا» to a transfer pair or a debt match, remembered so it is not asked again. |
+
+Five kinds, one order rule. A transfer pair, a payment that names a shop or
+person the household owes (`debt_payment`), a repeat pattern, a shop whose rows
+are waiting, and a single row. The answer that settles the most transactions
+comes first, ties by kind in that order, then newest. The other answers keep
+their own endpoints (`/transfers/link`, `/patterns/confirm`,
+`/transactions/{id}/category`); each returns `also_settled`.
+
+A debt match needs the party's name in the payment, not just the amount: a
+distinctive word of the name (not «محل», «بقالة», «أبو») in the note or the
+shop's name, the same currency, no more than is owed, and after the debt began.
+₪50 alone would match every ₪50 debt. Questions carry numbers and names, never
+sentences: the client words each kind from a fixed template.
+
+`/api/summary` also returns `months_available`, newest first, for the month
+switcher.
+
 ### Fixing a transaction
 
 Everything the bank cannot know stays editable on every row, imported ones

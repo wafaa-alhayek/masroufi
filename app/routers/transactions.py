@@ -589,6 +589,11 @@ def summary(
         "excluded": sum(1 for t in rows if t.excluded),
         "debt_repaid": round(sum(abs(t.amount) for t in repaid if t.amount < 0), 2),
         "from": start.isoformat() if start else None,
+        # Which months have anything at all, for the month switcher.
+        "months_available": sorted(
+            {t.booked_on.strftime("%Y-%m") for t in session.exec(select(Transaction)) if not t.excluded},
+            reverse=True,
+        ),
         "to": end.isoformat() if end else None,
         "by_category": {k: round(v, 2) for k, v in sorted(by_category.items(), key=lambda kv: -kv[1])},
         # The named parts of «other», so «phone repair» can be its own line.
@@ -654,7 +659,7 @@ def link_transfer(
 
     transfers.link(session, debit, credit)
     session.commit()
-    return {"linked": True, "amount": abs(debit.amount)}
+    return {"linked": True, "amount": abs(debit.amount), "also_settled": 2}
 
 
 def _cache_size(classifier: Classifier) -> int:
@@ -919,14 +924,14 @@ async def update_transaction(
 
     tab_entries = list(session.exec(select(LedgerEntry).where(LedgerEntry.transaction_id == transaction.id)))
     if tab_entries and update.amount is not None and update.amount > 0:
-        raise HTTPException(422, "Goods on the tab are money out: the amount is negative.")
+        raise HTTPException(422, "This is tied to a debt entry, so it stays money out: the amount is negative.")
     if update.amount is not None and update.amount != transaction.amount:
         _unlink_transfer(session, transaction)
         transaction.amount = update.amount
     if update.booked_on is not None:
         transaction.booked_on = update.booked_on
     for e in tab_entries:
-        # What is owed to the shop follows the purchase that raised it.
+        # A debt entry follows the transaction that raised it.
         e.amount = abs(transaction.amount)
         e.on = transaction.booked_on
         session.add(e)
@@ -987,7 +992,7 @@ def delete_transaction(transaction_id: int, session: Session = Depends(get_sessi
         )
     _unlink_transfer(session, transaction)
     for e in session.exec(select(LedgerEntry).where(LedgerEntry.transaction_id == transaction.id)):
-        session.delete(e)  # the shop is owed nothing for goods that were never taken
+        session.delete(e)  # a debt entry goes with the transaction that raised it
     vendor_id = transaction.vendor_id
     session.delete(transaction)
     session.flush()

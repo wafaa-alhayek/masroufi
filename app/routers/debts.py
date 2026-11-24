@@ -28,7 +28,7 @@ class EntryOut(BaseModel):
     on: date
     due_on: date | None
     note: str
-    transaction_id: int | None = Field(description="Set when a purchase on the tab raised it; edit that instead.")
+    transaction_id: int | None = Field(description="Set when a transaction raised it (a purchase on the tab, a payment); edit that instead.")
     balance_after: float | None = Field(default=None, description="In this entry's currency. Negative: you owe.")
 
 
@@ -192,7 +192,7 @@ class EntryUpdate(BaseModel):
 def _owned_by_purchase(row: LedgerEntry) -> None:
     if row.transaction_id is not None:
         raise HTTPException(
-            409, "This was raised by a purchase on the tab. Change or remove the purchase instead."
+            409, "This entry is tied to a transaction (a purchase on the tab, or a payment). Change or remove that instead."
         )
 
 
